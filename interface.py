@@ -17,28 +17,35 @@ class Application(Frame):
         # Creation
         self.hi_there = Button(self)
         # Different parameters
-        self.hi_there["text"] = "Hello",
-        self.hi_there["command"] = self.say_hi
+        self.hi_there["text"] = "Quit",
+        self.hi_there["command"] = self.quit  # or self.say_hi
         # Placement in the frame
-        self.hi_there.pack({"side": "left"})
+        self.hi_there.pack({"side": "bottom"})
 
         # --------- Ours ---------
-        display = Notebook(self, name="nb")
-        display.pack(fill=BOTH, padx=2, pady=3)
+        self.display = Notebook(self, name="nb")
+        self.display.pack(fill=BOTH, padx=2, pady=3)
 
-        fen_user = Frame(display, name="fen_user")
-
-        language = Checkbutton(fen_user, text="yo")
-        language.pack(side=LEFT)
-
-        fen_visualiser = Frame(display, name="fen_visualiser")
-
-        language2 = Checkbutton(fen_visualiser, text="pyo")
-        language2.pack(side=RIGHT)
-
-        display.add(fen_user, text="Options")
-        display.add(fen_visualiser, text="Visualiseur")
+        self.create_user_panel(self.display)
+        self.create_viewer_panel(self.display)
 
     # Example of function we can call
     def say_hi(self):
         print("hi there, everyone!")
+
+    def create_user_panel(self, display):
+        fen_user = Frame(display, name="fen_user")
+
+        self.toggle_language = StringVar()
+        self.toggle_language.set("Français")
+
+        language = Checkbutton(fen_user, textvariable=self.toggle_language,
+                               variable=self.toggle_language, onvalue="Français", offvalue="English")
+        language.pack()
+
+        display.add(fen_user, text="Options")
+
+    def create_viewer_panel(self, display):
+        fen_visualiser = Frame(display, name="fen_visualiser")
+
+        display.add(fen_visualiser, text="Visualiseur")
