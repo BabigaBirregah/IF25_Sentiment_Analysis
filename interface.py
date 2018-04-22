@@ -7,8 +7,9 @@ from tkinter.ttk import *
 
 
 class Application(Frame):
-    def __init__(self, master=None):
+    def __init__(self, master=None, **kw):
         Frame.__init__(self, master)
+        super().__init__(master, **kw)
         self.pack(fill=BOTH)
         self.createWidgets()
 
@@ -23,9 +24,10 @@ class Application(Frame):
         self.hi_there.pack({"side": "bottom"})
 
         # --------- Ours ---------
-        self.display = Notebook(self, name="nb")
-        self.display.pack(fill=BOTH, padx=2, pady=3)
+        self.display = Notebook(self, name="nb")  # tab manager
+        self.display.pack()
 
+        # Create the content for both tab
         self.create_user_panel(self.display)
         self.create_viewer_panel(self.display)
 
