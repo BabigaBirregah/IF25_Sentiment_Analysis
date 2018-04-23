@@ -1,6 +1,7 @@
 # http://apprendre-python.com/page-tkinter-interface-graphique-python-tutoriel
 # https://www.tutorialspoint.com/python/python_gui_programming.htm
 # https://docs.python.org/3/library/tkinter.ttk.html#notebook
+# http://tkinter.fdex.eu/index.html
 
 from tkinter import *
 from tkinter.ttk import *
@@ -44,6 +45,21 @@ class Application(Frame):
         language = Checkbutton(fen_user, textvariable=self.toggle_language,
                                variable=self.toggle_language, onvalue="Français", offvalue="English")
         language.pack()
+
+        self.value_submit = StringVar()
+        self.value_submit.set("Soumettre un texte")
+
+        def default_submit_text(why):
+            if why == "focusin":
+                self.value_submit.set("")
+            elif why == "focusout" and not self.value_submit.get():
+                self.value_submit.set("Soumettre un texte")
+
+        validate_command = fen_user.register(default_submit_text)
+
+        submit_text = Entry(fen_user, textvariable=self.value_submit, validate='all',
+                            validatecommand=(validate_command, '%V'))
+        submit_text.pack()
 
         display.add(fen_user, text="Options")
 
