@@ -57,9 +57,16 @@ class Application(Frame):
 
         validate_command = fen_user.register(default_submit_text)
 
-        submit_text = Entry(fen_user, textvariable=self.value_submit, validate='all',
-                            validatecommand=(validate_command, '%V'))
-        submit_text.pack()
+        entry_text = Entry(fen_user, textvariable=self.value_submit, validate='all',
+                           validatecommand=(validate_command, '%V'))
+        entry_text.pack({"side": "left"})
+
+        def text_analysis():
+            if self.value_submit != "Soumettre un texte":
+                pass  # function_to_call(self.value_submit)
+
+        submit_text = Button(fen_user, text="Soumettre", command=text_analysis)
+        submit_text.pack({"side": "right"})
 
         display.add(fen_user, text="Options")
 
