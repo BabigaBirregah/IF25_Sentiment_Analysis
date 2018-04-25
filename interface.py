@@ -6,6 +6,8 @@
 from tkinter.filedialog import *
 from tkinter.ttk import *
 
+import twitter_collect
+
 
 class Application(Frame):
     def __init__(self, master=None, **kw):
@@ -60,12 +62,11 @@ class Application(Frame):
 
         text_submit.grid(column=0, row=1)
 
-
         def text_analysis():
             if self.value_submit != "Soumettre un texte":
                 pass  # function_to_call(self.value_submit)
 
-        Button(fen_user, text="Soumettre", command=text_analysis).grid(column=1, row=1)
+        Button(fen_user, text="Soumettre texte", command=text_analysis).grid(column=1, row=1)
 
         def ask_file():
             file_name = askopenfile(title="Ouvrir fichier de tweets",
@@ -73,6 +74,28 @@ class Application(Frame):
             pass  # function_to_call(open(file_name, "r").read())
 
         Button(fen_user, text="Choisir un fichier à analyser", command=ask_file).grid(column=0, row=2)
+
+        self.user_query = StringVar()
+        self.user_query.set("Soumettre un '#' à regarder")
+
+        def default_query_text(arg):
+            if self.user_query.get() == "Soumettre un '#' à regarder":
+                self.user_query.set("")
+            elif not self.user_query.get():
+                self.user_query.set("Soumettre un '#' à regarder")
+
+        text_submit = Entry(fen_user, textvariable=self.user_query)
+
+        text_submit.bind("<Enter>", default_query_text)
+        text_submit.bind("<Leave>", default_query_text)
+
+        text_submit.grid(column=0, row=2)
+
+        def query_analysis():
+            if self.user_query != "Soumettre un '#' à regarder" and '#' in self.user_query:
+                twitter_collect.search_sample(self.user_query)
+
+        Button(fen_user, text="Echantillon de la requête", command=query_analysis).grid(column=1, row=2)
 
         display.add(fen_user, text="Options")
 
