@@ -3,7 +3,7 @@
 # https://docs.python.org/3/library/tkinter.ttk.html#notebook
 # http://tkinter.fdex.eu/index.html
 
-from tkinter import *
+from tkinter.filedialog import *
 from tkinter.ttk import *
 
 
@@ -42,31 +42,37 @@ class Application(Frame):
         self.toggle_language = StringVar()
         self.toggle_language.set("Français")
 
-        language = Checkbutton(fen_user, textvariable=self.toggle_language,
-                               variable=self.toggle_language, onvalue="Français", offvalue="English")
-        language.pack()
+        Checkbutton(fen_user, textvariable=self.toggle_language, variable=self.toggle_language, onvalue="Français",
+                    offvalue="English").grid(column=0, row=0)
 
         self.value_submit = StringVar()
         self.value_submit.set("Soumettre un texte")
 
-        def default_submit_text(why):
-            if why == "focusin":
+        def default_submit_text(arg):
+            if self.value_submit.get() == "Soumettre un texte":
                 self.value_submit.set("")
-            elif why == "focusout" and not self.value_submit.get():
+            elif not self.value_submit.get():
                 self.value_submit.set("Soumettre un texte")
 
-        validate_command = fen_user.register(default_submit_text)
+        text_submit = Entry(fen_user, textvariable=self.value_submit)
+        text_submit.bind("<Enter>", default_submit_text)
+        text_submit.bind("<Leave>", default_submit_text)
 
-        entry_text = Entry(fen_user, textvariable=self.value_submit, validate='all',
-                           validatecommand=(validate_command, '%V'))
-        entry_text.pack({"side": "left"})
+        text_submit.grid(column=0, row=1)
+
 
         def text_analysis():
             if self.value_submit != "Soumettre un texte":
                 pass  # function_to_call(self.value_submit)
 
-        submit_text = Button(fen_user, text="Soumettre", command=text_analysis)
-        submit_text.pack({"side": "right"})
+        Button(fen_user, text="Soumettre", command=text_analysis).grid(column=1, row=1)
+
+        def ask_file():
+            file_name = askopenfile(title="Ouvrir fichier de tweets",
+                                    filetypes=[('txt files', '.txt'), ('csv files', '.csv')])
+            pass  # function_to_call(open(file_name, "r").read())
+
+        Button(fen_user, text="Choisir un fichier à analyser", command=ask_file).grid(column=0, row=2)
 
         display.add(fen_user, text="Options")
 
