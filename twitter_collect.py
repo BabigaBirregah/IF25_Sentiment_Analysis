@@ -28,16 +28,15 @@ def search_sample(query):
 
 
 def collect_tweet(nb_tweets=1):
-    twitter_userstream = TwitterStream(auth=connect_method())
+    twitter_stream = TwitterStream(auth=connect_method())
 
     only_text = list()
-    for msg in twitter_userstream.statuses.sample():  # infinite loop
+    for msg in twitter_stream.statuses.sample():  # infinite loop
         print(msg)  # TODO : just for debugging purpose ; remove after not needed anymore
         try:
             if msg['text']:
                 only_text.append(msg['text'])
                 nb_tweets -= 1
-
         except:
             pass
 

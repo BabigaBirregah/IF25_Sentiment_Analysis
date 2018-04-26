@@ -13,30 +13,32 @@ class Application(Frame):
     def __init__(self, master=None, **kw):
         Frame.__init__(self, master)
         super().__init__(master, **kw)
-        self.pack(fill=BOTH)
+        self.grid()
         self.createWidgets()
 
     def createWidgets(self):
         # --------- Example ---------
         # Creation
-        self.hi_there = Button(self)
-        # Different parameters
-        self.hi_there["text"] = "Quit",
-        self.hi_there["command"] = self.quit  # or self.say_hi
-        # Placement in the frame
-        self.hi_there.pack({"side": "bottom"})
+        # self.hi_there = Button(self)
+        # # Different parameters
+        # self.hi_there["text"] = "Quit",
+        # self.hi_there["command"] = self.quit  # or self.say_hi
+        # # Placement in the frame
+        # self.hi_there.pack({"side": "bottom"})
 
         # --------- Ours ---------
         self.display = Notebook(self, name="nb")  # tab manager
-        self.display.pack()
+        self.display.grid()
 
-        # Create the content for both tab
+        # create the content for the user, where he can choose the action to perform
         self.create_user_panel(self.display)
-        self.create_viewer_panel(self.display)
+
+        # TODO : maybe we should only create this tab when there is something to show
+        # self.create_viewer_panel(self.display)  # create the content to visualize the action chosen by rhe user
 
     # Example of function we can call
-    def say_hi(self):
-        print("hi there, everyone!")
+    # def say_hi(self):
+    #     print("hi there, everyone!")
 
     def create_user_panel(self, display):
         fen_user = Frame(display, name="fen_user")
@@ -89,13 +91,26 @@ class Application(Frame):
         text_submit.bind("<Enter>", default_query_text)
         text_submit.bind("<Leave>", default_query_text)
 
-        text_submit.grid(column=0, row=2)
+        text_submit.grid(column=0, row=3)
 
         def query_analysis():
             if self.user_query != "Soumettre un '#' à regarder" and '#' in self.user_query:
                 twitter_collect.search_sample(self.user_query)
+            elif self.user_query != "Soumettre un '#' à regarder":
+                twitter_collect.search_sample('#' + self.user_query.get())
 
-        Button(fen_user, text="Echantillon de la requête", command=query_analysis).grid(column=1, row=2)
+        Button(fen_user, text="Echantillon de la requête", command=query_analysis).grid(column=1, row=3)
+
+        self.number_tweets = StringVar()
+        self.number_tweets.set(5)
+
+        Spinbox(fen_user, from_=1, to=222, increment=1, textvariable=self.number_tweets,
+                justify='center').grid(column=0, row=4)
+
+        def collect_tweet_stream():
+            twitter_collect.collect_tweet(self.number_tweets)
+
+        Button(fen_user, text="Collecter 'x' tweets", command=collect_tweet_stream).grid(column=1, row=4)
 
         display.add(fen_user, text="Options")
 
