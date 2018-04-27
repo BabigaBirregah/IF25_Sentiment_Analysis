@@ -1,4 +1,7 @@
+# TODO: Build the app with 'pyinstaller main.py'
+
 import tkinter as tk
+
 import interface
 
 main_frame = tk.Tk()
