@@ -13,10 +13,10 @@ def get_line_file(number_line, file):
 
 
 def get_some_sample(number_tweets):
-    with open("./CSV/Sentiment_analysis_dataset_1.csv", 'rb') as file_part1:
+    with open("./Ressources/Sentiment_analysis_dataset_1.csv", 'rb') as file_part1:
         number_lines, sample_list = get_line_file(number_tweets, file_part1)
         if number_tweets - number_lines:
-            with open("./CSV/Sentiment_analysis_dataset_2.csv", 'rb') as file_part2:
+            with open("./Ressources/Sentiment_analysis_dataset_2.csv", 'rb') as file_part2:
                 number_lines_2, sample_list_2 = get_line_file(number_tweets - number_lines, file_part2)
                 if number_tweets - (number_lines + number_lines_2):
                     return number_tweets_each_file * 2, sample_list + sample_list_2

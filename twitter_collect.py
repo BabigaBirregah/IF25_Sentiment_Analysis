@@ -47,5 +47,3 @@ def collect_tweet(nb_tweets=1):
     print(only_text)
     pass
 
-
-collect_tweet()
