@@ -234,7 +234,6 @@ no
 nobody
 non
 noone
-not
 nothing
 now
 nowhere
