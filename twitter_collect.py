@@ -3,17 +3,26 @@
 
 from twitter import *
 
-import credentials
+from credentials import credentials
 
 
 def connect_method():
-    ACCESS_TOKEN, ACCESS_SECRET, CONSUMER_KEY, CONSUMER_SECRET = credentials.credentials()
+    """
+    Collect the credentials and create the method to connect to the Twitter object
+    :return: OAuth object with the corresponding credentials
+    """
+    ACCESS_TOKEN, ACCESS_SECRET, CONSUMER_KEY, CONSUMER_SECRET = credentials()
     return OAuth(ACCESS_TOKEN, ACCESS_SECRET, CONSUMER_KEY, CONSUMER_SECRET)  # you should create a credential function,
     #  in a separate file not included to git, returning a tuple
     # (ACCESS_TOKEN, ACCESS_SECRET, CONSUMER_KEY, CONSUMER_SECRET)
 
 
 def search_sample(query):
+    """
+    Using the Twitter library we collect some tweets regarding the query
+    :param query: word to look for with the twitter API and collect som tweets
+    :return:
+    """
     connect_twitter = Twitter(auth=connect_method())
     result_query = connect_twitter.search.tweets(q=query)
     result_query = result_query['statuses']  # return a list of dictionaries containing tweets only
@@ -28,6 +37,11 @@ def search_sample(query):
 
 
 def collect_tweet(nb_tweets=1):
+    """
+    Collect the desired number of tweets using the Twitter library connecting to the Tweeter API live stream
+    :param nb_tweets: number of tweets to collect
+    :return:
+    """
     twitter_stream = TwitterStream(auth=connect_method())
 
     only_text = list()

@@ -6,11 +6,9 @@ from re import sub
 def load_positive_words(language='en'):
     """
     Load in a list all the positive words contained in a text file. One word per line
-    :param language:
-        'en' stands for english, by default since no french list yet
-        'fr' stands for french, yet to come
-
-    :return:
+    :param language: Choose the language from 'fr' that stands for french and 'en' that stands for english
+        'fr' | 'en'
+    :return: list of words
     """
     if language == 'fr':
         path = getcwd() + '/Ressources/positive_word_fr.txt'
@@ -25,10 +23,8 @@ def load_positive_words(language='en'):
 def load_negative_words(language='en'):
     """
         Load in a list all the negative words contained in a text file. One word per line
-        :param language:
-            'en' stands for english, by default since no french list yet
-            'fr' stands for french, yet to come
-
+        :param language: Choose the language from 'fr' that stands for french and 'en' that stands for english
+        'fr' | 'en'
         :return: list of words
         """
     if language == 'fr':
@@ -45,8 +41,7 @@ def load_emoticons():
     """
     Load in two separate lists the positive and negative emoticons.
     The file is composed of 'emoticons'sep'0|1' per line.
-    Due to the character used in emoticons we have to read them in binary mode
-
+    Due to the character used in emoticons we have to read them in binary mode.
     :return: 2 lists of positive and negative emoticons
     """
     positive_emoticon_dict, negative_emoticon_dict = list(), list()
@@ -66,12 +61,10 @@ def count_generic(list_element, list_words, struct, weight=1):
     Generic function to count the number of element from list_element in list_words.
     Since we are going to call this function in thread we use a struct -> dict to store the result of the counting.
     We can also apply a weight on the counting (emoticons have somehow bigger impact on the sentiment).
-
     :param list_element: list of elements we need to confront to list_words
     :param list_words: list of words that we are trying to count in list_element
     :param struct: dict in which we store the result of the counting
     :param weight: importance coefficient to use
-
     :return: None, this function will be used in a thread
     """
     count = 0
@@ -89,7 +82,6 @@ def characteristic_vector(list_element_tweet, language):
         - Number of negative words
         - Number of positive emoticons
         - Number of negative emoticons
-
     :param list_element_tweet: list of key elements of a tweet
     :param language: language used to write the tweet
         'fr' | 'en'
