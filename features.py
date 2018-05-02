@@ -1,3 +1,9 @@
+# http://thinknook.com/wp-content/uploads/2012/09/Sentiment-Analysis-Dataset.zip : labelled tweets data set
+# https://www.w3.org/community/sentiment/wiki/Datasets : emoticon Lexicon dictionary among others
+# https://github.com/jeffreybreen/twitter-sentiment-analysis-tutorial-201107 : english positive and negative words
+# http://positivewordsresearch.com/liste-des-mots-positifs/ : french positive words
+# http://richesse-et-finance.com/liste-mots-cles-negatifs/ : french negative words
+
 import threading
 from os import getcwd
 
