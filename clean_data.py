@@ -8,6 +8,15 @@ from os import getcwd
 from re import escape, match, sub
 
 
+def clean_end_line(text):
+    """
+    Remove the ending character from a string
+    :param text: word or text that ends with an ending character
+    :return: string containing the same text without ending character
+    """
+    return sub(r'(.*)\1\n|\r|\r\n', r'\1', text)
+
+
 def load_stop_word(language='fr'):
     """
     Load all the stop words for the corresponding language
@@ -20,8 +29,8 @@ def load_stop_word(language='fr'):
     elif language == 'en':
         path = getcwd() + '/Ressources/stop_word_en.txt'
 
-    with open(path, 'r') as file_stop_word:
-        stop_word = file_stop_word.readlines()
+    with open(path, 'rb') as file_stop_word:
+        stop_word = [clean_end_line(x) for x in file_stop_word.readlines()]
     return stop_word
 
 

@@ -1,6 +1,7 @@
 import threading
 from os import getcwd
-from re import sub
+
+from clean_data import clean_end_line
 
 
 def load_positive_words(language='en'):
@@ -15,8 +16,8 @@ def load_positive_words(language='en'):
     elif language == 'en':
         path = getcwd() + '/Ressources/positive_word_en.txt'
 
-    with open(path, 'r') as file_positive_word:
-        positive_word = [sub(r'(.*)\1\n', r'\1', x) for x in file_positive_word.readlines()]
+    with open(path, 'rb') as file_positive_word:
+        positive_word = [clean_end_line(x) for x in file_positive_word.readlines()]
     return positive_word
 
 
@@ -32,8 +33,8 @@ def load_negative_words(language='en'):
     elif language == 'en':
         path = getcwd() + '/Ressources/negative_word_en.txt'
 
-    with open(path, 'r') as file_negative_word:
-        negative_word = [sub(r'(.*)\1\n', r'\1', x) for x in file_negative_word.readlines()]
+    with open(path, 'rb') as file_negative_word:
+        negative_word = [clean_end_line(x) for x in file_negative_word.readlines()]
     return negative_word
 
 

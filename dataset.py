@@ -1,11 +1,20 @@
 from os import getcwd
 
+from clean_data import clean_end_line
+
 number_tweets_each_file = 789314
 
 
-# TODO: clean the lines to get only the text and the labelled (positive/negative feeling) from the file
-def clean_lines(line):
-    pass
+def clean_line(line):
+    """
+    The line of the sample is constructed like this :
+        Number_line,label_sentiment,Sentiment140,text_tweet
+    We need to extract the label and the text only
+    :param line: line extracted from the data set
+    :return: tuple containing the label and the text
+    """
+    label, text = line.split(',Sentiment140,')
+    return (label.split(',')[1], clean_end_line(text))
 
 
 def get_lines_file(number_line, file):
@@ -18,7 +27,7 @@ def get_lines_file(number_line, file):
     count_lines, list_tweets = 0, list()
     for line in file:
         count_lines += 1
-        list_tweets.append(clean_lines(line))
+        list_tweets.append(clean_line(line))
         number_line -= 1
         if not number_line:
             break
