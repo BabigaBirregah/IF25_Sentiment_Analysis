@@ -3,7 +3,7 @@
 
 from twitter import *
 
-from credentials import credentials
+from Data.credentials import credentials
 
 
 def connect_method():

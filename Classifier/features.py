@@ -8,7 +8,7 @@ import threading
 from os import getcwd
 from re import match
 
-from clean_data import clean_end_line
+from Data.clean_data import clean_end_line
 
 
 def load_positive_words(language='en'):

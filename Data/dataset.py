@@ -1,7 +1,7 @@
 from os import getcwd
 from secrets import randbelow
 
-from clean_data import clean_end_line
+from Data.clean_data import clean_end_line
 
 number_tweets_each_file = 789314
 total_positive_tweets = 790185

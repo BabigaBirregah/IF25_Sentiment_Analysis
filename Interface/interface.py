@@ -6,7 +6,7 @@
 from tkinter.filedialog import *
 from tkinter.ttk import *
 
-import twitter_collect
+from Data import twitter_collect
 
 
 class Application(Frame):
