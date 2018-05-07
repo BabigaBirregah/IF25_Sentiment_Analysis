@@ -1,8 +1,9 @@
 # http://www.lextek.com/manuals/onix/stopwords1.html : english stop words
 # https://www.ranks.nl/stopwords/french : french stop words
 
-from os import getcwd
 from re import escape, match, sub
+
+from Ressources.resource import get_resource
 
 
 def clean_end_line(text):
@@ -22,9 +23,9 @@ def load_stop_word(language='en'):
     :return: list of stop words in the desired language
     """
     if language == 'fr':
-        path = getcwd() + '/Ressources/stop_word_fr.txt'
+        path = get_resource('stop_word_fr.txt')
     elif language == 'en':
-        path = getcwd() + '/Ressources/stop_word_en.txt'
+        path = get_resource('stop_word_en.txt')
 
     with open(path, 'rb') as file_stop_word:
         stop_word = [clean_end_line(x) for x in file_stop_word.readlines()]

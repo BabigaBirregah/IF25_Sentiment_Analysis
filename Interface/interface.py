@@ -91,7 +91,7 @@ class Application(Frame):
         self.number_tweets = StringVar()
         self.number_tweets.set(5)
 
-        Spinbox(fen_user, from_=1, to=222, increment=1, textvariable=self.number_tweets,
+        Spinbox(fen_user, from_=5, to=1000, increment=5, textvariable=self.number_tweets,
                 justify='center').grid(column=0, row=4)
 
         def collect_tweet_stream():

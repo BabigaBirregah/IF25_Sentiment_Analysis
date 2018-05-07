@@ -5,10 +5,10 @@
 # http://richesse-et-finance.com/liste-mots-cles-negatifs/ : french negative words
 
 import threading
-from os import getcwd
 from re import match
 
 from Data.clean_data import clean_end_line
+from Ressources.resource import get_resource
 
 
 def load_positive_words(language='en'):
@@ -19,9 +19,9 @@ def load_positive_words(language='en'):
     :return: list of words
     """
     if language == 'fr':
-        path = getcwd() + '/Ressources/positive_word_fr.txt'
+        path = get_resource('positive_word_fr.txt')
     elif language == 'en':
-        path = getcwd() + '/Ressources/positive_word_en.txt'
+        path = get_resource('positive_word_en.txt')
 
     with open(path, 'rb') as file_positive_word:
         positive_word = [clean_end_line(x) for x in file_positive_word.readlines()]
@@ -36,9 +36,9 @@ def load_negative_words(language='en'):
         :return: list of words
         """
     if language == 'fr':
-        path = getcwd() + '/Ressources/negative_word_fr.txt'
+        path = get_resource('negative_word_fr.txt')
     elif language == 'en':
-        path = getcwd() + '/Ressources/negative_word_en.txt'
+        path = get_resource('negative_word_en.txt')
 
     with open(path, 'rb') as file_negative_word:
         negative_word = [clean_end_line(x) for x in file_negative_word.readlines()]
@@ -53,11 +53,11 @@ def load_emoticons():
     :return: 2 lists of positive and negative emoticons
     """
     positive_emoticon_dict, negative_emoticon_dict = list(), list()
-    with open(getcwd() + '/Ressources/EmoticonSentimentLexicon.txt', 'rb') as emoticons_file:
+    with open(get_resource('EmoticonSentimentLexicon.txt'), 'rb') as emoticons_file:
         print(emoticons_file.readline().split(b'sep'))
         for line in emoticons_file.readlines():
             key, value = line.split(b'sep')
-            if value:
+            if value == b'1':
                 positive_emoticon_dict.append(key)
             else:
                 negative_emoticon_dict.append(key)
@@ -94,12 +94,12 @@ def negation_presence(list_element, language, struct):
     """
     if language == 'fr':
         for element in list_element:
-            if match(r'ne|n\'.*', element):
+            if match(rb'ne|n\'.*', element):
                 struct['bool'] = 1
                 break
     elif language == 'en':
         for element in list_element:
-            if match(r'.*n\'t', element) or match(r'neither|not|nor', element):
+            if match(rb'.*n\'t', element) or match(rb'neither|not|nor', element):
                 struct['bool'] = 1
                 break
 
@@ -153,3 +153,6 @@ def characteristic_vector(list_element_tweet, language='en'):
 
     return [count_positive_words['count'], count_negative_words['count'], count_positive_emoticons['count'],
             count_negative_emoticons['count'], presence_negation['bool']]
+
+
+print(load_emoticons())
