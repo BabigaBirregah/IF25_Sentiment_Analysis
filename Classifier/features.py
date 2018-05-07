@@ -8,7 +8,7 @@ import threading
 from re import match
 
 from Data.clean_data import clean_end_line
-from Ressources.resource import get_resource
+from Ressources.resource import get_path_resource
 
 
 def load_positive_words(language='en'):
@@ -19,9 +19,9 @@ def load_positive_words(language='en'):
     :return: list of words
     """
     if language == 'fr':
-        path = get_resource('positive_word_fr.txt')
+        path = get_path_resource('positive_word_fr.txt')
     elif language == 'en':
-        path = get_resource('positive_word_en.txt')
+        path = get_path_resource('positive_word_en.txt')
 
     with open(path, 'rb') as file_positive_word:
         positive_word = [clean_end_line(x) for x in file_positive_word.readlines()]
@@ -36,9 +36,9 @@ def load_negative_words(language='en'):
         :return: list of words
         """
     if language == 'fr':
-        path = get_resource('negative_word_fr.txt')
+        path = get_path_resource('negative_word_fr.txt')
     elif language == 'en':
-        path = get_resource('negative_word_en.txt')
+        path = get_path_resource('negative_word_en.txt')
 
     with open(path, 'rb') as file_negative_word:
         negative_word = [clean_end_line(x) for x in file_negative_word.readlines()]
@@ -53,7 +53,7 @@ def load_emoticons():
     :return: 2 lists of positive and negative emoticons
     """
     positive_emoticon_dict, negative_emoticon_dict = list(), list()
-    with open(get_resource('EmoticonSentimentLexicon.txt'), 'rb') as emoticons_file:
+    with open(get_path_resource('EmoticonSentimentLexicon.txt'), 'rb') as emoticons_file:
         print(emoticons_file.readline().split(b'sep'))
         for line in emoticons_file.readlines():
             key, value = line.split(b'sep')

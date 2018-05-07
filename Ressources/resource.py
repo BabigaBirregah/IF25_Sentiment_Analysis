@@ -1,7 +1,7 @@
 from os import getcwd
 
 
-def get_resource(name_resource):
+def get_path_resource(name_resource):
     """
     Return the complete path of the desired element in the resource directory
     :param name_resource: file to get

@@ -3,7 +3,7 @@
 
 from re import escape, match, sub
 
-from Ressources.resource import get_resource
+from Ressources.resource import get_path_resource
 
 
 def clean_end_line(text):
@@ -23,9 +23,9 @@ def load_stop_word(language='en'):
     :return: list of stop words in the desired language
     """
     if language == 'fr':
-        path = get_resource('stop_word_fr.txt')
+        path = get_path_resource('stop_word_fr.txt')
     elif language == 'en':
-        path = get_resource('stop_word_en.txt')
+        path = get_path_resource('stop_word_en.txt')
 
     with open(path, 'rb') as file_stop_word:
         stop_word = [clean_end_line(x) for x in file_stop_word.readlines()]

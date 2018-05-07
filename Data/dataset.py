@@ -1,7 +1,7 @@
 from secrets import randbelow
 
 from Data.clean_data import clean_end_line
-from Ressources.resource import get_resource
+from Ressources.resource import get_path_resource
 
 number_tweets_each_file = 789314
 total_positive_tweets = 790185
@@ -50,10 +50,10 @@ def get_some_sample(number_tweets=12):
     # data set csv file : ItemID,Sentiment,SentimentSource,SentimentText
     # TODO: maybe use csv library to read and treat the file
     number_tweets = min(number_tweets, 2 * number_tweets_each_file)
-    with open(get_resource('Sentiment_analysis_dataset_1.csv'), 'rb') as file_part1:
+    with open(get_path_resource('Sentiment_analysis_dataset_1.csv'), 'rb') as file_part1:
         number_lines, sample_list = get_lines_file(number_tweets, file_part1)
         if number_tweets - number_lines:
-            with open(get_resource('Sentiment_analysis_dataset_2.csv'), 'rb') as file_part2:
+            with open(get_path_resource('Sentiment_analysis_dataset_2.csv'), 'rb') as file_part2:
                 number_lines_2, sample_list_2 = get_lines_file(number_tweets - number_lines, file_part2)
                 if number_tweets - (number_lines + number_lines_2):
                     return number_tweets_each_file * 2, sample_list + sample_list_2
@@ -107,8 +107,8 @@ def get_randomised_sample(number_tweets=12):
     """
     number_tweets = min(number_tweets, 2 * number_tweets_each_file)
     sample_list = list()
-    with open(get_resource('Sentiment_analysis_dataset_1.csv'), 'rb') as file_part1:
-        with open(get_resource('Sentiment_analysis_dataset_2.csv'), 'rb') as file_part2:
+    with open(get_path_resource('Sentiment_analysis_dataset_1.csv'), 'rb') as file_part1:
+        with open(get_path_resource('Sentiment_analysis_dataset_2.csv'), 'rb') as file_part2:
             global_file = file_part1.readlines() + file_part2.readlines()
             while number_tweets:
                 sample_list.append(global_file.pop(randbelow(len(global_file))))
@@ -127,8 +127,8 @@ def get_randomised_pos_neg_sample(num_pos=12, num_neg=12):
     num_pos = min(num_pos, total_positive_tweets)
     num_neg = min(num_neg, total_negative_tweets)
     positives, negatives = list(), list()
-    with open(get_resource('Sentiment_analysis_dataset_1.csv'), 'rb') as file_part1:
-        with open(get_resource('Sentiment_analysis_dataset_2.csv'), 'rb') as file_part2:
+    with open(get_path_resource('Sentiment_analysis_dataset_1.csv'), 'rb') as file_part1:
+        with open(get_path_resource('Sentiment_analysis_dataset_2.csv'), 'rb') as file_part2:
             global_file = file_part1.readlines() + file_part2.readlines()
             while num_pos or num_neg:
                 element = clean_line(global_file.pop(randbelow(len(global_file))))
@@ -147,8 +147,8 @@ def count_pos_neg_sample():
     :return: None, print the number of negative tweets, positive tweets and total tweets counted
     """
     count_pos, count_neg, number_tweets = 0, 0, 2 * number_tweets_each_file - 1
-    with open(get_resource('Sentiment_analysis_dataset_1.csv'), 'rb') as file_part1:
-        with open(get_resource('Sentiment_analysis_dataset_2.csv'), 'rb') as file_part2:
+    with open(get_path_resource('Sentiment_analysis_dataset_1.csv'), 'rb') as file_part1:
+        with open(get_path_resource('Sentiment_analysis_dataset_2.csv'), 'rb') as file_part2:
             global_file = file_part1.readlines() + file_part2.readlines()
             while number_tweets:
                 number_tweets -= 1
