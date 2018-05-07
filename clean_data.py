@@ -11,10 +11,10 @@ def clean_end_line(text):
     :param text: word or text that ends with an ending character
     :return: string containing the same text without ending character
     """
-    return sub(r'(.*)\1\n|\r|\r\n', r'\1', text)
+    return sub(rb'(.*)\1\n|\r|\r\n', rb'\1', text)
 
 
-def load_stop_word(language='fr'):
+def load_stop_word(language='en'):
     """
     Load all the stop words for the corresponding language
     :param language: Choose the language from 'fr' that stands for french and 'en' that stands for english
@@ -31,7 +31,7 @@ def load_stop_word(language='fr'):
     return stop_word
 
 
-def clean_element(element, language='fr'):
+def clean_element(element, language='en'):
     """
     Remove all the undesired stuff from the element in the desired language
     :param element: string representing an element between whitespaces from the tweet
@@ -44,17 +44,17 @@ def clean_element(element, language='fr'):
     element = element.lower()
 
     # if it is a mention or an url we don't need the element
-    if match(r'@\w+', element) or match(r'http.+', element):
+    if match(rb'@\w+', element) or match(rb'http.+', element):
         return None
 
     # remove the '#' from the element
-    element = sub('#', '', element)
+    element = sub(rb'#', rb'', element)
 
     # remove all the punctuations in the element
-    element = sub('[%s]+' % escape("""~"'([-|`\_^@)]=}/*-+.$£¨*!:/;,? """), '', element)
+    element = sub(rb'[%s]+' % escape("""~"'([-|`\_^@)]=}/*-+.$£¨*!:/;,? """), r'', element)
 
     # remove all repetition of the same alphabetic character
-    element = sub(r'(\w)\1+', r'\1', element)
+    element = sub(rb'(\w)\1+', rb'\1', element)
 
     # check whether the element is relevant or not
     if element in load_stop_word(language):
@@ -72,7 +72,7 @@ def clean_text(text, language):
     :return: list of relevant and cleaned element from the text
     """
     list_cleaned_element = list()
-    for element in text.split(" "):
+    for element in text.split(rb" "):
         cleaned_element = clean_element(element, language)
         if cleaned_element:
             list_cleaned_element.append(cleaned_element)

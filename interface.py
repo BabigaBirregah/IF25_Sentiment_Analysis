@@ -17,15 +17,6 @@ class Application(Frame):
         self.createWidgets()
 
     def createWidgets(self):
-        # --------- Example ---------
-        # Creation
-        # self.hi_there = Button(self)
-        # # Different parameters
-        # self.hi_there["text"] = "Quit",
-        # self.hi_there["command"] = self.quit  # or self.say_hi
-        # # Placement in the frame
-        # self.hi_there.pack({"side": "bottom"})
-
         # --------- Ours ---------
         self.display = Notebook(self, name="nb")  # tab manager
         self.display.grid()
@@ -34,20 +25,16 @@ class Application(Frame):
         self.create_user_panel(self.display)
 
         # TODO : maybe we should only create this tab when there is something to show
-        # self.create_viewer_panel(self.display)  # create the content to visualize the action chosen by rhe user
-
-    # Example of function we can call
-    # def say_hi(self):
-    #     print("hi there, everyone!")
+        # self.create_viewer_panel(self.display)  # create the content to visualize the action chosen by the user
 
     def create_user_panel(self, display):
         fen_user = Frame(display, name="fen_user")
 
         self.toggle_language = StringVar()
-        self.toggle_language.set("Français")
+        self.toggle_language.set("English")
 
-        Checkbutton(fen_user, textvariable=self.toggle_language, variable=self.toggle_language, onvalue="Français",
-                    offvalue="English").grid(column=0, row=0)
+        Checkbutton(fen_user, textvariable=self.toggle_language, variable=self.toggle_language, onvalue="English",
+                    offvalue="Français").grid(column=0, row=0)
 
         self.value_submit = StringVar()
         self.value_submit.set("Soumettre un texte")
@@ -73,7 +60,7 @@ class Application(Frame):
         def ask_file():
             file_name = askopenfile(title="Ouvrir fichier de tweets",
                                     filetypes=[('txt files', '.txt'), ('csv files', '.csv')])
-            pass  # function_to_call(open(file_name, "r").read())
+            pass  # function_to_call(open(file_name, "rb").read())
 
         Button(fen_user, text="Choisir un fichier à analyser", command=ask_file).grid(column=0, row=2)
 

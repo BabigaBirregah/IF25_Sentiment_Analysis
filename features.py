@@ -99,12 +99,12 @@ def negation_presence(list_element, language, struct):
                 break
     elif language == 'en':
         for element in list_element:
-            if match(r'.*n\'t', element) or match(r'neither|not', element):
+            if match(r'.*n\'t', element) or match(r'neither|not|nor', element):
                 struct['bool'] = 1
                 break
 
 
-def characteristic_vector(list_element_tweet, language):
+def characteristic_vector(list_element_tweet, language='en'):
     """
     Creation of the characteristic vector to further use in a classifier.
     The characteristics to be counted :
