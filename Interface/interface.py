@@ -30,11 +30,54 @@ class Application(Frame):
     def create_user_panel(self, display):
         fen_user = Frame(display, name="fen_user")
 
+        # Configure the analysis #
+        general_options = LabelFrame(fen_user, text="General Options")
+
+        # ---------- Choose the language -------------
+        language_frame = LabelFrame(general_options, text="Choose the language")
+
         self.toggle_language = StringVar()
         self.toggle_language.set("English")
 
-        Checkbutton(fen_user, textvariable=self.toggle_language, variable=self.toggle_language, onvalue="English",
-                    offvalue="Français").grid(column=0, row=0)
+        Checkbutton(language_frame, textvariable=self.toggle_language, variable=self.toggle_language, onvalue="English",
+                    offvalue="Français").grid()
+        language_frame.grid(column=0, row=0)
+
+        # ---------- Choose the kernel used -------------
+        kernel_frame = LabelFrame(general_options, text="Choose the kernel used")
+
+        value_kernel = StringVar()
+        value_kernel.set("gaussian")
+
+        Radiobutton(kernel_frame, text="Linear", variable=value_kernel, value="linear").grid()
+        Radiobutton(kernel_frame, text="Polynomial", variable=value_kernel, value="polynomial").grid()
+        Radiobutton(kernel_frame, text="Gaussian", variable=value_kernel, value="gaussian").grid()
+
+        kernel_frame.grid(column=1, row=0)
+
+        # ---------- Choose the sample used -------------
+        sample_frame = LabelFrame(general_options, text="Choose the sample used")
+
+        value_sample = StringVar()
+        value_sample.set("few_randomised")
+
+        Radiobutton(sample_frame, text="1'000 tweets randomised", variable=value_sample, value="few_randomised").grid()
+        Radiobutton(sample_frame, text="10'000 tweets randomised", variable=value_sample,
+                    value="many_randomised").grid()
+        Radiobutton(sample_frame, text="1'000 tweets non-randomised", variable=value_sample,
+                    value="few_non-randomised").grid()
+        Radiobutton(sample_frame, text="10'000 tweets non-randomised", variable=value_sample,
+                    value="many_non-randomised").grid()
+
+        sample_frame.grid(column=2, row=0)
+
+        general_options.grid()
+
+        # Trigger some specific actions #
+        specific_actions = LabelFrame(fen_user, text="Trigger specific actions")
+
+        # ---------- Submit custom text -------------
+        custom_text_frame = LabelFrame(specific_actions, text="Analyse custom text")
 
         self.value_submit = StringVar()
         self.value_submit.set("Soumettre un texte")
@@ -45,24 +88,32 @@ class Application(Frame):
             elif not self.value_submit.get():
                 self.value_submit.set("Soumettre un texte")
 
-        text_submit = Entry(fen_user, textvariable=self.value_submit)
+        text_submit = Entry(custom_text_frame, textvariable=self.value_submit)
         text_submit.bind("<Enter>", default_submit_text)
         text_submit.bind("<Leave>", default_submit_text)
 
-        text_submit.grid(column=0, row=1)
+        text_submit.grid()
 
         def text_analysis():
             if self.value_submit != "Soumettre un texte":
                 pass  # function_to_call(self.value_submit)
 
-        Button(fen_user, text="Soumettre texte", command=text_analysis).grid(column=1, row=1)
+        Button(custom_text_frame, text="Do it", command=text_analysis).grid()
+        custom_text_frame.grid(column=0, row=0)
+
+        # ---------- Submit custom text/csv file -------------
+        custom_file_frame = LabelFrame(specific_actions, text="Analyse custom file")
 
         def ask_file():
             file_name = askopenfile(title="Ouvrir fichier de tweets",
                                     filetypes=[('txt files', '.txt'), ('csv files', '.csv')])
             pass  # function_to_call(open(file_name, "rb").read())
 
-        Button(fen_user, text="Choisir un fichier à analyser", command=ask_file).grid(column=0, row=2)
+        Button(custom_file_frame, text="Do it", command=ask_file).grid()
+        custom_file_frame.grid(column=1, row=0)
+
+        # ---------- Get and analyse specific tweet -------------
+        query_frame = LabelFrame(specific_actions, text="Analyse some tweet related topic")
 
         self.user_query = StringVar()
         self.user_query.set("Soumettre un '#' à regarder")
@@ -73,12 +124,12 @@ class Application(Frame):
             elif not self.user_query.get():
                 self.user_query.set("Soumettre un '#' à regarder")
 
-        text_submit = Entry(fen_user, textvariable=self.user_query)
+        text_submit = Entry(query_frame, textvariable=self.user_query)
 
         text_submit.bind("<Enter>", default_query_text)
         text_submit.bind("<Leave>", default_query_text)
 
-        text_submit.grid(column=0, row=3)
+        text_submit.grid()
 
         def query_analysis():
             if self.user_query != "Soumettre un '#' à regarder" and '#' in self.user_query:
@@ -86,18 +137,25 @@ class Application(Frame):
             elif self.user_query != "Soumettre un '#' à regarder":
                 twitter_collect.search_sample('#' + self.user_query.get())
 
-        Button(fen_user, text="Echantillon de la requête", command=query_analysis).grid(column=1, row=3)
+        Button(query_frame, text="Do it", command=query_analysis).grid()
+        query_frame.grid(column=2, row=0)
+
+        # ---------- Get and analyse 'x' tweets -------------
+        number_frame = LabelFrame(specific_actions, text="Collect and analyse 'x' tweets")
 
         self.number_tweets = StringVar()
         self.number_tweets.set(5)
 
-        Spinbox(fen_user, from_=5, to=1000, increment=5, textvariable=self.number_tweets,
-                justify='center').grid(column=0, row=4)
+        Spinbox(number_frame, from_=5, to=1000, increment=5, textvariable=self.number_tweets,
+                justify='center').grid()
 
         def collect_tweet_stream():
             twitter_collect.collect_tweet(self.number_tweets)
 
-        Button(fen_user, text="Collecter 'x' tweets", command=collect_tweet_stream).grid(column=1, row=4)
+        Button(number_frame, text="Do it", command=collect_tweet_stream).grid()
+        number_frame.grid(column=3, row=0)
+
+        specific_actions.grid()
 
         display.add(fen_user, text="Options")
 
