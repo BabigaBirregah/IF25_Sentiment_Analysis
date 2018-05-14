@@ -24,6 +24,9 @@ class Application(Frame):
         # create the content for the user, where he can choose the action to perform
         self.create_user_panel(self.display)
 
+        # create the tab where the user can perform another custom training
+        self.create_training_panel(self.display)
+
         # TODO : maybe we should only create this tab when there is something to show
         # self.create_viewer_panel(self.display)  # create the content to visualize the action chosen by the user
 
@@ -36,10 +39,10 @@ class Application(Frame):
         # ---------- Choose the language -------------
         language_frame = LabelFrame(general_options, text="Choose the language")
 
-        self.toggle_language = StringVar()
-        self.toggle_language.set("English")
+        toggle_language = StringVar()
+        toggle_language.set("English")
 
-        Checkbutton(language_frame, textvariable=self.toggle_language, variable=self.toggle_language, onvalue="English",
+        Checkbutton(language_frame, textvariable=toggle_language, variable=toggle_language, onvalue="English",
                     offvalue="Français").grid()
         language_frame.grid(column=0, row=0)
 
@@ -143,11 +146,10 @@ class Application(Frame):
         # ---------- Get and analyse 'x' tweets -------------
         number_frame = LabelFrame(specific_actions, text="Collect and analyse 'x' tweets")
 
-        self.number_tweets = StringVar()
+        self.number_tweets = IntVar()
         self.number_tweets.set(5)
 
-        Spinbox(number_frame, from_=5, to=1000, increment=5, textvariable=self.number_tweets,
-                justify='center').grid()
+        Spinbox(number_frame, from_=5, to=1000, increment=5, textvariable=self.number_tweets, justify='center').grid()
 
         def collect_tweet_stream():
             twitter_collect.collect_tweet(self.number_tweets)
@@ -159,7 +161,34 @@ class Application(Frame):
 
         display.add(fen_user, text="Options")
 
+    def create_training_panel(self, display):
+        fen_training = Frame(display, name="fen_visualiser")
+
+        # ---------- Get and analyse 'x' tweets -------------
+        options_frame = LabelFrame(fen_training, text="Tweak the parameters")
+
+        self.number_tweets = IntVar()
+        self.number_tweets.set(100)
+
+        Label(options_frame, text="Choose the size of the training sample").grid(column=0, row=0)
+        Spinbox(options_frame, from_=100, to=1000000, increment=100, textvariable=self.number_tweets,
+                justify='center').grid(column=1, row=0)
+
+        toggle_randomness = StringVar()
+        toggle_randomness.set("Randomised")
+
+        Checkbutton(options_frame, textvariable=toggle_randomness, variable=toggle_randomness, onvalue="Randomised",
+                    offvalue="Non-randomised").grid()
+
+        def train_settings():
+            pass
+
+        Button(options_frame, text="Do it", command=train_settings).grid()
+        options_frame.grid()
+
+        display.add(fen_training, text="Training")
+
     def create_viewer_panel(self, display):
         fen_visualiser = Frame(display, name="fen_visualiser")
 
-        display.add(fen_visualiser, text="Visualiseur")
+        display.add(fen_visualiser, text="Visualiser")
