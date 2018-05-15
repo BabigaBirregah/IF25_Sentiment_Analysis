@@ -1,7 +1,7 @@
 # https://pypi.org/project/twitter/
 # http://socialmedia-class.org/twittertutorial.html
 
-from twitter import *
+from twitter import OAuth, Twitter, TwitterStream
 
 from Data.credentials import credentials
 
@@ -11,10 +11,10 @@ def connect_method():
     Collect the credentials and create the method to connect to the Twitter object
     :return: OAuth object with the corresponding credentials
     """
-    ACCESS_TOKEN, ACCESS_SECRET, CONSUMER_KEY, CONSUMER_SECRET = credentials()
-    return OAuth(ACCESS_TOKEN, ACCESS_SECRET, CONSUMER_KEY, CONSUMER_SECRET)  # you should create a credential function,
-    #  in a separate file not included to git, returning a tuple
+    # you should create a credential function, in a separate file not included to git, returning a tuple
     # (ACCESS_TOKEN, ACCESS_SECRET, CONSUMER_KEY, CONSUMER_SECRET)
+    ACCESS_TOKEN, ACCESS_SECRET, CONSUMER_KEY, CONSUMER_SECRET = credentials()
+    return OAuth(ACCESS_TOKEN, ACCESS_SECRET, CONSUMER_KEY, CONSUMER_SECRET)
 
 
 def search_sample(query):
@@ -23,17 +23,7 @@ def search_sample(query):
     :param query: word to look for with the twitter API and collect som tweets
     :return:
     """
-    connect_twitter = Twitter(auth=connect_method())
-    result_query = connect_twitter.search.tweets(q=query)
-    result_query = result_query['statuses']  # return a list of dictionaries containing tweets only
-
-    # we just want the text from it
-    only_text = list()
-    for dic in result_query:
-        only_text.append(dic['text'])
-
-    # deal with the text
-    pass
+    return [dic['text'] for dic in Twitter(auth=connect_method()).search.tweets(q=query)['statuses']]
 
 
 def collect_tweet(nb_tweets=1):
@@ -46,7 +36,6 @@ def collect_tweet(nb_tweets=1):
 
     only_text = list()
     for msg in twitter_stream.statuses.sample():  # infinite loop
-        print(msg)  # TODO : just for debugging purpose ; remove after not needed anymore
         try:
             if msg['text']:
                 only_text.append(msg['text'])
@@ -57,6 +46,4 @@ def collect_tweet(nb_tweets=1):
         if not nb_tweets:  # to stop the loop when reaching the desired amount of tweets
             break
 
-    # deal with the text
-    print(only_text)
-    pass
+    return only_text
