@@ -24,6 +24,7 @@ class Application(Frame):
         self.nb_tweet_collect = IntVar()
         self.nb_tweet_train = IntVar()
         self.toggle_randomness = StringVar()
+        self.toggle_nb_pos_neg = StringVar()
         self.train_kernel = StringVar()
 
         # Populate the window
@@ -36,10 +37,11 @@ class Application(Frame):
         # create the content for the user, where he can choose the action to perform
         self.create_user_panel(self.display)
 
-        self.create_actions_panel(self.display)
-
         # create the tab where the user can perform another custom training
         self.create_training_panel(self.display)
+
+        # create the actions that the user can trigger
+        self.create_actions_panel(self.display)
 
         # TODO : maybe we should only create this tab when there is something to show
         # self.create_viewer_panel(self.display)  # create the content to visualize the action chosen by the user
@@ -203,6 +205,16 @@ class Application(Frame):
 
         random_frame.grid(column=1, row=0, padx=10, pady=10)
 
+        # ---------- Choose either number of positive tweets should equal negative -------------
+        nb_pos_neg_frame = LabelFrame(options_frame, text="Number of positive equal negative tweets")
+
+        self.toggle_nb_pos_neg.set("Equal")
+
+        Checkbutton(nb_pos_neg_frame, textvariable=self.toggle_nb_pos_neg, variable=self.toggle_nb_pos_neg,
+                    onvalue="Equal", offvalue="Non-equal").grid(padx=5, pady=5)
+
+        nb_pos_neg_frame.grid(column=2, row=0, padx=10, pady=10)
+
         # ---------- Choose the kernel to use -------------
         kernel_frame = LabelFrame(options_frame, text="Choose the kernel used")
 
@@ -213,10 +225,11 @@ class Application(Frame):
                                                                                                           pady=5)
         Radiobutton(kernel_frame, text="Gaussian", variable=self.train_kernel, value="gaussian").grid(padx=5, pady=5)
 
-        kernel_frame.grid(column=2, row=0, padx=10, pady=10)
+        kernel_frame.grid(column=3, row=0, padx=10, pady=10)
 
         def train_settings():
-            custom_training(self.nb_tweet_train, self.toggle_randomness == "Randomised", self.train_kernel)
+            custom_training(self.nb_tweet_train, self.toggle_randomness.get() == "Randomised",
+                            self.toggle_nb_pos_neg.get() == "Equal", self.train_kernel)
 
         Button(options_frame, text="Do it", command=train_settings).grid(column=1, padx=5, pady=5)
 

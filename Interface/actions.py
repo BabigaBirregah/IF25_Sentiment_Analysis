@@ -19,5 +19,5 @@ def analyse_tweets(nb_tweets, kernel):
     pass
 
 
-def custom_training(nb_tweet_sample, randomised, kernel):
+def custom_training(nb_tweet_sample, randomised, equal_pos_neg, kernel):
     pass
