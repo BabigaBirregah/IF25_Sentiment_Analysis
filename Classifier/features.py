@@ -54,7 +54,6 @@ def load_emoticons():
     """
     positive_emoticon_dict, negative_emoticon_dict = list(), list()
     with open(get_path_resource('EmoticonSentimentLexicon.txt'), 'rb') as emoticons_file:
-        print(emoticons_file.readline().split(b'sep'))
         for line in emoticons_file.readlines():
             key, value = line.split(b'sep')
             if value == b'1':
@@ -153,6 +152,3 @@ def characteristic_vector(list_element_tweet, language='en'):
 
     return [count_positive_words['count'], count_negative_words['count'], count_positive_emoticons['count'],
             count_negative_emoticons['count'], presence_negation['bool']]
-
-
-print(load_emoticons())

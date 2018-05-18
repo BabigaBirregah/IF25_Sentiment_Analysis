@@ -52,7 +52,7 @@ def clean_element(element, language='en'):
     element = sub(rb'#', rb'', element)
 
     # remove all the punctuations in the element
-    element = sub(rb'[%s]+' % escape("""~"'([-|`\_^@)]=}/*-+.$£¨*!:/;,? """), r'', element)
+    element = sub(rb'[%s]+' % escape("""~"'([-|`\_^@)]=}/*-+.$£¨*!:/;,? """.encode()), rb'', element)
 
     # remove all repetition of the same alphabetic character
     element = sub(rb'(\w)\1+', rb'\1', element)
@@ -64,7 +64,7 @@ def clean_element(element, language='en'):
         return element
 
 
-def clean_text(text, language):
+def clean_text(text, language='en'):
     """
     Clean the text in the desired language from all undesired elements
     :param text: string to transform in a cleaned list of element

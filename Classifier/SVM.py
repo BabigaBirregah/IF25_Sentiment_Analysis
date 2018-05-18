@@ -1,6 +1,6 @@
 from cvxopt import matrix
 from cvxopt.solvers import qp
-from numpy import diag, mean, ones, outer, ravel, sign, vstack, zeros
+from numpy import diag, mean, ones, outer, ravel, shape, sign, vstack, zeros
 
 MIN_SUPPORT_VECTOR_MULTIPLIER = 1e-5
 
@@ -12,8 +12,7 @@ class SVMTrainer(object):
 
     def train(self, features_vector, labels_vector):
         """
-        Given the training features features_vector with labels labels_vector, returns a SVM
-        predictor representing the trained SVM
+        Given the training features with labels, returns a SVM predictor representing the trained SVM
         :param features_vector:
         :param labels_vector:
         :return:
@@ -22,7 +21,7 @@ class SVMTrainer(object):
         return self._construct_predictor(features_vector, labels_vector, lagrange_multipliers)
 
     def _gram_matrix(self, features_vector):
-        n_samples, n_features = features_vector.shape()
+        n_samples, n_features = shape(features_vector)
         K = zeros((n_samples, n_samples))
         for i, x_i in enumerate(features_vector):
             for j, x_j in enumerate(features_vector):
@@ -44,7 +43,7 @@ class SVMTrainer(object):
                             support_vectors=support_vectors, support_vector_labels=support_vector_labels)
 
     def _compute_multipliers(self, features_vector, labels_vector):
-        n_samples, n_features = features_vector.shape()
+        n_samples, n_features = shape(features_vector)
 
         K = self._gram_matrix(features_vector)
 

@@ -1,4 +1,4 @@
-from os import getcwd
+from os.path import dirname
 
 
 def get_path_resource(name_resource):
@@ -7,4 +7,4 @@ def get_path_resource(name_resource):
     :param name_resource: file to get
     :return: absolute path to the file
     """
-    return getcwd() + name_resource
+    return dirname(__file__) + '\\' + name_resource

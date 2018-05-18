@@ -19,6 +19,7 @@ class Application(Frame):
         self.display = Notebook(self, name="nb")  # tab manager
         self.toggle_language = StringVar()
         self.analyse_kernel = StringVar()
+        self.value_sample = StringVar()
         self.value_submit = StringVar()
         self.user_query = StringVar()
         self.nb_tweet_collect = IntVar()
@@ -76,16 +77,16 @@ class Application(Frame):
         # ---------- Choose the sample used -------------
         sample_frame = LabelFrame(general_options, text="Choose the sample used")
 
-        value_sample = StringVar()
-        value_sample.set("few_randomised")
+        self.value_sample.set("few_randomised")
 
-        Radiobutton(sample_frame, text="1'000 tweets randomised", variable=value_sample, value="few_randomised").grid(
+        Radiobutton(sample_frame, text="1'000 tweets randomised", variable=self.value_sample,
+                    value="few_randomised").grid(
                 padx=5, pady=5)
-        Radiobutton(sample_frame, text="10'000 tweets randomised", variable=value_sample,
+        Radiobutton(sample_frame, text="10'000 tweets randomised", variable=self.value_sample,
                     value="many_randomised").grid(padx=5, pady=5)
-        Radiobutton(sample_frame, text="1'000 tweets non-randomised", variable=value_sample,
+        Radiobutton(sample_frame, text="1'000 tweets non-randomised", variable=self.value_sample,
                     value="few_non-randomised").grid(padx=5, pady=5)
-        Radiobutton(sample_frame, text="10'000 tweets non-randomised", variable=value_sample,
+        Radiobutton(sample_frame, text="10'000 tweets non-randomised", variable=self.value_sample,
                     value="many_non-randomised").grid(padx=5, pady=5)
 
         sample_frame.grid(column=2, row=0, padx=10, pady=10)
@@ -119,7 +120,7 @@ class Application(Frame):
 
         def text_analysis():
             if self.value_submit != "Soumettre un texte":
-                analyse_text(self.value_submit, self.analyse_kernel)
+                analyse_text(self.value_submit, self.toggle_language, self.analyse_kernel, self.value_sample)
 
         Button(custom_text_frame, text="Do it", command=text_analysis).grid(padx=5, pady=5)
         custom_text_frame.grid(column=0, row=0, padx=10, pady=10)
@@ -130,7 +131,7 @@ class Application(Frame):
         def ask_file():
             file_name = askopenfile(title="Ouvrir fichier de tweets",
                                     filetypes=[('txt files', '.txt'), ('csv files', '.csv')])
-            analyse_file(open(file_name, "rb").read(), self.analyse_kernel)
+            analyse_file(open(file_name, "rb").read(), self.toggle_language, self.analyse_kernel, self.value_sample)
 
         Button(custom_file_frame, text="Do it", command=ask_file).grid(padx=5, pady=5)
         custom_file_frame.grid(column=1, row=0, padx=10, pady=10)
@@ -155,9 +156,9 @@ class Application(Frame):
 
         def query_analysis():
             if self.user_query != "Soumettre un '#' à regarder" and '#' in self.user_query:
-                analyse_query(self.user_query, self.analyse_kernel)
+                analyse_query(self.user_query, self.toggle_language, self.analyse_kernel, self.value_sample)
             elif self.user_query != "Soumettre un '#' à regarder":
-                analyse_query('#' + self.user_query.get(), self.analyse_kernel)
+                analyse_query('#' + self.user_query.get(), self.toggle_language, self.analyse_kernel, self.value_sample)
 
         Button(query_frame, text="Do it", command=query_analysis).grid(padx=5, pady=5)
         query_frame.grid(column=2, row=0, padx=10, pady=10)
@@ -171,7 +172,7 @@ class Application(Frame):
                 padx=5, pady=5)
 
         def analyse_stream_tweet():
-            analyse_tweets(self.nb_tweet_collect, self.analyse_kernel)
+            analyse_tweets(self.nb_tweet_collect, self.toggle_language, self.analyse_kernel, self.value_sample)
 
         Button(number_frame, text="Do it", command=analyse_stream_tweet).grid(padx=5, pady=5)
         number_frame.grid(column=3, row=0, padx=10, pady=10)
@@ -216,7 +217,7 @@ class Application(Frame):
         nb_pos_neg_frame.grid(column=2, row=0, padx=10, pady=10)
 
         # ---------- Choose the kernel to use -------------
-        kernel_frame = LabelFrame(options_frame, text="Choose the kernel used")
+        kernel_frame = LabelFrame(options_frame, text="Choose the kernel to use")
 
         self.train_kernel.set("gaussian")
 
@@ -229,7 +230,7 @@ class Application(Frame):
 
         def train_settings():
             custom_training(self.nb_tweet_train, self.toggle_randomness.get() == "Randomised",
-                            self.toggle_nb_pos_neg.get() == "Equal", self.train_kernel)
+                            self.toggle_nb_pos_neg.get() == "Equal", self.toggle_language, self.analyse_kernel)
 
         Button(options_frame, text="Do it", command=train_settings).grid(column=1, padx=5, pady=5)
 

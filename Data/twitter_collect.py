@@ -20,7 +20,7 @@ def connect_method():
 def search_sample(query):
     """
     Using the Twitter library we collect some tweets regarding the query
-    :param query: word to look for with the twitter API and collect som tweets
+    :param query: word to look for with the twitter API and collect some tweets
     :return:
     """
     return [dic['text'] for dic in Twitter(auth=connect_method()).search.tweets(q=query)['statuses']]
