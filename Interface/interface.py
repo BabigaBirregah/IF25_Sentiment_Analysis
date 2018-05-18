@@ -174,20 +174,27 @@ class Application(Frame):
     def create_training_panel(self, display):
         fen_training = Frame(display, name="fen_visualiser")
 
-        # ---------- Train by using 'x' tweets -------------
         options_frame = LabelFrame(fen_training, text="Tweak the parameters")
+
+        # ---------- Train by using 'x' tweets -------------
+        size_frame = LabelFrame(options_frame, text="Size of the training sample")
 
         self.nb_tweet_train.set(100)
 
-        Label(options_frame, text="Choose the size of the training sample").grid(column=0, row=0, padx=10, pady=10)
-        Spinbox(options_frame, from_=100, to=1000000, increment=100, textvariable=self.nb_tweet_train,
+        Spinbox(size_frame, from_=100, to=1000000, increment=100, textvariable=self.nb_tweet_train,
                 justify='center').grid(column=1, row=0, padx=5, pady=5)
 
+        size_frame.grid(column=0, row=0, padx=10, pady=10)
+
         # ---------- Choose to randomise the sample -------------
+        random_frame = LabelFrame(options_frame, text="Order of tweets")
+
         self.toggle_randomness.set("Randomised")
 
-        Checkbutton(options_frame, textvariable=self.toggle_randomness, variable=self.toggle_randomness,
+        Checkbutton(random_frame, textvariable=self.toggle_randomness, variable=self.toggle_randomness,
                     onvalue="Randomised", offvalue="Non-randomised").grid(padx=5, pady=5)
+
+        random_frame.grid(column=1, row=0, padx=10, pady=10)
 
         # ---------- Choose the kernel to use -------------
         kernel_frame = LabelFrame(options_frame, text="Choose the kernel used")
@@ -199,12 +206,13 @@ class Application(Frame):
                                                                                                           pady=5)
         Radiobutton(kernel_frame, text="Gaussian", variable=self.train_kernel, value="gaussian").grid(padx=5, pady=5)
 
-        kernel_frame.grid(column=1, row=0, padx=10, pady=10)
+        kernel_frame.grid(column=2, row=0, padx=10, pady=10)
 
         def train_settings():
             custom_training(self.nb_tweet_train, self.toggle_randomness == "Randomised", self.train_kernel)
 
-        Button(options_frame, text="Do it", command=train_settings).grid(padx=5, pady=5)
+        Button(options_frame, text="Do it", command=train_settings).grid(column=1, padx=5, pady=5)
+
         options_frame.grid(padx=10, pady=10)
 
         display.add(fen_training, text="Training")
