@@ -86,7 +86,7 @@ class SVMPredictor(object):
 
     def predict(self, features_given):
         """
-        Computes the SVM prediction on the given features features_given
+        Computes the SVM prediction on the given features
         :param features_given:
         :return:
         """

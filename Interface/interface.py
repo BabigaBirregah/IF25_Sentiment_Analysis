@@ -36,6 +36,8 @@ class Application(Frame):
         # create the content for the user, where he can choose the action to perform
         self.create_user_panel(self.display)
 
+        self.create_actions_panel(self.display)
+
         # create the tab where the user can perform another custom training
         self.create_training_panel(self.display)
 
@@ -88,8 +90,13 @@ class Application(Frame):
 
         general_options.grid(padx=10, pady=10)
 
+        display.add(fen_user, text="Options")
+
+    def create_actions_panel(self, display):
+        fen_actions = Frame(display, name="fen_actions")
+
         # Trigger some specific actions #
-        specific_actions = LabelFrame(fen_user, text="Trigger specific actions")
+        specific_actions = LabelFrame(fen_actions, text="Trigger specific actions")
 
         # ---------- Submit custom text -------------
         custom_text_frame = LabelFrame(specific_actions, text="Analyse custom text")
@@ -169,7 +176,7 @@ class Application(Frame):
 
         specific_actions.grid(padx=10, pady=10)
 
-        display.add(fen_user, text="Options")
+        display.add(fen_actions, text="Actions")
 
     def create_training_panel(self, display):
         fen_training = Frame(display, name="fen_visualiser")
