@@ -29,25 +29,25 @@ class Application(Frame):
         self.train_kernel = StringVar()
 
         # Populate the window
-        self.createWidgets()
+        self._create_widgets()
 
-    def createWidgets(self):
+    def _create_widgets(self):
         # --------- Ours ---------
         self.display.grid()
 
         # create the content for the user, where he can choose the action to perform
-        self.create_user_panel(self.display)
+        self._create_user_panel(self.display)
 
         # create the tab where the user can perform another custom training
-        self.create_training_panel(self.display)
+        self._create_training_panel(self.display)
 
         # create the actions that the user can trigger
-        self.create_actions_panel(self.display)
+        self._create_actions_panel(self.display)
 
         # TODO : maybe we should only create this tab when there is something to show
         # self.create_viewer_panel(self.display)  # create the content to visualize the action chosen by the user
 
-    def create_user_panel(self, display):
+    def _create_user_panel(self, display):
         fen_user = Frame(display, name="fen_user")
 
         # Configure the analysis #
@@ -95,7 +95,7 @@ class Application(Frame):
 
         display.add(fen_user, text="Options")
 
-    def create_actions_panel(self, display):
+    def _create_actions_panel(self, display):
         fen_actions = Frame(display, name="fen_actions")
 
         # Trigger some specific actions #
@@ -181,7 +181,7 @@ class Application(Frame):
 
         display.add(fen_actions, text="Actions")
 
-    def create_training_panel(self, display):
+    def _create_training_panel(self, display):
         fen_training = Frame(display, name="fen_visualiser")
 
         options_frame = LabelFrame(fen_training, text="Tweak the parameters")

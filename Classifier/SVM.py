@@ -1,95 +1,153 @@
+from json import dumps, loads
+
 from cvxopt import matrix
 from cvxopt.solvers import qp
-from numpy import diag, mean, ones, outer, ravel, shape, sign, vstack, zeros
+from numpy import (arange, diag, dot, hstack, identity, ones, outer, ravel, sign, vstack,
+                   zeros)
 
-MIN_SUPPORT_VECTOR_MULTIPLIER = 1e-5
+from Classifier.Kernel import Kernel
 
 
-class SVMTrainer(object):
-    def __init__(self, kernel, c):
-        self._kernel = kernel
-        self._c = c
+class SVM(object):
 
-    def train(self, features_vector, labels_vector):
+    def __init__(self, kernel=Kernel.linear(), C=None):
+        self.kernel = kernel
+        self.C = C
+        if self.C is not None:
+            self.C = float(self.C)
+
+    def fit(self, features, labels):
         """
-        Given the training features with labels, returns a SVM predictor representing the trained SVM
-        :param features_vector:
-        :param labels_vector:
+
+        :param features:
+        :param labels:
         :return:
         """
-        lagrange_multipliers = self._compute_multipliers(features_vector, labels_vector)
-        return self._construct_predictor(features_vector, labels_vector, lagrange_multipliers)
+        n_samples, n_features = features.shape
 
-    def _gram_matrix(self, features_vector):
-        n_samples, n_features = shape(features_vector)
+        # 1) Gram matrix
         K = zeros((n_samples, n_samples))
-        for i, x_i in enumerate(features_vector):
-            for j, x_j in enumerate(features_vector):
-                K[i, j] = self._kernel(x_i, x_j)
-        return K
+        for i in range(n_samples):
+            for j in range(n_samples):
+                K[i, j] = self.kernel(features[i], features[j])
 
-    def _construct_predictor(self, features_vector, labels_vector, lagrange_multipliers):
-        support_vector_indices = lagrange_multipliers > MIN_SUPPORT_VECTOR_MULTIPLIER
-
-        support_multipliers = lagrange_multipliers[support_vector_indices]
-        support_vectors = features_vector[support_vector_indices]
-        support_vector_labels = labels_vector[support_vector_indices]
-
-        bias = mean([y_k - SVMPredictor(kernel=self._kernel, bias=0.0, weights=support_multipliers,
-                                        support_vectors=support_vectors,
-                                        support_vector_labels=support_vector_labels).predict(x_k) for (y_k, x_k) in
-                     zip(support_vector_labels, support_vectors)])
-        return SVMPredictor(kernel=self._kernel, bias=bias, weights=support_multipliers,
-                            support_vectors=support_vectors, support_vector_labels=support_vector_labels)
-
-    def _compute_multipliers(self, features_vector, labels_vector):
-        n_samples, n_features = shape(features_vector)
-
-        K = self._gram_matrix(features_vector)
-
-        P = matrix(outer(labels_vector, labels_vector) * K)
-        q = matrix(-1 * ones(n_samples))
-
-        G_std = matrix(diag(ones(n_samples) * -1))
-        h_std = matrix(zeros(n_samples))
-
-        G_slack = matrix(diag(ones(n_samples)))
-        h_slack = matrix(ones(n_samples) * self._c)
-
-        G = matrix(vstack((G_std, G_slack)))
-        h = matrix(vstack((h_std, h_slack)))
-
-        A = matrix(labels_vector, (1, n_samples))
+        P = matrix(outer(labels, labels) * K)
+        q = matrix(ones(n_samples) * -1)
+        A = matrix(labels, (1, n_samples))
         b = matrix(0.0)
 
+        if self.C is None:
+            G = matrix(diag(ones(n_samples) * -1))
+            h = matrix(zeros(n_samples))
+        else:
+            tmp1 = diag(ones(n_samples) * -1)
+            tmp2 = identity(n_samples)
+            G = matrix(vstack((tmp1, tmp2)))
+            tmp1 = zeros(n_samples)
+            tmp2 = ones(n_samples) * self.C
+            h = matrix(hstack((tmp1, tmp2)))
+
+        # 2) Resolve QP problem
         solution = qp(P, q, G, h, A, b)
 
-        return ravel(solution['x'])
+        # 3) Lagrange multipliers
+        lagrange_multipliers = ravel(solution['x'])
 
+        # 4) Lagrange multipliers
+        support_vectors = lagrange_multipliers > 1e-5
+        ind = arange(len(lagrange_multipliers))[support_vectors]
+        self.lagrange_multipliers = lagrange_multipliers[support_vectors]
+        self.support_vectors = features[support_vectors]
+        self.support_vectors_labels = labels[support_vectors]
+        print("%d support vectors out of %d points" % (len(self.lagrange_multipliers), n_samples))
 
-class SVMPredictor(object):
-    def __init__(self, kernel, bias, weights, support_vectors, support_vector_labels):
+        # 5) Bias
+        self.bias = 0
+        for n in range(len(self.lagrange_multipliers)):
+            self.bias += self.support_vectors_labels[n]
+            self.bias -= sum(self.lagrange_multipliers * self.support_vectors_labels * K[ind[n], support_vectors])
+        self.bias /= len(self.lagrange_multipliers)
+
+        # 6) Weight vector
+        if self.kernel == Kernel.linear():
+            self.weights = zeros(n_features)
+            for n in range(len(self.lagrange_multipliers)):
+                self.weights += self.lagrange_multipliers[n] * self.support_vectors_labels[n] * self.support_vectors[n]
+        else:
+            self.weights = None
+
+    def _project(self, features):
         """
 
-        :param kernel:
-        :param bias:
-        :param weights:
-        :param support_vectors:
-        :param support_vector_labels:
-        """
-        self._kernel = kernel
-        self._bias = bias
-        self._weights = weights
-        self._support_vectors = support_vectors
-        self._support_vector_labels = support_vector_labels
-
-    def predict(self, features_given):
-        """
-        Computes the SVM prediction on the given features
-        :param features_given:
+        :param features:
         :return:
         """
-        result = self._bias
-        for z_i, x_i, y_i in zip(self._weights, self._support_vectors, self._support_vector_labels):
-            result += z_i * y_i * self._kernel(x_i, features_given)
-        return sign(result).item()
+        if self.weights is not None:
+            return dot(features, self.weights) + self.bias
+        else:
+            y_predict = zeros(len(features))
+            for i in range(len(features)):
+                s = 0
+                for lagrange_multipliers, support_vectors_labels, support_vectors in zip(self.lagrange_multipliers,
+                                                                                         self.support_vectors_labels,
+                                                                                         self.support_vectors):
+                    s += lagrange_multipliers * support_vectors_labels * self.kernel(features[i], support_vectors)
+                y_predict[i] = s
+            return y_predict + self.bias
+
+    def attributes(self):
+        """
+
+        :return:
+        """
+        dic_attribute = dict()
+        dic_attribute["kernel"] = self.kernel
+        dic_attribute["C"] = self.C
+        dic_attribute["weights"] = self.weights
+        dic_attribute["lagrange_multipliers"] = self.lagrange_multipliers
+        dic_attribute["support_vectors"] = self.support_vectors
+        dic_attribute["support_vectors_labels"] = self.support_vectors_labels
+        dic_attribute["bias"] = self.bias
+        return dic_attribute
+
+    def save_to_file(self):
+        """
+
+        :return:
+        """
+        name_file = str(len(self.support_vectors)) + '_' + str(self.kernel) + '.txt'
+        with open(name_file, 'w') as profile:
+            profile.write(dumps(self.attributes()))
+
+    def predict(self, features):
+        """
+
+        :param features:
+        :return:
+        """
+        return sign(self._project(features))
+
+
+class SVMPredictor(SVM):
+
+    def __init__(self, kernel, C, weights, lagrange_multipliers, support_vectors, support_vectors_labels, bias):
+        self.kernel = kernel
+        self.C = C
+        self.weights = weights
+        self.lagrange_multipliers = lagrange_multipliers
+        self.support_vectors = support_vectors
+        self.support_vectors_labels = support_vectors_labels
+        self.bias = bias
+
+
+def get_from_file(name_file):
+    """
+
+    :param name_file:
+    :return:
+    """
+    with open(name_file, 'r') as profile:
+        dic_attribute = loads(profile.read())
+    return SVMPredictor(dic_attribute["kernel"], dic_attribute["C"], dic_attribute["weights"],
+                        dic_attribute["lagrange_multipliers"], dic_attribute["support_vectors"],
+                        dic_attribute["support_vectors_labels"], dic_attribute["bias"])

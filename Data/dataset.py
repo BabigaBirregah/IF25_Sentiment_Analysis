@@ -23,7 +23,7 @@ def clean_line(line):
     return (label.split(b',')[1], clean_end_line(text))
 
 
-def get_lines_file(number_line, file):
+def _get_lines_file(number_line, file):
     """
     Collect the desired amount of line in the file
     :param number_line: total number of lines to collect from the file
@@ -51,10 +51,10 @@ def get_some_sample(number_tweets=12):
     # TODO: maybe use csv library to read and treat the file
     number_tweets = min(number_tweets, 2 * NB_TWEETS_PER_FILE)
     with open(get_path_resource('Sentiment_analysis_dataset_1.csv'), 'rb') as file_part1:
-        number_lines, sample_list = get_lines_file(number_tweets, file_part1)
+        number_lines, sample_list = _get_lines_file(number_tweets, file_part1)
         if number_tweets - number_lines:
             with open(get_path_resource('Sentiment_analysis_dataset_2.csv'), 'rb') as file_part2:
-                number_lines_2, sample_list_2 = get_lines_file(number_tweets - number_lines, file_part2)
+                number_lines_2, sample_list_2 = _get_lines_file(number_tweets - number_lines, file_part2)
                 if number_tweets - (number_lines + number_lines_2):
                     return NB_TWEETS_PER_FILE * 2, sample_list + sample_list_2
                 else:
@@ -141,7 +141,7 @@ def get_randomised_pos_neg_sample(num_pos=12, num_neg=12):
     return negatives, positives
 
 
-def count_pos_neg_sample():
+def _count_pos_neg_sample():
     """
     Method to compute the number of positive and negative sample contained in our data set
     :return: None, print the number of negative tweets, positive tweets and total tweets counted

@@ -15,7 +15,7 @@ def clean_end_line(text):
     return sub(rb'(.*)\1\n|\r|\r\n', rb'\1', text)
 
 
-def load_stop_word(language='en'):
+def _load_stop_word(language='en'):
     """
     Load all the stop words for the corresponding language
     :param language: Choose the language from 'fr' that stands for french and 'en' that stands for english
@@ -58,7 +58,7 @@ def clean_element(element, language='en'):
     element = sub(rb'(\w)\1+', rb'\1', element)
 
     # check whether the element is relevant or not
-    if element in load_stop_word(language):
+    if element in _load_stop_word(language):
         return None
     else:
         return element
