@@ -1,6 +1,9 @@
 from secrets import randbelow
 
-from Data.clean_data import clean_end_line
+from numpy import array
+
+from Classifier.features import characteristic_vector
+from Data.clean_data import clean_end_line, clean_text
 from Ressources.resource import get_path_resource
 
 NB_TWEETS_PER_FILE = 789314
@@ -157,3 +160,31 @@ def _count_pos_neg_sample():
                 else:
                     count_neg += 1
     print(count_neg, count_pos, count_neg + count_pos)
+
+
+def get_characteristic_label_vectors(nb, randomness, pos_equal_neg):
+    """
+
+    :param nb:
+    :return:
+    """
+    m_features, m_labels = list(), list()
+    nb_pos, nb_neg = 0, 0
+    with open(get_path_resource('Sentiment_analysis_dataset_1.csv'), 'rb') as file_part1:
+        with open(get_path_resource('Sentiment_analysis_dataset_2.csv'), 'rb') as file_part2:
+            global_file = file_part1.readlines() + file_part2.readlines()
+            while len(m_features) < nb:
+                if randomness:
+                    label, text = clean_line(global_file.pop(randbelow(len(global_file))))
+                else:
+                    label, text = clean_line(global_file.pop())
+                feature_vector = characteristic_vector(clean_text(text))
+                if feature_vector != [0, 0, 0, 0, 0]:
+                    if pos_equal_neg:
+                        if float(label) == 1.0 and nb_pos < nb // 2 or float(label) == 0.0 and nb_neg < nb // 2:
+                            m_features.append(feature_vector)
+                            m_labels.append(float(label))
+                    else:
+                        m_features.append(feature_vector)
+                        m_labels.append(float(label))
+    return (array(m_features), array(m_labels))

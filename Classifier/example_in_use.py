@@ -1,9 +1,9 @@
-from numpy import (array)
+from numpy import array
 
 from Classifier.SVM import SVM
 from Classifier.features import characteristic_vector
-from Data.clean_data import *
-from Data.dataset import *
+from Data.clean_data import clean_text
+from Data.dataset import clean_line, get_randomised_sample
 
 tweets = get_randomised_sample(256)
 

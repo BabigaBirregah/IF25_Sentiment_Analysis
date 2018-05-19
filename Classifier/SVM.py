@@ -2,8 +2,7 @@ from json import dumps, loads
 
 from cvxopt import matrix
 from cvxopt.solvers import qp
-from numpy import (arange, diag, dot, hstack, identity, ones, outer, ravel, sign, vstack,
-                   zeros)
+from numpy import (arange, array, diag, dot, hstack, identity, ones, outer, ravel, sign, vstack, zeros)
 
 from Classifier.Kernel import Kernel
 
@@ -101,23 +100,26 @@ class SVM(object):
         :return:
         """
         dic_attribute = dict()
-        dic_attribute["kernel"] = self.kernel
+        dic_attribute["kernel"] = str(self.kernel).split('.')[1]
         dic_attribute["C"] = self.C
-        dic_attribute["weights"] = self.weights
-        dic_attribute["lagrange_multipliers"] = self.lagrange_multipliers
-        dic_attribute["support_vectors"] = self.support_vectors
-        dic_attribute["support_vectors_labels"] = self.support_vectors_labels
+        if self.weights:
+            dic_attribute["weights"] = self.weights.tolist()
+        else:
+            dic_attribute["weights"] = self.weights
+        dic_attribute["lagrange_multipliers"] = self.lagrange_multipliers.tolist()
+        dic_attribute["support_vectors"] = self.support_vectors.tolist()
+        dic_attribute["support_vectors_labels"] = self.support_vectors_labels.tolist()
         dic_attribute["bias"] = self.bias
         return dic_attribute
 
-    def save_to_file(self):
+    def save_to_file(self, name_file):
         """
 
         :return:
         """
-        name_file = str(len(self.support_vectors)) + '_' + str(self.kernel) + '.txt'
         with open(name_file, 'w') as profile:
-            profile.write(dumps(self.attributes()))
+            print(self.attributes())
+            profile.write(dumps(self.attributes(), ))
 
     def predict(self, features):
         """
@@ -148,6 +150,21 @@ def get_from_file(name_file):
     """
     with open(name_file, 'r') as profile:
         dic_attribute = loads(profile.read())
-    return SVMPredictor(dic_attribute["kernel"], dic_attribute["C"], dic_attribute["weights"],
-                        dic_attribute["lagrange_multipliers"], dic_attribute["support_vectors"],
-                        dic_attribute["support_vectors_labels"], dic_attribute["bias"])
+
+    if dic_attribute["kernel"] == "linear":
+        kernel = Kernel.linear()
+    elif dic_attribute["kernel"] == "gaussian":
+        kernel = Kernel.gaussian()
+    elif dic_attribute["kernel"] == "poly_kernel":
+        kernel = Kernel.poly_kernel()
+    elif dic_attribute["kernel"] == "hyperbolic_tangent":
+        kernel = Kernel.hyperbolic_tangent()
+    else:
+        kernel = Kernel.radial_basis()
+
+    if dic_attribute["weights"]:
+        dic_attribute["weights"] = array(dic_attribute["weights"])
+
+    return SVMPredictor(kernel, dic_attribute["C"], dic_attribute["weights"],
+                        array(dic_attribute["lagrange_multipliers"]), array(dic_attribute["support_vectors"]),
+                        array(dic_attribute["support_vectors_labels"]), dic_attribute["bias"])
