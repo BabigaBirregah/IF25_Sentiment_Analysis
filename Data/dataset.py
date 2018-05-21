@@ -169,22 +169,29 @@ def get_characteristic_label_vectors(nb, randomness, pos_equal_neg):
     :return:
     """
     m_features, m_labels = list(), list()
-    nb_pos, nb_neg = 0, 0
+    nb_pos, nb_neg, nb_tweet = 0, 0, 0
     with open(get_path_resource('Sentiment_analysis_dataset_1.csv'), 'rb') as file_part1:
         with open(get_path_resource('Sentiment_analysis_dataset_2.csv'), 'rb') as file_part2:
             global_file = file_part1.readlines() + file_part2.readlines()
-            while len(m_features) < nb:
+            while nb_tweet < nb:
                 if randomness:
-                    label, text = clean_line(global_file.pop(randbelow(len(global_file))))
+                    label, text = clean_line(global_file.pop(randbelow(2 * NB_TWEETS_PER_FILE - nb_tweet)))
                 else:
                     label, text = clean_line(global_file.pop())
                 feature_vector = characteristic_vector(clean_text(text))
                 if feature_vector != [0, 0, 0, 0, 0]:
+                    float_label = float(label)
                     if pos_equal_neg:
-                        if float(label) == 1.0 and nb_pos < nb // 2 or float(label) == 0.0 and nb_neg < nb // 2:
+                        if float_label == 0.0 and nb_neg < nb // 2 or float_label == 1.0 and nb_pos < nb // 2:
                             m_features.append(feature_vector)
-                            m_labels.append(float(label))
+                            m_labels.append(float_label)
+                            nb_tweet += 1
+                            if float(label) == 1.0:
+                                nb_pos += 1
+                            else:
+                                nb_neg += 1
                     else:
                         m_features.append(feature_vector)
-                        m_labels.append(float(label))
+                        m_labels.append(float_label)
+                        nb_tweet += 1
     return (array(m_features), array(m_labels))

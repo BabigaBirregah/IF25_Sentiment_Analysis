@@ -15,7 +15,7 @@ class SVM(object):
         if self.C is not None:
             self.C = float(self.C)
 
-    def fit(self, features, labels):
+    def fit(self, features, labels, iters=16):
         """
 
         :param features:
@@ -47,10 +47,13 @@ class SVM(object):
             h = matrix(hstack((tmp1, tmp2)))
 
         # 2) Resolve QP problem
-        solution = qp(P, q, G, h, A, b)
+        options = dict()
+        options['maxiters'] = iters
+        # options['show_progress'] = False
+        solution = qp(P, q, G, h, A, b, options=options)['x']
 
         # 3) Lagrange multipliers
-        lagrange_multipliers = ravel(solution['x'])
+        lagrange_multipliers = ravel(solution)
 
         # 4) Lagrange multipliers
         support_vectors = lagrange_multipliers > 1e-5
@@ -58,7 +61,6 @@ class SVM(object):
         self.lagrange_multipliers = lagrange_multipliers[support_vectors]
         self.support_vectors = features[support_vectors]
         self.support_vectors_labels = labels[support_vectors]
-        print("%d support vectors out of %d points" % (len(self.lagrange_multipliers), n_samples))
 
         # 5) Bias
         self.bias = 0
@@ -118,8 +120,7 @@ class SVM(object):
         :return:
         """
         with open(name_file, 'w') as profile:
-            print(self.attributes())
-            profile.write(dumps(self.attributes(), ))
+            profile.write(dumps(self.attributes()))
 
     def predict(self, features):
         """
