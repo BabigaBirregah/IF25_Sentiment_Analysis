@@ -22,3 +22,12 @@ class Kernel(object):
     @staticmethod
     def radial_basis(gamma=10):
         return lambda x, y: np.exp(-gamma * la.norm(np.subtract(x, y)))
+
+    @staticmethod
+    def get_correct_kernel(name):
+        if name == "linear":
+            return Kernel.linear()
+        elif name == "poly_kernel":
+            return Kernel.poly_kernel()
+        elif name == "gaussian":
+            return Kernel.gaussian()

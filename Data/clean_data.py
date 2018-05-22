@@ -32,7 +32,7 @@ def _load_stop_word(language='en'):
     return stop_word
 
 
-def clean_element(element, language='en'):
+def _clean_element(element, language='en'):
     """
     Remove all the undesired stuff from the element in the desired language
     :param element: string representing an element between whitespaces from the tweet
@@ -74,7 +74,7 @@ def clean_text(text, language='en'):
     """
     list_cleaned_element = list()
     for element in text.split(rb" "):
-        cleaned_element = clean_element(element, language)
+        cleaned_element = _clean_element(element, language)
         if cleaned_element:
             list_cleaned_element.append(cleaned_element)
 

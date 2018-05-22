@@ -5,6 +5,7 @@ from cvxopt.solvers import qp
 from numpy import (arange, array, diag, dot, hstack, identity, ones, outer, ravel, sign, vstack, zeros)
 
 from Classifier.Kernel import Kernel
+from Classifier.Profile.profile_file import get_path_profile
 
 
 class SVM(object):
@@ -121,7 +122,7 @@ class SVM(object):
         :param name_file: name of the file to save all the attributes of the SVM classifier to a file
         :return:
         """
-        with open(name_file, 'w') as profile:
+        with open(get_path_profile(name_file), 'w') as profile:
             profile.write(dumps(self.attributes()))
 
     def predict(self, features):
@@ -151,7 +152,7 @@ def get_from_file(name_file):
     :param name_file: name of the file containing the information to initiate the SVM classifier
     :return: SVM classifier already initiated (ready to predict)
     """
-    with open(name_file, 'r') as profile:
+    with open(get_path_profile(name_file), 'r') as profile:
         dic_attribute = loads(profile.read())
 
     if dic_attribute["kernel"] == "linear":

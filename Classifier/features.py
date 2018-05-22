@@ -4,14 +4,13 @@
 # http://positivewordsresearch.com/liste-des-mots-positifs/ : french positive words
 # http://richesse-et-finance.com/liste-mots-cles-negatifs/ : french negative words
 
-import threading
 from re import match
 
 from Data.clean_data import clean_end_line
 from Ressources.resource import get_path_resource
 
 
-def _load_positive_words(language='en'):
+def load_positive_words(language='en'):
     """
     Load in a list all the positive words contained in a text file. One word per line
     :param language: Choose the language from 'fr' that stands for french and 'en' that stands for english
@@ -28,7 +27,7 @@ def _load_positive_words(language='en'):
     return positive_word
 
 
-def _load_negative_words(language='en'):
+def load_negative_words(language='en'):
     """
         Load in a list all the negative words contained in a text file. One word per line
         :param language: Choose the language from 'fr' that stands for french and 'en' that stands for english
@@ -45,7 +44,7 @@ def _load_negative_words(language='en'):
     return negative_word
 
 
-def _load_emoticons():
+def load_emoticons():
     """
     Load in two separate lists the positive and negative emoticons.
     The file is composed of 'emoticons'sep'0|1' per line.
@@ -63,14 +62,13 @@ def _load_emoticons():
     return positive_emoticon_dict, negative_emoticon_dict
 
 
-def _count_generic(list_element, list_words, struct, weight=1):
+def _count_generic(list_element, list_words, weight=1):
     """
     Generic function to count the number of element from list_element in list_words.
     Since we are going to call this function in thread we use a struct -> dict to store the result of the counting.
     We can also apply a weight on the counting (emoticons have somehow bigger impact on the sentiment).
     :param list_element: list of elements we need to confront to list_words
     :param list_words: list of words that we are trying to count in list_element
-    :param struct: dict in which we store the result of the counting
     :param weight: importance coefficient to use
     :return: None, this function will be used in a thread (hence the dict)
     """
@@ -78,32 +76,30 @@ def _count_generic(list_element, list_words, struct, weight=1):
     for element in list_element:
         if element in list_words:
             count += 1 * weight
-    struct['count'] = count
+    return count
 
 
-def _negation_presence(list_element, language, struct):
+def _negation_presence(list_element, language='en'):
     """
     Method to be called within a thread to detect whether there is a negation or not among the elements of the tweets
     contained in the list of elements.
     :param list_element: list of relevant element in the tweet
     :param language: Choose the language from 'fr' that stands for french and 'en' that stands for english
         'fr' | 'en'
-    :param struct: dict in which we store the result of the counting
     :return: None, this function will be used in a thread (hence the dict)
     """
     if language == 'fr':
         for element in list_element:
             if match(rb'ne|n\'.*', element):
-                struct['bool'] = 1
-                break
+                return 1
     elif language == 'en':
         for element in list_element:
             if match(rb'.*n\'t', element) or match(rb'neither|not|nor', element):
-                struct['bool'] = 1
-                break
+                return 1
+    return 0
 
 
-def characteristic_vector(list_element_tweet, language='en'):
+def characteristic_vector(list_element_tweet, Ressource=None, language='en'):
     """
     Creation of the characteristic vector to further use in a classifier.
     The characteristics to be counted :
@@ -117,38 +113,16 @@ def characteristic_vector(list_element_tweet, language='en'):
         'fr' | 'en'
     :return: list / vector
     """
-    positive_words = _load_positive_words(language)
-    negative_words = _load_negative_words(language)
-    positive_emoticons, negative_emoticons = _load_emoticons()
-    count_positive_words, count_negative_words, count_positive_emoticons, count_negative_emoticons, presence_negation \
-        = dict(), dict(), \
-          dict(), dict(), dict()
+    if Ressource:
+        positive_words = Ressource.positive_words
+        negative_words = Ressource.negative_words
+        positive_emoticons = Ressource.positive_emoticons
+        negative_emoticons = Ressource.negative_emoticons
+    else:
+        positive_words = load_positive_words()
+        negative_words = load_negative_words()
+        positive_emoticons, negative_emoticons = load_emoticons()
 
-    count_positive_words['count'] = 0
-    count_negative_words['count'] = 0
-    count_positive_emoticons['count'] = 0
-    count_negative_emoticons['count'] = 0
-    presence_negation['bool'] = 0
-
-    thread_pw = threading.Thread(target=_count_generic, args=(list_element_tweet, positive_words, count_positive_words))
-    thread_nw = threading.Thread(target=_count_generic, args=(list_element_tweet, negative_words, count_negative_words))
-    thread_pe = threading.Thread(target=_count_generic,
-                                 args=(list_element_tweet, positive_emoticons, count_positive_emoticons, 2))
-    thread_ne = threading.Thread(target=_count_generic,
-                                 args=(list_element_tweet, negative_emoticons, count_negative_emoticons, 2))
-    thread_np = threading.Thread(target=_negation_presence, args=(list_element_tweet, language, presence_negation))
-
-    thread_pw.start()
-    thread_nw.start()
-    thread_pe.start()
-    thread_ne.start()
-    thread_np.start()
-
-    thread_pw.join()
-    thread_nw.join()
-    thread_pe.join()
-    thread_ne.join()
-    thread_np.join()
-
-    return [count_positive_words['count'], count_negative_words['count'], count_positive_emoticons['count'],
-            count_negative_emoticons['count'], presence_negation['bool']]
+    return [_count_generic(list_element_tweet, positive_words), _count_generic(list_element_tweet, negative_words),
+            _count_generic(list_element_tweet, positive_emoticons, 2),
+            _count_generic(list_element_tweet, negative_emoticons, 2), _negation_presence(list_element_tweet)]

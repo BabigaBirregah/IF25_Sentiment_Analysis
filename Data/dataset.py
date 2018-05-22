@@ -114,7 +114,7 @@ def get_randomised_sample(number_tweets=12):
         with open(get_path_resource('Sentiment_analysis_dataset_2.csv'), 'rb') as file_part2:
             global_file = file_part1.readlines() + file_part2.readlines()
             while number_tweets:
-                sample_list.append(global_file.pop(randbelow(len(global_file))))
+                sample_list.append(clean_line(global_file.pop(randbelow(len(global_file)))))
                 number_tweets -= 1
     return sample_list
 
@@ -162,7 +162,7 @@ def _count_pos_neg_sample():
     print(count_neg, count_pos, count_neg + count_pos)
 
 
-def get_characteristic_label_vectors(nb, randomness, pos_equal_neg):
+def get_characteristic_label_vectors(nb, randomness, pos_equal_neg, Resource, bypass=False):
     """
     Collect the desired number of label vectors regarding the parameters given. Provide 2 booleans to get a
     collection randomised or not and equal in number of positive and negative vector, or not.
@@ -181,8 +181,8 @@ def get_characteristic_label_vectors(nb, randomness, pos_equal_neg):
                     label, text = clean_line(global_file.pop(randbelow(2 * NB_TWEETS_PER_FILE - nb_tweet)))
                 else:
                     label, text = clean_line(global_file.pop())
-                feature_vector = characteristic_vector(clean_text(text))
-                if feature_vector != [0, 0, 0, 0, 0]:
+                feature_vector = characteristic_vector(clean_text(text), Resource)
+                if feature_vector != [0, 0, 0, 0, 0] or bypass:
                     float_label = float(label)
                     if pos_equal_neg:
                         if float_label == 0.0 and nb_neg < nb // 2 or float_label == 1.0 and nb_pos < nb // 2:

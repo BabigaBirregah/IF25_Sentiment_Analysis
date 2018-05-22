@@ -22,10 +22,10 @@ def construct_name_file(size_sample, randomness, pos_equal_neg, kernel):
     else:
         pos_equal_neg = "pos-neg-neq"
 
-    return "Profile/{}_{}_{}_{}.json".format(size_sample, randomness, pos_equal_neg, kernel)
+    return "{}_{}_{}_{}.json".format(size_sample, randomness, pos_equal_neg, kernel)
 
 
-def create_SVM_profile(size_sample, randomness, pos_equal_neg, kernel, m_features=None,
+def create_SVM_profile(size_sample, randomness, pos_equal_neg, kernel, Resource, m_features=None,
                        m_labels=None, language='English'):
     """
     With the desired parameters, create a SVM classifier and save it to a file
@@ -44,7 +44,7 @@ def create_SVM_profile(size_sample, randomness, pos_equal_neg, kernel, m_feature
     :return:
     """
     if m_features is None and m_labels is None:
-        m_features, m_labels = get_characteristic_label_vectors(size_sample, randomness, pos_equal_neg)
+        m_features, m_labels = get_characteristic_label_vectors(size_sample, randomness, pos_equal_neg, Resource)
 
     Classifier = SVM(kernel)
     Classifier.fit(m_features, m_labels)
@@ -54,7 +54,7 @@ def create_SVM_profile(size_sample, randomness, pos_equal_neg, kernel, m_feature
     Classifier.save_to_file(name_file)
 
 
-def generate_profiles(kernel=None, l_size=[1000, 10000], l_random=[True, False], l_pos_eq_neg=[True, False]):
+def generate_profiles(Resource, kernel=None, l_size=[1000, 10000], l_random=[True, False], l_pos_eq_neg=[True, False]):
     """
     Generate multiple profiles for one or more kernels
     :param kernel:
@@ -65,24 +65,21 @@ def generate_profiles(kernel=None, l_size=[1000, 10000], l_random=[True, False],
     :param l_pos_eq_neg: list of situation of positives equal negatives
     :return:
     """
-    if kernel == "linear":
-        kernel = Kernel.linear()
-    elif kernel == "poly_kernel":
-        kernel = Kernel.poly_kernel()
-    elif kernel == "gaussian":
-        kernel = Kernel.gaussian()
-
     for size_sample in l_size:
         for randomness in l_random:
             for pos_eq_neg in l_pos_eq_neg:
-                m_features, m_labels = get_characteristic_label_vectors(size_sample, randomness, pos_eq_neg)
+                m_features, m_labels = get_characteristic_label_vectors(size_sample, randomness, pos_eq_neg, Resource)
                 if kernel is not None:
+                    kernel = Kernel.get_correct_kernel(kernel)
                     try:
-                        create_SVM_profile(size_sample, randomness, pos_eq_neg, kernel, m_features, m_labels)
+                        create_SVM_profile(size_sample, randomness, pos_eq_neg, kernel, Resource, m_features, m_labels)
                     except:
                         print("fail : " + construct_name_file(size_sample, randomness, pos_eq_neg,
                                                               str(kernel).split('.')[1]))
                 else:
-                    create_SVM_profile(size_sample, randomness, pos_eq_neg, Kernel.linear(), m_features, m_labels)
-                    create_SVM_profile(size_sample, randomness, pos_eq_neg, Kernel.poly_kernel(), m_features, m_labels)
-                    create_SVM_profile(size_sample, randomness, pos_eq_neg, Kernel.gaussian(), m_features, m_labels)
+                    create_SVM_profile(size_sample, randomness, pos_eq_neg, Kernel.linear(), Resource, m_features,
+                                       m_labels)
+                    create_SVM_profile(size_sample, randomness, pos_eq_neg, Kernel.poly_kernel(), Resource, m_features,
+                                       m_labels)
+                    create_SVM_profile(size_sample, randomness, pos_eq_neg, Kernel.gaussian(), Resource, m_features,
+                                       m_labels)

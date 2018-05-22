@@ -6,7 +6,9 @@
 from tkinter.filedialog import *
 from tkinter.ttk import *
 
-from Interface.actions import analyse_file, analyse_query, analyse_text, analyse_tweets, custom_training
+from Classifier.features import load_emoticons, load_negative_words, load_positive_words
+from Interface.actions import (analyse_file, analyse_query, analyse_text, analyse_tweets, custom_training,
+                               load_classifier)
 
 
 class Application(Frame):
@@ -19,14 +21,26 @@ class Application(Frame):
         self.display = Notebook(self, name="nb")  # tab manager
         self.toggle_language = StringVar()
         self.analyse_kernel = StringVar()
-        self.size_sample = IntVar()
+        self.size_sample = StringVar()
         self.value_submit = StringVar()
         self.user_query = StringVar()
         self.nb_tweet_collect = IntVar()
         self.nb_tweet_train = IntVar()
         self.toggle_randomness = StringVar()
+        self.toggle_randomness_t = StringVar()
         self.toggle_nb_pos_neg = StringVar()
+        self.toggle_nb_pos_neg_t = StringVar()
         self.train_kernel = StringVar()
+        self.SVMClassifier = None
+        self.custom_SVMClassifier = None
+
+        class Resource(object):
+            pass
+
+        self.Resource = Resource
+        self.Resource.positive_words = load_positive_words()
+        self.Resource.negative_words = load_negative_words()
+        self.Resource.positive_emoticons, self.Resource.negative_emoticons = load_emoticons()
 
         # Populate the window
         self._create_widgets()
@@ -62,8 +76,11 @@ class Application(Frame):
                     offvalue="Français").grid()
         language_frame.grid(column=0, row=0, padx=10, pady=10)
 
+        # Options for the default SVM classifier #
+        default_classifier = LabelFrame(general_options, text="Default SVM classifier")
+
         # ---------- Choose the sample used -------------
-        sample_frame = LabelFrame(general_options, text="Choose the sample used")
+        sample_frame = LabelFrame(default_classifier, text="Choose the sample used")
 
         self.size_sample.set("1 000 tweets")
 
@@ -73,7 +90,7 @@ class Application(Frame):
         sample_frame.grid(column=1, row=0, padx=10, pady=10)
 
         # ---------- Choose to randomise the sample -------------
-        random_frame = LabelFrame(general_options, text="Order of tweets")
+        random_frame = LabelFrame(default_classifier, text="Order of tweets")
 
         self.toggle_randomness.set("Randomised")
 
@@ -83,7 +100,7 @@ class Application(Frame):
         random_frame.grid(column=2, row=0, padx=10, pady=10)
 
         # ---------- Choose either number of positive tweets should equal negative -------------
-        nb_pos_neg_frame = LabelFrame(general_options, text="Number of positive equal negative tweets")
+        nb_pos_neg_frame = LabelFrame(default_classifier, text="Number of positive equal negative tweets")
 
         self.toggle_nb_pos_neg.set("Equal")
 
@@ -93,16 +110,18 @@ class Application(Frame):
         nb_pos_neg_frame.grid(column=3, row=0, padx=10, pady=10)
 
         # ---------- Choose the kernel used -------------
-        kernel_frame = LabelFrame(general_options, text="Choose the kernel used")
+        kernel_frame = LabelFrame(default_classifier, text="Choose the kernel used")
 
         self.analyse_kernel.set("gaussian")
 
         Radiobutton(kernel_frame, text="Linear", variable=self.analyse_kernel, value="linear").grid(padx=5, pady=5)
-        Radiobutton(kernel_frame, text="Polynomial", variable=self.analyse_kernel, value="polynomial").grid(padx=5,
-                                                                                                            pady=5)
+        Radiobutton(kernel_frame, text="Polynomial", variable=self.analyse_kernel, value="poly_kernel").grid(padx=5,
+                                                                                                             pady=5)
         Radiobutton(kernel_frame, text="Gaussian", variable=self.analyse_kernel, value="gaussian").grid(padx=5, pady=5)
 
         kernel_frame.grid(column=4, row=0, padx=10, pady=10)
+
+        default_classifier.grid(column=1, row=0, padx=10, pady=10)
 
         general_options.grid(padx=10, pady=10)
 
@@ -111,7 +130,7 @@ class Application(Frame):
     def _create_training_panel(self, display):
         fen_training = Frame(display, name="fen_visualiser")
 
-        options_frame = LabelFrame(fen_training, text="Tweak the parameters")
+        options_frame = LabelFrame(fen_training, text="Create your own SVM classfier")
 
         # ---------- Train by using 'x' tweets -------------
         size_frame = LabelFrame(options_frame, text="Size of the training sample")
@@ -126,19 +145,19 @@ class Application(Frame):
         # ---------- Choose to randomise the sample -------------
         random_frame = LabelFrame(options_frame, text="Order of tweets")
 
-        self.toggle_randomness.set("Randomised")
+        self.toggle_randomness_t.set("Randomised")
 
-        Checkbutton(random_frame, textvariable=self.toggle_randomness, variable=self.toggle_randomness,
+        Checkbutton(random_frame, textvariable=self.toggle_randomness_t, variable=self.toggle_randomness_t,
                     onvalue="Randomised", offvalue="Non-randomised").grid(padx=5, pady=5)
 
         random_frame.grid(column=1, row=0, padx=10, pady=10)
 
         # ---------- Choose either number of positive tweets should equal negative -------------
-        nb_pos_neg_frame = LabelFrame(options_frame, text="Number of positive equal negative tweets")
+        nb_pos_neg_frame = LabelFrame(options_frame, text="Number of positive and negative tweets")
 
-        self.toggle_nb_pos_neg.set("Equal")
+        self.toggle_nb_pos_neg_t.set("Equal")
 
-        Checkbutton(nb_pos_neg_frame, textvariable=self.toggle_nb_pos_neg, variable=self.toggle_nb_pos_neg,
+        Checkbutton(nb_pos_neg_frame, textvariable=self.toggle_nb_pos_neg_t, variable=self.toggle_nb_pos_neg_t,
                     onvalue="Equal", offvalue="Non-equal").grid(padx=5, pady=5)
 
         nb_pos_neg_frame.grid(column=2, row=0, padx=10, pady=10)
@@ -149,15 +168,17 @@ class Application(Frame):
         self.train_kernel.set("gaussian")
 
         Radiobutton(kernel_frame, text="Linear", variable=self.train_kernel, value="linear").grid(padx=5, pady=5)
-        Radiobutton(kernel_frame, text="Polynomial", variable=self.train_kernel, value="polynomial").grid(padx=5,
-                                                                                                          pady=5)
+        Radiobutton(kernel_frame, text="Polynomial", variable=self.train_kernel, value="poly_kernel").grid(padx=5,
+                                                                                                           pady=5)
         Radiobutton(kernel_frame, text="Gaussian", variable=self.train_kernel, value="gaussian").grid(padx=5, pady=5)
 
         kernel_frame.grid(column=3, row=0, padx=10, pady=10)
 
         def train_settings():
-            custom_training(self.nb_tweet_train, self.toggle_randomness.get() == "Randomised",
-                            self.toggle_nb_pos_neg.get() == "Equal", self.toggle_language, self.analyse_kernel)
+            self.custom_SVMClassifier = custom_training(self.nb_tweet_train.get(),
+                                                        self.toggle_randomness_t.get() == "Randomised",
+                                                        self.toggle_nb_pos_neg_t.get() == "Equal", self.toggle_language,
+                                                        self.train_kernel.get(), self.Resource)
 
         Button(options_frame, text="Do it", command=train_settings).grid(column=1, padx=5, pady=5)
 
@@ -174,13 +195,13 @@ class Application(Frame):
         # ---------- Submit custom text -------------
         custom_text_frame = LabelFrame(specific_actions, text="Analyse custom text")
 
-        self.value_submit.set("Soumettre un texte")
+        self.value_submit.set("Text to analyse")
 
         def default_submit_text(arg):
-            if self.value_submit.get() == "Soumettre un texte":
+            if self.value_submit.get() == "Text to analyse":
                 self.value_submit.set("")
             elif not self.value_submit.get():
-                self.value_submit.set("Soumettre un texte")
+                self.value_submit.set("Text to analyse")
 
         text_submit = Entry(custom_text_frame, textvariable=self.value_submit)
         text_submit.bind("<Enter>", default_submit_text)
@@ -189,8 +210,18 @@ class Application(Frame):
         text_submit.grid(padx=5, pady=5)
 
         def text_analysis():
-            if self.value_submit != "Soumettre un texte":
-                analyse_text(self.value_submit, self.toggle_language, self.analyse_kernel, self.size_sample)
+            if self.value_submit != "Text to analyse":
+                if self.custom_SVMClassifier:
+                    analyse_text(self.value_submit.get(), self.custom_SVMClassifier, self.Resource)
+                elif self.SVMClassifier:
+                    analyse_text(self.value_submit.get(), self.SVMClassifier, self.Resource)
+                else:
+                    self.SVMClassifier = load_classifier(self.size_sample.get(),
+                                                         self.toggle_randomness.get() == "Randomised",
+                                                         self.toggle_nb_pos_neg.get() == "Equal",
+                                                         self.analyse_kernel.get())
+                    if self.SVMClassifier:
+                        analyse_text(self.value_submit.get(), self.SVMClassifier, self.Resource)
 
         Button(custom_text_frame, text="Do it", command=text_analysis).grid(padx=5, pady=5)
         custom_text_frame.grid(column=0, row=0, padx=10, pady=10)
@@ -199,7 +230,7 @@ class Application(Frame):
         custom_file_frame = LabelFrame(specific_actions, text="Analyse custom file")
 
         def ask_file():
-            file_name = askopenfile(title="Ouvrir fichier de tweets",
+            file_name = askopenfile(title="Open file of tweets",
                                     filetypes=[('txt files', '.txt'), ('csv files', '.csv')])
             analyse_file(open(file_name, "rb").read(), self.toggle_language, self.analyse_kernel, self.size_sample)
 
@@ -207,15 +238,15 @@ class Application(Frame):
         custom_file_frame.grid(column=1, row=0, padx=10, pady=10)
 
         # ---------- Get and analyse specific tweet -------------
-        query_frame = LabelFrame(specific_actions, text="Analyse some tweet related topic")
+        query_frame = LabelFrame(specific_actions, text="Analyse few trend tweets related topic")
 
-        self.user_query.set("Soumettre un '#' à regarder")
+        self.user_query.set("'#ITAR'")
 
         def default_query_text(arg):
-            if self.user_query.get() == "Soumettre un '#' à regarder":
+            if self.user_query.get() == "'#ITAR'":
                 self.user_query.set("")
             elif not self.user_query.get():
-                self.user_query.set("Soumettre un '#' à regarder")
+                self.user_query.set("'#ITAR'")
 
         text_submit = Entry(query_frame, textvariable=self.user_query)
 
@@ -225,9 +256,9 @@ class Application(Frame):
         text_submit.grid(padx=5, pady=5)
 
         def query_analysis():
-            if self.user_query != "Soumettre un '#' à regarder" and '#' in self.user_query:
+            if self.user_query != "'#ITAR'" and '#' in self.user_query:
                 analyse_query(self.user_query, self.toggle_language, self.analyse_kernel, self.size_sample)
-            elif self.user_query != "Soumettre un '#' à regarder":
+            elif self.user_query != "'#ITAR'":
                 analyse_query('#' + self.user_query.get(), self.toggle_language, self.analyse_kernel, self.size_sample)
 
         Button(query_frame, text="Do it", command=query_analysis).grid(padx=5, pady=5)
