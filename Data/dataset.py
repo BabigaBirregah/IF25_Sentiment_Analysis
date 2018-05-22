@@ -164,9 +164,12 @@ def _count_pos_neg_sample():
 
 def get_characteristic_label_vectors(nb, randomness, pos_equal_neg):
     """
-
-    :param nb:
-    :return:
+    Collect the desired number of label vectors regarding the parameters given. Provide 2 booleans to get a
+    collection randomised or not and equal in number of positive and negative vector, or not.
+    :param nb: number of vector to collect
+    :param randomness: if the collection should be randomised among all the tweets in the sample
+    :param pos_equal_neg: if we want the same amount of positive and negative vectors
+    :return: tuple of array containing the features vectors and labels vectors corresponding
     """
     m_features, m_labels = list(), list()
     nb_pos, nb_neg, nb_tweet = 0, 0, 0

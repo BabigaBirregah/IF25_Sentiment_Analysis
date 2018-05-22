@@ -17,9 +17,10 @@ class SVM(object):
 
     def fit(self, features, labels, iters=16):
         """
-
-        :param features:
-        :param labels:
+        Compute the parameters of the SVM classifier regarding the features and the associated labels.
+        :param features: array of features vectors
+        :param labels: array of labels vectors corresponding to the features
+        :param iters: number of iteration to solve the quadratic problem
         :return:
         """
         n_samples, n_features = features.shape
@@ -79,9 +80,9 @@ class SVM(object):
 
     def _project(self, features):
         """
-
-        :param features:
-        :return:
+        Compute the score of the features
+        :param features: array of features vectors
+        :return: score prediction of the features (real number)
         """
         if self.weights is not None:
             return dot(features, self.weights) + self.bias
@@ -98,8 +99,8 @@ class SVM(object):
 
     def attributes(self):
         """
-
-        :return:
+        Create a dictionary (that is writable to a file) of the different attributes of the SVM classifier
+        :return: dictionary containing the different attributes of the SVM classifier
         """
         dic_attribute = dict()
         dic_attribute["kernel"] = str(self.kernel).split('.')[1]
@@ -116,7 +117,8 @@ class SVM(object):
 
     def save_to_file(self, name_file):
         """
-
+        Save to a file the SVM classifier to initiate a SVMPredictor
+        :param name_file: name of the file to save all the attributes of the SVM classifier to a file
         :return:
         """
         with open(name_file, 'w') as profile:
@@ -124,9 +126,9 @@ class SVM(object):
 
     def predict(self, features):
         """
-
-        :param features:
-        :return:
+        Given an array of features, predict the label of each vector
+        :param features: array of features vectors
+        :return: array of corresponding labels (0.0 or 1.0)
         """
         return sign(self._project(features))
 
@@ -145,9 +147,9 @@ class SVMPredictor(SVM):
 
 def get_from_file(name_file):
     """
-
-    :param name_file:
-    :return:
+    Create a SVM classifier already initiated with the information contained in the corresponding file
+    :param name_file: name of the file containing the information to initiate the SVM classifier
+    :return: SVM classifier already initiated (ready to predict)
     """
     with open(name_file, 'r') as profile:
         dic_attribute = loads(profile.read())
