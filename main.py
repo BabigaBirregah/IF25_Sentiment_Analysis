@@ -1,4 +1,4 @@
-# TODO: Build the app with 'pyinstaller main.py'
+# Build the app with 'pyinstaller main.py'
 
 import tkinter as tk
 

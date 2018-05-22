@@ -20,6 +20,7 @@ def analyse_text(text, classifier, Resource, language='en'):
     m_features = list()
     m_features.append(characteristic_vector(list_text, Resource))
     result = classifier.predict(array(m_features))
+    # TODO: create the viewer part for the result
 
 
 def analyse_file(file_content, classifier, Resource, language='en'):

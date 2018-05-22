@@ -51,7 +51,6 @@ def get_some_sample(number_tweets=12):
     :return: tuple of actual number of tweets collected and the list of tweets
     """
     # data set csv file : ItemID,Sentiment,SentimentSource,SentimentText
-    # TODO: maybe use csv library to read and treat the file
     number_tweets = min(number_tweets, 2 * NB_TWEETS_PER_FILE)
     with open(get_path_resource('Sentiment_analysis_dataset_1.csv'), 'rb') as file_part1:
         number_lines, sample_list = _get_lines_file(number_tweets, file_part1)

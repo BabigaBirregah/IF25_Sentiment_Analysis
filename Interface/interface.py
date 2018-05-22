@@ -6,7 +6,7 @@
 from tkinter.filedialog import *
 from tkinter.ttk import *
 
-from Classifier.features import load_emoticons, load_negative_words, load_positive_words
+from Classifier.features import Resource
 from Interface.actions import (analyse_file, analyse_query, analyse_text, analyse_tweets, custom_training,
                                load_classifier)
 
@@ -33,17 +33,22 @@ class Application(Frame):
         self.train_kernel = StringVar()
         self.SVMClassifier = None
         self.custom_SVMClassifier = None
-
-        class Resource(object):
-            pass
-
         self.Resource = Resource
-        self.Resource.positive_words = load_positive_words()
-        self.Resource.negative_words = load_negative_words()
-        self.Resource.positive_emoticons, self.Resource.negative_emoticons = load_emoticons()
 
         # Populate the window
         self._create_widgets()
+
+    def _get_classifier(self):
+        if self.custom_SVMClassifier:
+            return self.custom_SVMClassifier
+        elif self.SVMClassifier:
+            return self.SVMClassifier
+        else:
+            self.SVMClassifier = load_classifier(self.size_sample.get(),
+                                                 self.toggle_randomness.get() == "Randomised",
+                                                 self.toggle_nb_pos_neg.get() == "Equal",
+                                                 self.analyse_kernel.get())
+            return self.SVMClassifier
 
     def _create_widgets(self):
         # --------- Ours ---------
@@ -57,9 +62,6 @@ class Application(Frame):
 
         # create the actions that the user can trigger
         self._create_actions_panel(self.display)
-
-        # TODO : maybe we should only create this tab when there is something to show
-        # self.create_viewer_panel(self.display)  # create the content to visualize the action chosen by the user
 
     def _create_options_panel(self, display):
         fen_user = Frame(display, name="fen_user")
@@ -211,17 +213,7 @@ class Application(Frame):
 
         def text_analysis():
             if self.value_submit != "Text to analyse":
-                if self.custom_SVMClassifier:
-                    analyse_text(self.value_submit.get(), self.custom_SVMClassifier, self.Resource)
-                elif self.SVMClassifier:
-                    analyse_text(self.value_submit.get(), self.SVMClassifier, self.Resource)
-                else:
-                    self.SVMClassifier = load_classifier(self.size_sample.get(),
-                                                         self.toggle_randomness.get() == "Randomised",
-                                                         self.toggle_nb_pos_neg.get() == "Equal",
-                                                         self.analyse_kernel.get())
-                    if self.SVMClassifier:
-                        analyse_text(self.value_submit.get(), self.SVMClassifier, self.Resource)
+                analyse_text(self.value_submit.get(), self._get_classifier(), self.Resource)
 
         Button(custom_text_frame, text="Do it", command=text_analysis).grid(padx=5, pady=5)
         custom_text_frame.grid(column=0, row=0, padx=10, pady=10)
@@ -257,9 +249,9 @@ class Application(Frame):
 
         def query_analysis():
             if self.user_query != "'#ITAR'" and '#' in self.user_query:
-                analyse_query(self.user_query, self.toggle_language, self.analyse_kernel, self.size_sample)
+                analyse_query(self.user_query.get(), self._get_classifier(), self.Resource)
             elif self.user_query != "'#ITAR'":
-                analyse_query('#' + self.user_query.get(), self.toggle_language, self.analyse_kernel, self.size_sample)
+                analyse_query('#' + self.user_query.get(), self._get_classifier(), self.Resource)
 
         Button(query_frame, text="Do it", command=query_analysis).grid(padx=5, pady=5)
         query_frame.grid(column=2, row=0, padx=10, pady=10)
@@ -273,7 +265,7 @@ class Application(Frame):
                 padx=5, pady=5)
 
         def analyse_stream_tweet():
-            analyse_tweets(self.nb_tweet_collect, self.toggle_language, self.analyse_kernel, self.size_sample)
+            analyse_tweets(self.nb_tweet_collect, self._get_classifier(), self.Resource)
 
         Button(number_frame, text="Do it", command=analyse_stream_tweet).grid(padx=5, pady=5)
         number_frame.grid(column=3, row=0, padx=10, pady=10)

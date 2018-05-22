@@ -10,7 +10,7 @@ from Data.clean_data import clean_end_line
 from Ressources.resource import get_path_resource
 
 
-def load_positive_words(language='en'):
+def _load_positive_words(language='en'):
     """
     Load in a list all the positive words contained in a text file. One word per line
     :param language: Choose the language from 'fr' that stands for french and 'en' that stands for english
@@ -27,7 +27,7 @@ def load_positive_words(language='en'):
     return positive_word
 
 
-def load_negative_words(language='en'):
+def _load_negative_words(language='en'):
     """
         Load in a list all the negative words contained in a text file. One word per line
         :param language: Choose the language from 'fr' that stands for french and 'en' that stands for english
@@ -44,7 +44,7 @@ def load_negative_words(language='en'):
     return negative_word
 
 
-def load_emoticons():
+def _load_emoticons():
     """
     Load in two separate lists the positive and negative emoticons.
     The file is composed of 'emoticons'sep'0|1' per line.
@@ -60,6 +60,14 @@ def load_emoticons():
             else:
                 negative_emoticon_dict.append(key)
     return positive_emoticon_dict, negative_emoticon_dict
+
+
+class Resource(object):
+
+    def __init__(self):
+        self.positive_words = _load_positive_words()
+        self.negative_words = _load_negative_words()
+        self.positive_emoticons, self.negative_emoticons = _load_emoticons()
 
 
 def _count_generic(list_element, list_words, weight=1):
