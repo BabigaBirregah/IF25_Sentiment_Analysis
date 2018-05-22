@@ -99,7 +99,7 @@ def _negation_presence(list_element, language='en'):
     return 0
 
 
-def characteristic_vector(list_element_tweet, Ressource=None, language='en'):
+def characteristic_vector(list_element_tweet, Ressource, language='en'):
     """
     Creation of the characteristic vector to further use in a classifier.
     The characteristics to be counted :
@@ -113,16 +113,8 @@ def characteristic_vector(list_element_tweet, Ressource=None, language='en'):
         'fr' | 'en'
     :return: list / vector
     """
-    if Ressource:
-        positive_words = Ressource.positive_words
-        negative_words = Ressource.negative_words
-        positive_emoticons = Ressource.positive_emoticons
-        negative_emoticons = Ressource.negative_emoticons
-    else:
-        positive_words = load_positive_words()
-        negative_words = load_negative_words()
-        positive_emoticons, negative_emoticons = load_emoticons()
 
-    return [_count_generic(list_element_tweet, positive_words), _count_generic(list_element_tweet, negative_words),
-            _count_generic(list_element_tweet, positive_emoticons, 2),
-            _count_generic(list_element_tweet, negative_emoticons, 2), _negation_presence(list_element_tweet)]
+    return [_count_generic(list_element_tweet, Ressource.positive_words),
+            _count_generic(list_element_tweet, Ressource.negative_words),
+            _count_generic(list_element_tweet, Ressource.positive_emoticons, 2),
+            _count_generic(list_element_tweet, Ressource.negative_emoticons, 2), _negation_presence(list_element_tweet)]
