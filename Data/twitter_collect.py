@@ -21,7 +21,7 @@ def search_sample(query):
     """
     Using the Twitter library we collect some tweets regarding the query
     :param query: word to look for with the twitter API and collect some tweets
-    :return:
+    :return: list containing only the text from tweets
     """
     return [dic['text'] for dic in Twitter(auth=connect_method()).search.tweets(q=query)['statuses']]
 
@@ -30,7 +30,7 @@ def collect_tweet(nb_tweets=1):
     """
     Collect the desired number of tweets using the Twitter library connecting to the Tweeter API live stream
     :param nb_tweets: number of tweets to collect
-    :return:
+    :return: list containing only the text from tweets
     """
     twitter_stream = TwitterStream(auth=connect_method())
 

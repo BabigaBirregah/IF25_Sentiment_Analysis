@@ -24,22 +24,33 @@ def load_classifier(size_sample, randomness, pos_eq_neg, kernel):
     return get_from_file(construct_name_file(size_sample, randomness, pos_eq_neg, kernel))
 
 
-
-def analyse_text(text, classifier, Resource, language='en'):
+def _minimal_analysis(text, classifier, Resource, language='en'):
     """
 
     :param text:
     :param classifier:
-    :param Resource: class object containing all the resources (positive words, negative words, positive emoticons,
-    negative emoticons, stop words)
+    :param Resource:
     :param language:
     :return:
     """
     list_text = clean_text(bytes(text, 'utf-8'), get_correct_stop_word(Resource, language))
     m_features = list()
     m_features.append(characteristic_vector(list_text, Resource))
-    result = classifier.predict(array(m_features))
-    # TODO: create the viewer part for the result
+    return classifier.predict(array(m_features))
+
+
+def analyse_text(custom_text, classifier, Resource, language='en'):
+    """
+
+    :param custom_text:
+    :param classifier:
+    :param Resource: class object containing all the resources (positive words, negative words, positive emoticons,
+    negative emoticons, stop words)
+    :param language:
+    :return:
+    """
+    result = _minimal_analysis(custom_text, classifier, Resource, language)
+    return [result]
 
 
 def analyse_file(file_content, classifier, Resource, language='en'):
@@ -52,7 +63,8 @@ def analyse_file(file_content, classifier, Resource, language='en'):
     :param language:
     :return:
     """
-    pass
+    for line in file_content:
+        yield _minimal_analysis(line, classifier, Resource, language)
 
 
 def analyse_query(query, classifier, Resource, language='en'):
@@ -65,8 +77,8 @@ def analyse_query(query, classifier, Resource, language='en'):
     :param language:
     :return:
     """
-    twitter_sample = search_sample(query)
-    pass
+    for line in search_sample(query):
+        yield _minimal_analysis(line, classifier, Resource, language)
 
 
 def analyse_tweets(nb_tweets, classifier, Resource, language='en'):
@@ -79,8 +91,8 @@ def analyse_tweets(nb_tweets, classifier, Resource, language='en'):
     :param language:
     :return:
     """
-    twitter_sample = collect_tweet(nb_tweets)
-    pass
+    for line in collect_tweet(nb_tweets):
+        yield _minimal_analysis(line, classifier, Resource, language)
 
 
 def custom_training(nb_tweet_sample, randomised, equal_pos_neg, language, name_kernel, Resource):

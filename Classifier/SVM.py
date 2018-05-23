@@ -2,7 +2,7 @@ from json import dumps, loads
 
 from cvxopt import matrix
 from cvxopt.solvers import qp
-from numpy import (arange, array, diag, dot, hstack, identity, ones, outer, ravel, sign, vstack, zeros)
+from numpy import (arange, array, diag, dot, hstack, identity, ones, outer, ravel, vstack, zeros)
 
 from Classifier.Kernel import Kernel
 from Classifier.Profile.profile_file import get_path_profile
@@ -96,7 +96,9 @@ class SVM(object):
                                                                                          self.support_vectors):
                     score += lagrange_multipliers * support_vectors_labels * self.kernel(features[i], support_vectors)
                 y_predict[i] = score
-            print("_project y_predict + self.bias", y_predict + self.bias)
+            print("\n_project y_predict + self.bias", y_predict + self.bias)
+            print("_project self.bias", self.bias)
+            print("_project y_predict", y_predict)
             return y_predict + self.bias
 
     def attributes(self):
@@ -132,14 +134,13 @@ class SVM(object):
         :param features: array of features vectors
         :return: array of corresponding labels (0.0 or 1.0)
         """
-        # result = self._project(features)
-        # if result < -0.33:
-        #     return "Negative"
-        # elif result < 0.33:
-        #     return "Neutral"
-        # else:
-        #     return "Positive"
-        return sign(self._project(features))
+        result = self._project(features)
+        if result < -0.33:
+            return "Negative"
+        elif result < 0.33:
+            return "Neutral"
+        else:
+            return "Positive"
 
 
 class SVMPredictor(SVM):

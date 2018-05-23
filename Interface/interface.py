@@ -44,11 +44,15 @@ class Application(Frame):
         elif self.SVMClassifier:
             return self.SVMClassifier
         else:
-            self.SVMClassifier = load_classifier(self.size_sample.get(),
-                                                 self.toggle_randomness.get() == "Randomised",
-                                                 self.toggle_nb_pos_neg.get() == "Equal",
-                                                 self.analyse_kernel.get())
+            self.SVMClassifier = self._load_default_classifier()
             return self.SVMClassifier
+
+    def _load_default_classifier(self):
+        self.SVMClassifier = load_classifier(self.size_sample.get(),
+                                             self.toggle_randomness.get() == "Randomised",
+                                             self.toggle_nb_pos_neg.get() == "Equal",
+                                             self.analyse_kernel.get())
+        return self.SVMClassifier
 
     def _create_widgets(self):
         # --------- Ours ---------
@@ -84,10 +88,10 @@ class Application(Frame):
         # ---------- Choose the sample used -------------
         sample_frame = LabelFrame(default_classifier, text="Choose the sample used")
 
-        self.size_sample.set("1 000 tweets")
+        self.size_sample.set("10 000 tweets")
 
-        Checkbutton(sample_frame, textvariable=self.size_sample, variable=self.size_sample, onvalue="1 000 tweets",
-                    offvalue="10 000 tweets").grid()
+        Checkbutton(sample_frame, textvariable=self.size_sample, variable=self.size_sample, onvalue="10 000 tweets",
+                    offvalue="1 000 tweets", command=self._load_default_classifier).grid()
 
         sample_frame.grid(column=1, row=0, padx=10, pady=10)
 
@@ -97,7 +101,8 @@ class Application(Frame):
         self.toggle_randomness.set("Randomised")
 
         Checkbutton(random_frame, textvariable=self.toggle_randomness, variable=self.toggle_randomness,
-                    onvalue="Randomised", offvalue="Non-randomised").grid(padx=5, pady=5)
+                    onvalue="Randomised", offvalue="Non-randomised", command=self._load_default_classifier).grid(padx=5,
+                                                                                                                 pady=5)
 
         random_frame.grid(column=2, row=0, padx=10, pady=10)
 
@@ -107,7 +112,7 @@ class Application(Frame):
         self.toggle_nb_pos_neg.set("Equal")
 
         Checkbutton(nb_pos_neg_frame, textvariable=self.toggle_nb_pos_neg, variable=self.toggle_nb_pos_neg,
-                    onvalue="Equal", offvalue="Non-equal").grid(padx=5, pady=5)
+                    onvalue="Equal", offvalue="Non-equal", command=self._load_default_classifier).grid(padx=5, pady=5)
 
         nb_pos_neg_frame.grid(column=3, row=0, padx=10, pady=10)
 
@@ -116,10 +121,13 @@ class Application(Frame):
 
         self.analyse_kernel.set("gaussian")
 
-        Radiobutton(kernel_frame, text="Linear", variable=self.analyse_kernel, value="linear").grid(padx=5, pady=5)
-        Radiobutton(kernel_frame, text="Polynomial", variable=self.analyse_kernel, value="poly_kernel").grid(padx=5,
-                                                                                                             pady=5)
-        Radiobutton(kernel_frame, text="Gaussian", variable=self.analyse_kernel, value="gaussian").grid(padx=5, pady=5)
+        Radiobutton(kernel_frame, text="Linear", variable=self.analyse_kernel, value="linear",
+                    command=self._load_default_classifier).grid(padx=5, pady=5)
+        Radiobutton(kernel_frame, text="Polynomial", variable=self.analyse_kernel, value="poly_kernel",
+                    command=self._load_default_classifier).grid(padx=5,
+                                                                pady=5)
+        Radiobutton(kernel_frame, text="Gaussian", variable=self.analyse_kernel, value="gaussian",
+                    command=self._load_default_classifier).grid(padx=5, pady=5)
 
         kernel_frame.grid(column=4, row=0, padx=10, pady=10)
 
@@ -212,7 +220,7 @@ class Application(Frame):
         text_submit.grid(padx=5, pady=5)
 
         def text_analysis():
-            if self.value_submit != "Text to analyse":
+            if self.value_submit.get() != "Text to analyse":
                 analyse_text(self.value_submit.get(), self._get_classifier(), self.Resource)
 
         Button(custom_text_frame, text="Do it", command=text_analysis).grid(padx=5, pady=5)
@@ -224,7 +232,7 @@ class Application(Frame):
         def ask_file():
             file_name = askopenfile(title="Open file of tweets",
                                     filetypes=[('txt files', '.txt'), ('csv files', '.csv')])
-            analyse_file(open(file_name, "rb").read(), self.toggle_language, self.analyse_kernel, self.size_sample)
+            analyse_file(open(file_name, "rb").readlines(), self._get_classifier(), self.Resource)
 
         Button(custom_file_frame, text="Do it", command=ask_file).grid(padx=5, pady=5)
         custom_file_frame.grid(column=1, row=0, padx=10, pady=10)
@@ -248,10 +256,11 @@ class Application(Frame):
         text_submit.grid(padx=5, pady=5)
 
         def query_analysis():
-            if self.user_query != "'#ITAR'" and '#' in self.user_query:
+            if self.user_query.get() != "'#ITAR'" and '#' in self.user_query.get():
                 analyse_query(self.user_query.get(), self._get_classifier(), self.Resource)
-            elif self.user_query != "'#ITAR'":
-                analyse_query('#' + self.user_query.get(), self._get_classifier(), self.Resource)
+            elif self.user_query.get() != "'#ITAR'":
+                for x in analyse_query('#' + self.user_query.get(), self._get_classifier(), self.Resource):
+                    print(x)
 
         Button(query_frame, text="Do it", command=query_analysis).grid(padx=5, pady=5)
         query_frame.grid(column=2, row=0, padx=10, pady=10)
@@ -265,7 +274,7 @@ class Application(Frame):
                 padx=5, pady=5)
 
         def analyse_stream_tweet():
-            analyse_tweets(self.nb_tweet_collect, self._get_classifier(), self.Resource)
+            analyse_tweets(self.nb_tweet_collect.get(), self._get_classifier(), self.Resource)
 
         Button(number_frame, text="Do it", command=analyse_stream_tweet).grid(padx=5, pady=5)
         number_frame.grid(column=3, row=0, padx=10, pady=10)
