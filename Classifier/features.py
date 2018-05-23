@@ -6,69 +6,6 @@
 
 from re import match
 
-from Data.clean_data import clean_end_line
-from Ressources.resource import get_path_resource
-
-
-def _load_positive_words(language='en'):
-    """
-    Load in a list all the positive words contained in a text file. One word per line
-    :param language: Choose the language from 'fr' that stands for french and 'en' that stands for english
-        'fr' | 'en'
-    :return: list of words
-    """
-    if language == 'fr':
-        path = get_path_resource('positive_word_fr.txt')
-    elif language == 'en':
-        path = get_path_resource('positive_word_en.txt')
-
-    with open(path, 'rb') as file_positive_word:
-        positive_word = [clean_end_line(x) for x in file_positive_word.readlines()]
-    return positive_word
-
-
-def _load_negative_words(language='en'):
-    """
-        Load in a list all the negative words contained in a text file. One word per line
-        :param language: Choose the language from 'fr' that stands for french and 'en' that stands for english
-        'fr' | 'en'
-        :return: list of words
-        """
-    if language == 'fr':
-        path = get_path_resource('negative_word_fr.txt')
-    elif language == 'en':
-        path = get_path_resource('negative_word_en.txt')
-
-    with open(path, 'rb') as file_negative_word:
-        negative_word = [clean_end_line(x) for x in file_negative_word.readlines()]
-    return negative_word
-
-
-def _load_emoticons():
-    """
-    Load in two separate lists the positive and negative emoticons.
-    The file is composed of 'emoticons'sep'0|1' per line.
-    Due to the character used in emoticons we have to read them in binary mode.
-    :return: 2 lists of positive and negative emoticons
-    """
-    positive_emoticon_dict, negative_emoticon_dict = list(), list()
-    with open(get_path_resource('EmoticonSentimentLexicon.txt'), 'rb') as emoticons_file:
-        for line in emoticons_file.readlines():
-            key, value = line.split(b'sep')
-            if value == b'1':
-                positive_emoticon_dict.append(key)
-            else:
-                negative_emoticon_dict.append(key)
-    return positive_emoticon_dict, negative_emoticon_dict
-
-
-class Resource(object):
-
-    def __init__(self):
-        self.positive_words = _load_positive_words()
-        self.negative_words = _load_negative_words()
-        self.positive_emoticons, self.negative_emoticons = _load_emoticons()
-
 
 def _count_generic(list_element, list_words, weight=1):
     """
@@ -92,7 +29,7 @@ def _negation_presence(list_element, language='en'):
     Method to be called within a thread to detect whether there is a negation or not among the elements of the tweets
     contained in the list of elements.
     :param list_element: list of relevant element in the tweet
-    :param language: Choose the language from 'fr' that stands for french and 'en' that stands for english
+    :param language: Choose the language from french to english
         'fr' | 'en'
     :return: None, this function will be used in a thread (hence the dict)
     """
@@ -116,6 +53,7 @@ def characteristic_vector(list_element_tweet, Ressource, language='en'):
         - Number of positive emoticons
         - Number of negative emoticons
         - Presence of negation
+    :param Ressource:
     :param list_element_tweet: list of key elements of a tweet
     :param language: language used to write the tweet
         'fr' | 'en'

@@ -11,6 +11,8 @@ from Classifier.Profile.profile_file import get_path_profile
 class SVM(object):
 
     def __init__(self, kernel=Kernel.linear(), C=None):
+        self.weights = None
+        self.bias = 0
         self.kernel = kernel
         self.C = C
         if self.C is not None:
@@ -65,7 +67,6 @@ class SVM(object):
         self.support_vectors_labels = labels[support_vectors]
 
         # 5) Bias
-        self.bias = 0
         for n in range(len(self.lagrange_multipliers)):
             self.bias += self.support_vectors_labels[n]
             self.bias -= sum(self.lagrange_multipliers * self.support_vectors_labels * K[ind[n], support_vectors])
@@ -76,8 +77,6 @@ class SVM(object):
             self.weights = zeros(n_features)
             for n in range(len(self.lagrange_multipliers)):
                 self.weights += self.lagrange_multipliers[n] * self.support_vectors_labels[n] * self.support_vectors[n]
-        else:
-            self.weights = None
 
     def _project(self, features):
         """
@@ -86,16 +85,18 @@ class SVM(object):
         :return: score prediction of the features (real number)
         """
         if self.weights is not None:
+            print("_project dot(features, self.weights) + self.bias", dot(features, self.weights) + self.bias)
             return dot(features, self.weights) + self.bias
         else:
             y_predict = zeros(len(features))
             for i in range(len(features)):
-                s = 0
+                score = 0
                 for lagrange_multipliers, support_vectors_labels, support_vectors in zip(self.lagrange_multipliers,
                                                                                          self.support_vectors_labels,
                                                                                          self.support_vectors):
-                    s += lagrange_multipliers * support_vectors_labels * self.kernel(features[i], support_vectors)
-                y_predict[i] = s
+                    score += lagrange_multipliers * support_vectors_labels * self.kernel(features[i], support_vectors)
+                y_predict[i] = score
+            print("_project y_predict + self.bias", y_predict + self.bias)
             return y_predict + self.bias
 
     def attributes(self):
@@ -131,6 +132,13 @@ class SVM(object):
         :param features: array of features vectors
         :return: array of corresponding labels (0.0 or 1.0)
         """
+        # result = self._project(features)
+        # if result < -0.33:
+        #     return "Negative"
+        # elif result < 0.33:
+        #     return "Neutral"
+        # else:
+        #     return "Positive"
         return sign(self._project(features))
 
 

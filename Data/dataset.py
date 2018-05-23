@@ -4,6 +4,7 @@ from numpy import array
 
 from Classifier.features import characteristic_vector
 from Data.clean_data import clean_end_line, clean_text
+from Ressources.resource import get_correct_stop_word
 from Ressources.resource import get_path_resource
 
 NB_TWEETS_PER_FILE = 789314
@@ -15,6 +16,7 @@ def clean_line(line):
     """
     The line of the sample is constructed like this :
         Number_line,label_sentiment,Sentiment140,text_tweet
+        Number_line,label_sentiment,Kaggle,text_tweet
     We need to extract the label and the text only
     :param line: line extracted from the data set
     :return: tuple containing the label and the text
@@ -23,7 +25,7 @@ def clean_line(line):
         label, text = line.split(b',Sentiment140,')
     except:
         label, text = line.split(b',Kaggle,')
-    return (label.split(b',')[1], clean_end_line(text))
+    return label.split(b',')[1], clean_end_line(text)
 
 
 def _get_lines_file(number_line, file):
@@ -161,13 +163,20 @@ def _count_pos_neg_sample():
     print(count_neg, count_pos, count_neg + count_pos)
 
 
-def get_characteristic_label_vectors(nb, randomness, pos_equal_neg, Resource, bypass=False):
+def get_characteristic_label_vectors(nb, randomness, pos_equal_neg, Resource, bypass=False, language='en'):
     """
     Collect the desired number of label vectors regarding the parameters given. Provide 2 booleans to get a
     collection randomised or not and equal in number of positive and negative vector, or not.
     :param nb: number of vector to collect
     :param randomness: if the collection should be randomised among all the tweets in the sample
     :param pos_equal_neg: if we want the same amount of positive and negative vectors
+    :param Resource: class object containing all the resources (positive words, negative words, positive emoticons,
+    negative emoticons, stop words)
+    :param bypass: False or True
+        False : if we only want non null vector
+        True : if we want tweets only, with the corresponding eventually null vector
+    :param language: Choose the language from french to english
+        'fr' | 'en'
     :return: tuple of array containing the features vectors and labels vectors corresponding
     """
     m_features, m_labels = list(), list()
@@ -180,7 +189,8 @@ def get_characteristic_label_vectors(nb, randomness, pos_equal_neg, Resource, by
                     label, text = clean_line(global_file.pop(randbelow(2 * NB_TWEETS_PER_FILE - nb_tweet)))
                 else:
                     label, text = clean_line(global_file.pop())
-                feature_vector = characteristic_vector(clean_text(text), Resource)
+                feature_vector = characteristic_vector(clean_text(text, get_correct_stop_word(Resource, language)),
+                                                       Resource)
                 if feature_vector != [0, 0, 0, 0, 0] or bypass:
                     float_label = float(label)
                     if pos_equal_neg:
@@ -196,4 +206,4 @@ def get_characteristic_label_vectors(nb, randomness, pos_equal_neg, Resource, by
                         m_features.append(feature_vector)
                         m_labels.append(float_label)
                         nb_tweet += 1
-    return (array(m_features), array(m_labels))
+    return array(m_features), array(m_labels)

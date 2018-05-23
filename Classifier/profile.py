@@ -26,9 +26,10 @@ def construct_name_file(size_sample, randomness, pos_equal_neg, kernel):
 
 
 def create_SVM_profile(size_sample, randomness, pos_equal_neg, kernel, Resource, m_features=None,
-                       m_labels=None, language='English'):
+                       m_labels=None, language='en'):
     """
     With the desired parameters, create a SVM classifier and save it to a file
+    :param Resource:
     :param size_sample: number of tweets / characteristic vectors to use
     :param randomness: if the collection should be randomised from data set
     :param pos_equal_neg: if the same amount of positive and negative tweets / characteristic vectors should be used
@@ -39,12 +40,13 @@ def create_SVM_profile(size_sample, randomness, pos_equal_neg, kernel, Resource,
     :param m_labels:
         (optional) array of already constructed labels vector
         (default) will construct an array of labels vector
-    :param language: Choose the language from 'fr' that stands for french and 'en' that stands for english
+    :param language: Choose the language from french to english
         'fr' | 'en'
     :return:
     """
     if m_features is None and m_labels is None:
-        m_features, m_labels = get_characteristic_label_vectors(size_sample, randomness, pos_equal_neg, Resource)
+        m_features, m_labels = get_characteristic_label_vectors(size_sample, randomness, pos_equal_neg, Resource, False,
+                                                                language)
 
     Classifier = SVM(kernel)
     Classifier.fit(m_features, m_labels)
@@ -54,21 +56,31 @@ def create_SVM_profile(size_sample, randomness, pos_equal_neg, kernel, Resource,
     Classifier.save_to_file(name_file)
 
 
-def generate_profiles(Resource, kernel=None, l_size=[1000, 10000], l_random=[True, False], l_pos_eq_neg=[True, False]):
+def generate_profiles(Resource, kernel=None, l_size=None, l_random=None, l_pos_eq_neg=None, language='en'):
     """
     Generate multiple profiles for one or more kernels
+    :param Resource:
     :param kernel:
         (optional) name of the kernel to use
-        'default) will construct profiles for every kernel (linear, poly_kernel, gaussian)
+        (default) will construct profiles for every kernel (linear, poly_kernel, gaussian)
     :param l_size: list of the desired size of characteristic vectors
     :param l_random: list of situation of randomness
     :param l_pos_eq_neg: list of situation of positives equal negatives
+    :param language: Choose the language from french to english
+        'fr' | 'en'
     :return:
     """
+    if l_random is None:
+        l_random = [True, False]
+    if l_pos_eq_neg is None:
+        l_pos_eq_neg = [True, False]
+    if l_size is None:
+        l_size = [1000, 10000]
     for size_sample in l_size:
         for randomness in l_random:
             for pos_eq_neg in l_pos_eq_neg:
-                m_features, m_labels = get_characteristic_label_vectors(size_sample, randomness, pos_eq_neg, Resource)
+                m_features, m_labels = get_characteristic_label_vectors(size_sample, randomness, pos_eq_neg, Resource,
+                                                                        False, language)
                 if kernel is not None:
                     kernel = Kernel.get_correct_kernel(kernel)
                     try:

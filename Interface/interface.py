@@ -6,9 +6,9 @@
 from tkinter.filedialog import *
 from tkinter.ttk import *
 
-from Classifier.features import Resource
 from Interface.actions import (analyse_file, analyse_query, analyse_text, analyse_tweets, custom_training,
                                load_classifier)
+from Ressources.resource import Resource
 
 
 class Application(Frame):
@@ -33,7 +33,7 @@ class Application(Frame):
         self.train_kernel = StringVar()
         self.SVMClassifier = None
         self.custom_SVMClassifier = None
-        self.Resource = Resource
+        self.Resource = Resource()
 
         # Populate the window
         self._create_widgets()
@@ -132,7 +132,7 @@ class Application(Frame):
     def _create_training_panel(self, display):
         fen_training = Frame(display, name="fen_visualiser")
 
-        options_frame = LabelFrame(fen_training, text="Create your own SVM classfier")
+        options_frame = LabelFrame(fen_training, text="Create your own SVM classifier")
 
         # ---------- Train by using 'x' tweets -------------
         size_frame = LabelFrame(options_frame, text="Size of the training sample")

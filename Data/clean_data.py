@@ -3,42 +3,22 @@
 
 from re import escape, match, sub
 
-from Ressources.resource import get_path_resource
-
 
 def clean_end_line(text):
     """
-    Remove the ending character from a string
+    Remove the ending characters from a string
     :param text: word or text that ends with an ending character
-    :return: string containing the same text without ending character
+    :return: string containing the same text without ending characters
     """
     return sub(rb'(.*)\1\n|\r|\r\n', rb'\1', text)
 
 
-def _load_stop_word(language='en'):
+def _clean_element(element, stop_words):
     """
-    Load all the stop words for the corresponding language
-    :param language: Choose the language from 'fr' that stands for french and 'en' that stands for english
-        'fr' | 'en'
-    :return: list of stop words in the desired language
-    """
-    if language == 'fr':
-        path = get_path_resource('stop_word_fr.txt')
-    elif language == 'en':
-        path = get_path_resource('stop_word_en.txt')
-
-    with open(path, 'rb') as file_stop_word:
-        stop_word = [clean_end_line(x) for x in file_stop_word.readlines()]
-    return stop_word
-
-
-def _clean_element(element, language='en'):
-    """
-    Remove all the undesired stuff from the element in the desired language
-    :param element: string representing an element between whitespaces from the tweet
-    :param language: Choose the language from 'fr' that stands for french and 'en' that stands for english
-        'fr' | 'en'
-    :return:
+    Remove all the undesired stuff from the element including stop words in the correct language
+    :param element: string representing an element (between whitespaces) from the tweet
+    :param stop_words: list of stop word in the desired language
+    :return: None or String
         None if the element is not relevant
         String containing the element cleaned
     """
@@ -58,24 +38,22 @@ def _clean_element(element, language='en'):
     element = sub(rb'(\w)\1+', rb'\1', element)
 
     # check whether the element is relevant or not
-    if element in _load_stop_word(language):
+    if element in stop_words:
         return None
     else:
         return element
 
 
-def clean_text(text, language='en'):
+def clean_text(text, stop_words):
     """
-    Clean the text in the desired language from all undesired elements
+    Clean the text from all undesired elements including the stop words in the desired language
     :param text: string to transform in a cleaned list of element
-    :param language: Choose the language from 'fr' that stands for french and 'en' that stands for english
-        'fr' | 'en'
+    :param stop_words: list of stop words in the correct language
     :return: list of relevant and cleaned element from the text
     """
     list_cleaned_element = list()
     for element in text.split(rb" "):
-        cleaned_element = _clean_element(element, language)
+        cleaned_element = _clean_element(element, stop_words)
         if cleaned_element:
             list_cleaned_element.append(cleaned_element)
-
     return list_cleaned_element
