@@ -29,7 +29,8 @@ def create_SVM_profile(size_sample, randomness, pos_equal_neg, kernel, Resource,
                        m_labels=None, language='en'):
     """
     With the desired parameters, create a SVM classifier and save it to a file
-    :param Resource:
+    :param Resource: class object containing all the resources (positive words, negative words, positive emoticons,
+    negative emoticons, stop words)
     :param size_sample: number of tweets / characteristic vectors to use
     :param randomness: if the collection should be randomised from data set
     :param pos_equal_neg: if the same amount of positive and negative tweets / characteristic vectors should be used
@@ -59,7 +60,8 @@ def create_SVM_profile(size_sample, randomness, pos_equal_neg, kernel, Resource,
 def generate_profiles(Resource, kernel=None, l_size=None, l_random=None, l_pos_eq_neg=None, language='en'):
     """
     Generate multiple profiles for one or more kernels
-    :param Resource:
+    :param Resource: class object containing all the resources (positive words, negative words, positive emoticons,
+    negative emoticons, stop words)
     :param kernel:
         (optional) name of the kernel to use
         (default) will construct profiles for every kernel (linear, poly_kernel, gaussian)

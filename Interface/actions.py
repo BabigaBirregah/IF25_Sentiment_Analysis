@@ -12,12 +12,12 @@ from Ressources.resource import get_correct_stop_word
 
 def load_classifier(size_sample, randomness, pos_eq_neg, kernel):
     """
-
-    :param size_sample:
-    :param randomness:
-    :param pos_eq_neg:
-    :param kernel:
-    :return:
+    Load th desired SVM classifier saved in a file
+    :param size_sample: size of the sample used
+    :param randomness: boolean indicating the randomness of the sample
+    :param pos_eq_neg: boolean indicating if the number of positive and negative features vectors is equal
+    :param kernel: name of the kernel used
+    :return: SVM Predictor (SVM classifier ready to predict)
     """
     size_sample = int("".join(size_sample.split(" tweets")[0].split()))
 
@@ -30,7 +30,8 @@ def analyse_text(text, classifier, Resource, language='en'):
 
     :param text:
     :param classifier:
-    :param Resource:
+    :param Resource: class object containing all the resources (positive words, negative words, positive emoticons,
+    negative emoticons, stop words)
     :param language:
     :return:
     """
@@ -46,7 +47,8 @@ def analyse_file(file_content, classifier, Resource, language='en'):
 
     :param file_content:
     :param classifier:
-    :param Resource:
+    :param Resource: class object containing all the resources (positive words, negative words, positive emoticons,
+    negative emoticons, stop words)
     :param language:
     :return:
     """
@@ -58,7 +60,8 @@ def analyse_query(query, classifier, Resource, language='en'):
 
     :param query:
     :param classifier:
-    :param Resource:
+    :param Resource: class object containing all the resources (positive words, negative words, positive emoticons,
+    negative emoticons, stop words)
     :param language:
     :return:
     """
@@ -71,7 +74,8 @@ def analyse_tweets(nb_tweets, classifier, Resource, language='en'):
 
     :param nb_tweets:
     :param classifier:
-    :param Resource:
+    :param Resource: class object containing all the resources (positive words, negative words, positive emoticons,
+    negative emoticons, stop words)
     :param language:
     :return:
     """
@@ -87,7 +91,8 @@ def custom_training(nb_tweet_sample, randomised, equal_pos_neg, language, name_k
     :param equal_pos_neg:
     :param language:
     :param name_kernel:
-    :param Resource:
+    :param Resource: class object containing all the resources (positive words, negative words, positive emoticons,
+    negative emoticons, stop words)
     :return:
     """
     m_features, m_labels = get_characteristic_label_vectors(nb_tweet_sample, randomised, equal_pos_neg, Resource, True,
