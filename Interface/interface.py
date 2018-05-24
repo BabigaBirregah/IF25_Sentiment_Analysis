@@ -34,6 +34,7 @@ class Application(Frame):
         self.SVMClassifier = None
         self.custom_SVMClassifier = None
         self.Resource = Resource()
+        self.count_visualiser = 0
 
         # Populate the window
         self._create_widgets()
@@ -128,6 +129,10 @@ class Application(Frame):
                                                                 pady=5)
         Radiobutton(kernel_frame, text="Gaussian", variable=self.analyse_kernel, value="gaussian",
                     command=self._load_default_classifier).grid(padx=5, pady=5)
+        # Radiobutton(kernel_frame, text="Hyperbolic tangent", variable=self.analyse_kernel,
+        # value="hyperbolic_tangent", command=self._load_default_classifier).grid(padx=5, pady=5)
+        # Radiobutton(kernel_frame, text="Radial basis", variable=self.analyse_kernel, value="radial_basis",
+        # command=self._load_default_classifier).grid(padx=5, pady=5)
 
         kernel_frame.grid(column=4, row=0, padx=10, pady=10)
 
@@ -221,7 +226,8 @@ class Application(Frame):
 
         def text_analysis():
             if self.value_submit.get() != "Text to analyse":
-                analyse_text(self.value_submit.get(), self._get_classifier(), self.Resource)
+                result = analyse_text(self.value_submit.get(), self._get_classifier(), self.Resource)
+                self._create_viewer_panel(self.display, result)
 
         Button(custom_text_frame, text="Do it", command=text_analysis).grid(padx=5, pady=5)
         custom_text_frame.grid(column=0, row=0, padx=10, pady=10)
@@ -232,7 +238,8 @@ class Application(Frame):
         def ask_file():
             file_name = askopenfile(title="Open file of tweets",
                                     filetypes=[('txt files', '.txt'), ('csv files', '.csv')])
-            analyse_file(open(file_name, "rb").readlines(), self._get_classifier(), self.Resource)
+            result = analyse_file(open(file_name, "rb").readlines(), self._get_classifier(), self.Resource)
+            self._create_viewer_panel(self.display, result)
 
         Button(custom_file_frame, text="Do it", command=ask_file).grid(padx=5, pady=5)
         custom_file_frame.grid(column=1, row=0, padx=10, pady=10)
@@ -257,10 +264,11 @@ class Application(Frame):
 
         def query_analysis():
             if self.user_query.get() != "'#ITAR'" and '#' in self.user_query.get():
-                analyse_query(self.user_query.get(), self._get_classifier(), self.Resource)
+                result = analyse_query(self.user_query.get(), self._get_classifier(), self.Resource)
+                self._create_viewer_panel(self.display, result)
             elif self.user_query.get() != "'#ITAR'":
-                for x in analyse_query('#' + self.user_query.get(), self._get_classifier(), self.Resource):
-                    print(x)
+                result = analyse_query('#' + self.user_query.get(), self._get_classifier(), self.Resource)
+                self._create_viewer_panel(self.display, result)
 
         Button(query_frame, text="Do it", command=query_analysis).grid(padx=5, pady=5)
         query_frame.grid(column=2, row=0, padx=10, pady=10)
@@ -274,7 +282,8 @@ class Application(Frame):
                 padx=5, pady=5)
 
         def analyse_stream_tweet():
-            analyse_tweets(self.nb_tweet_collect.get(), self._get_classifier(), self.Resource)
+            result = analyse_tweets(self.nb_tweet_collect.get(), self._get_classifier(), self.Resource)
+            self._create_viewer_panel(self.display, result)
 
         Button(number_frame, text="Do it", command=analyse_stream_tweet).grid(padx=5, pady=5)
         number_frame.grid(column=3, row=0, padx=10, pady=10)
@@ -283,7 +292,43 @@ class Application(Frame):
 
         display.add(fen_actions, text="Actions")
 
-    def create_viewer_panel(self, display):
-        fen_visualiser = Frame(display, name="fen_visualiser")
+    def _create_viewer_panel(self, display, result):
+        self.count_visualiser += 1
+        name_viewer = "fen_visualiser_{}".format(self.count_visualiser)
 
-        display.add(fen_visualiser, text="Visualiser")
+        global_frame = Frame(display, width=900, height=600)
+
+        def close_tab():
+            display.forget(self.count_visualiser + 2)
+
+        Button(global_frame, command=close_tab, text="Close tab").grid()
+
+        canvas_result = Canvas(global_frame, width=900, height=600)
+        canvas_result.grid(row=1, column=0, sticky="nsew")
+
+        fen_visualiser = Frame(canvas_result, name=name_viewer)
+        canvas_result.create_window(0, 0, window=fen_visualiser)
+
+        for idx, value in enumerate(result):
+            group_tweet = LabelFrame(fen_visualiser, text="Tweet {}".format(idx))
+            Label(group_tweet, text="Text :").grid(column=0, row=idx // 2, sticky="e")
+            Label(group_tweet, text=bytes(value[0], 'utf-8')).grid(column=1, row=idx // 2, sticky="w")
+            Label(group_tweet, text="Label :").grid(column=0, row=idx // 2 + 1, sticky="e")
+            Label(group_tweet, text=value[1]).grid(column=1, row=idx // 2 + 1, sticky="w")
+            group_tweet.grid(sticky="w")
+
+        vertical_scrollbar = Scrollbar(global_frame, command=canvas_result.yview)
+        canvas_result.configure(yscrollcommand=vertical_scrollbar.set)
+
+        horizontal_scrollbar = Scrollbar(global_frame, orient=HORIZONTAL, command=canvas_result.xview)
+        canvas_result.configure(xscrollcommand=horizontal_scrollbar.set)
+
+        vertical_scrollbar.grid(row=1, column=1, sticky="ns")
+        horizontal_scrollbar.grid(row=2, column=0, sticky="ew")
+
+        def update_scrollregion(event):
+            canvas_result.configure(scrollregion=canvas_result.bbox("all"))
+
+        fen_visualiser.bind("<Configure>", update_scrollregion)
+
+        display.add(global_frame, text="Visualiser {}".format(self.count_visualiser))

@@ -123,9 +123,6 @@ class SVM(object):
                                                                                          self.support_vectors):
                     score += lagrange_multipliers * support_vectors_labels * self.kernel(features[i], support_vectors)
                 y_predict[i] = score
-            print("\npredict y_predict + self.bias", y_predict + self.bias)
-            print("predict self.bias", self.bias)
-            print("predict y_predict", y_predict)
             result = y_predict + self.bias
 
         if result < -0.25:

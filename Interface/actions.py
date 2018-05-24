@@ -29,7 +29,8 @@ def _minimal_analysis(text, classifier, Resource, language='en'):
 
     :param text:
     :param classifier:
-    :param Resource:
+    :param Resource: class object containing all the resources (positive words, negative words, positive emoticons,
+    negative emoticons, stop words)
     :param language:
     :return:
     """
@@ -50,7 +51,7 @@ def analyse_text(custom_text, classifier, Resource, language='en'):
     :return:
     """
     result = _minimal_analysis(custom_text, classifier, Resource, language)
-    return [result]
+    return [(custom_text, result)]
 
 
 def analyse_file(file_content, classifier, Resource, language='en'):
@@ -64,7 +65,7 @@ def analyse_file(file_content, classifier, Resource, language='en'):
     :return:
     """
     for line in file_content:
-        yield _minimal_analysis(line, classifier, Resource, language)
+        yield (line, _minimal_analysis(line, classifier, Resource, language))
 
 
 def analyse_query(query, classifier, Resource, language='en'):
@@ -78,7 +79,7 @@ def analyse_query(query, classifier, Resource, language='en'):
     :return:
     """
     for line in search_sample(query):
-        yield _minimal_analysis(line, classifier, Resource, language)
+        yield (line, _minimal_analysis(line, classifier, Resource, language))
 
 
 def analyse_tweets(nb_tweets, classifier, Resource, language='en'):
@@ -92,7 +93,7 @@ def analyse_tweets(nb_tweets, classifier, Resource, language='en'):
     :return:
     """
     for line in collect_tweet(nb_tweets):
-        yield _minimal_analysis(line, classifier, Resource, language)
+        yield (line, _minimal_analysis(line, classifier, Resource, language))
 
 
 def custom_training(nb_tweet_sample, randomised, equal_pos_neg, language, name_kernel, Resource):

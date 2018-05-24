@@ -57,12 +57,12 @@ def create_SVM_profile(size_sample, randomness, pos_equal_neg, kernel, Resource,
     Classifier.save_to_file(name_file)
 
 
-def generate_profiles(Resource, kernel=None, l_size=None, l_random=None, l_pos_eq_neg=None, language='en'):
+def generate_profiles(Resource, name_kernel=None, l_size=None, l_random=None, l_pos_eq_neg=None, language='en'):
     """
     Generate multiple profiles for one or more kernels
     :param Resource: class object containing all the resources (positive words, negative words, positive emoticons,
     negative emoticons, stop words)
-    :param kernel:
+    :param name_kernel:
         (optional) name of the kernel to use
         (default) will construct profiles for every kernel (linear, poly_kernel, gaussian)
     :param l_size: list of the desired size of characteristic vectors
@@ -78,13 +78,14 @@ def generate_profiles(Resource, kernel=None, l_size=None, l_random=None, l_pos_e
         l_pos_eq_neg = [True, False]
     if l_size is None:
         l_size = [1000, 10000]
+
     for size_sample in l_size:
         for randomness in l_random:
             for pos_eq_neg in l_pos_eq_neg:
                 m_features, m_labels = get_characteristic_label_vectors(size_sample, randomness, pos_eq_neg, Resource,
                                                                         False, language)
-                if kernel is not None:
-                    kernel = Kernel.get_correct_kernel(kernel)
+                if name_kernel is not None:
+                    kernel = Kernel.get_correct_kernel(name_kernel)
                     try:
                         create_SVM_profile(size_sample, randomness, pos_eq_neg, kernel, Resource, m_features, m_labels)
                     except:
@@ -97,3 +98,12 @@ def generate_profiles(Resource, kernel=None, l_size=None, l_random=None, l_pos_e
                                        m_labels)
                     create_SVM_profile(size_sample, randomness, pos_eq_neg, Kernel.gaussian(), Resource, m_features,
                                        m_labels)
+                    create_SVM_profile(size_sample, randomness, pos_eq_neg, Kernel.hyperbolic_tangent(), Resource,
+                                       m_features, m_labels)
+                    create_SVM_profile(size_sample, randomness, pos_eq_neg, Kernel.radial_basis(), Resource, m_features,
+                                       m_labels)
+
+# from Ressources.resource import Resource
+#
+# generate_profiles(Resource(), Kernel.hyperbolic_tangent())
+# generate_profiles(Resource(), Kernel.radial_basis())
