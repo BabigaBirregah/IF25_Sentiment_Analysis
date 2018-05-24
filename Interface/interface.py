@@ -119,7 +119,7 @@ class Application(Frame):
         # ---------- Choose the kernel used -------------
         kernel_frame = LabelFrame(default_classifier, text="Choose the kernel used")
 
-        self.analyse_kernel.set("gaussian")
+        self.analyse_kernel.set("linear")
 
         Radiobutton(kernel_frame, text="Linear", variable=self.analyse_kernel, value="linear",
                     command=self._load_default_classifier).grid(padx=5, pady=5)

@@ -78,29 +78,6 @@ class SVM(object):
             for n in range(len(self.lagrange_multipliers)):
                 self.weights += self.lagrange_multipliers[n] * self.support_vectors_labels[n] * self.support_vectors[n]
 
-    def _project(self, features):
-        """
-        Compute the score of the features
-        :param features: array of features vectors
-        :return: score prediction of the features (real number)
-        """
-        if self.weights is not None:
-            print("_project dot(features, self.weights) + self.bias", dot(features, self.weights) + self.bias)
-            return dot(features, self.weights) + self.bias
-        else:
-            y_predict = zeros(len(features))
-            for i in range(len(features)):
-                score = 0
-                for lagrange_multipliers, support_vectors_labels, support_vectors in zip(self.lagrange_multipliers,
-                                                                                         self.support_vectors_labels,
-                                                                                         self.support_vectors):
-                    score += lagrange_multipliers * support_vectors_labels * self.kernel(features[i], support_vectors)
-                y_predict[i] = score
-            print("\n_project y_predict + self.bias", y_predict + self.bias)
-            print("_project self.bias", self.bias)
-            print("_project y_predict", y_predict)
-            return y_predict + self.bias
-
     def attributes(self):
         """
         Create a dictionary (that is writable to a file) of the different attributes of the SVM classifier
@@ -132,12 +109,28 @@ class SVM(object):
         """
         Given an array of features, predict the label of each vector
         :param features: array of features vectors
-        :return: array of corresponding labels (0.0 or 1.0)
+        :return: Corresponding labels ('Negative' 'Neutral' 'Positive')
         """
-        result = self._project(features)
-        if result < -0.33:
+        if self.weights is not None:
+            print("_project dot(features, self.weights) + self.bias", dot(features, self.weights) + self.bias)
+            result = dot(features, self.weights) + self.bias
+        else:
+            y_predict = zeros(len(features))
+            for i in range(len(features)):
+                score = 0
+                for lagrange_multipliers, support_vectors_labels, support_vectors in zip(self.lagrange_multipliers,
+                                                                                         self.support_vectors_labels,
+                                                                                         self.support_vectors):
+                    score += lagrange_multipliers * support_vectors_labels * self.kernel(features[i], support_vectors)
+                y_predict[i] = score
+            print("\npredict y_predict + self.bias", y_predict + self.bias)
+            print("predict self.bias", self.bias)
+            print("predict y_predict", y_predict)
+            result = y_predict + self.bias
+
+        if result < -0.25:
             return "Negative"
-        elif result < 0.33:
+        elif result < 0.25:
             return "Neutral"
         else:
             return "Positive"
