@@ -6,6 +6,8 @@
 from tkinter.filedialog import *
 from tkinter.ttk import *
 
+from Classifier.SVM import get_from_file
+from Classifier.profile import construct_name_file
 from Interface.actions import (analyse_file, analyse_query, analyse_text, analyse_tweets, custom_training,
                                load_classifier)
 from Ressources.resource import Resource
@@ -186,16 +188,37 @@ class Application(Frame):
         Radiobutton(kernel_frame, text="Polynomial", variable=self.train_kernel, value="poly_kernel").grid(padx=5,
                                                                                                            pady=5)
         Radiobutton(kernel_frame, text="Gaussian", variable=self.train_kernel, value="gaussian").grid(padx=5, pady=5)
+        # Radiobutton(kernel_frame, text="Hyperbolic tangent", variable=self.train_kernel,
+        # value="hyperbolic_tangent").grid(padx=5, pady=5)
+        # Radiobutton(kernel_frame, text="Radial basis", variable=self.train_kernel, value="radial_basis").grid(
+        # padx=5, pady=5)
 
         kernel_frame.grid(column=3, row=0, padx=10, pady=10)
 
+        # ---------- Create the desired custom SVM classifier -------------
         def train_settings():
             self.custom_SVMClassifier = custom_training(self.nb_tweet_train.get(),
                                                         self.toggle_randomness_t.get() == "Randomised",
                                                         self.toggle_nb_pos_neg_t.get() == "Equal", self.toggle_language,
                                                         self.train_kernel.get(), self.Resource)
 
-        Button(options_frame, text="Do it", command=train_settings).grid(column=1, padx=5, pady=5)
+        Button(options_frame, text="Create custom SVM", command=train_settings).grid(column=4, row=0, padx=5, pady=5)
+
+        # ---------- Save custom SVM classifier -------------
+        def save_custom_SVM():
+            if self.custom_SVMClassifier:
+                name_file = construct_name_file(self.nb_tweet_train.get(), self.toggle_randomness_t.get(),
+                                                self.toggle_nb_pos_neg_t.get(), self.train_kernel.get())
+                self.custom_SVMClassifier.save_to_file(name_file)
+
+        Button(options_frame, text="Save custom SVM", command=save_custom_SVM).grid(column=1, row=1, padx=5, pady=5)
+
+        # ---------- Load custom SVM classifier -------------
+        def load_custom_SVM():
+            file_name = askopenfile(title="Open file of tweets", filetypes=[('json files', '.json')])
+            self.custom_SVMClassifier = get_from_file(file_name)
+
+        Button(options_frame, text="Load custom SVM", command=load_custom_SVM).grid(column=2, row=1, padx=5, pady=5)
 
         options_frame.grid(padx=10, pady=10)
 
@@ -229,7 +252,7 @@ class Application(Frame):
                 result = analyse_text(self.value_submit.get(), self._get_classifier(), self.Resource)
                 self._create_viewer_panel(self.display, result)
 
-        Button(custom_text_frame, text="Do it", command=text_analysis).grid(padx=5, pady=5)
+        Button(custom_text_frame, text="Analyse text", command=text_analysis).grid(padx=5, pady=5)
         custom_text_frame.grid(column=0, row=0, padx=10, pady=10)
 
         # ---------- Submit custom text/csv file -------------
@@ -241,7 +264,7 @@ class Application(Frame):
             result = analyse_file(open(file_name, "rb").readlines(), self._get_classifier(), self.Resource)
             self._create_viewer_panel(self.display, result)
 
-        Button(custom_file_frame, text="Do it", command=ask_file).grid(padx=5, pady=5)
+        Button(custom_file_frame, text="Open file & Analyse", command=ask_file).grid(padx=5, pady=5)
         custom_file_frame.grid(column=1, row=0, padx=10, pady=10)
 
         # ---------- Get and analyse specific tweet -------------
@@ -270,7 +293,7 @@ class Application(Frame):
                 result = analyse_query('#' + self.user_query.get(), self._get_classifier(), self.Resource)
                 self._create_viewer_panel(self.display, result)
 
-        Button(query_frame, text="Do it", command=query_analysis).grid(padx=5, pady=5)
+        Button(query_frame, text="Analyse trend", command=query_analysis).grid(padx=5, pady=5)
         query_frame.grid(column=2, row=0, padx=10, pady=10)
 
         # ---------- Get and analyse 'x' tweets -------------
@@ -285,7 +308,7 @@ class Application(Frame):
             result = analyse_tweets(self.nb_tweet_collect.get(), self._get_classifier(), self.Resource)
             self._create_viewer_panel(self.display, result)
 
-        Button(number_frame, text="Do it", command=analyse_stream_tweet).grid(padx=5, pady=5)
+        Button(number_frame, text="Analyse 'x' tweets", command=analyse_stream_tweet).grid(padx=5, pady=5)
         number_frame.grid(column=3, row=0, padx=10, pady=10)
 
         specific_actions.grid(padx=10, pady=10)
@@ -314,7 +337,12 @@ class Application(Frame):
             Label(group_tweet, text="Text :").grid(column=0, row=idx // 2, sticky="e")
             Label(group_tweet, text=bytes(value[0], 'utf-8')).grid(column=1, row=idx // 2, sticky="w")
             Label(group_tweet, text="Label :").grid(column=0, row=idx // 2 + 1, sticky="e")
-            Label(group_tweet, text=value[1]).grid(column=1, row=idx // 2 + 1, sticky="w")
+            if value[1] == "Negative":
+                Label(group_tweet, text=value[1], foreground="red").grid(column=1, row=idx // 2 + 1, sticky="w")
+            elif value[1] == "Neutral":
+                Label(group_tweet, text=value[1], foreground="gray").grid(column=1, row=idx // 2 + 1, sticky="w")
+            elif value[1] == "Positive":
+                Label(group_tweet, text=value[1], foreground="green").grid(column=1, row=idx // 2 + 1, sticky="w")
             group_tweet.grid(sticky="w")
 
         vertical_scrollbar = Scrollbar(global_frame, command=canvas_result.yview)
@@ -326,9 +354,9 @@ class Application(Frame):
         vertical_scrollbar.grid(row=1, column=1, sticky="ns")
         horizontal_scrollbar.grid(row=2, column=0, sticky="ew")
 
-        def update_scrollregion(event):
+        def update_scroll_region(event):
             canvas_result.configure(scrollregion=canvas_result.bbox("all"))
 
-        fen_visualiser.bind("<Configure>", update_scrollregion)
+        fen_visualiser.bind("<Configure>", update_scroll_region)
 
         display.add(global_frame, text="Visualiser {}".format(self.count_visualiser))
