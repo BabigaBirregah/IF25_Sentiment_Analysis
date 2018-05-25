@@ -95,11 +95,11 @@ def get_positive_negative_tweets(sample_list):
     :return: 2 lists of text, first one containing the negatives, second the positive
     """
     positive, negative = list(), list()
-    for tuple in sample_list:
-        if tuple[0] == b'1':
-            positive.append(tuple[1])
+    for l_element in sample_list:
+        if l_element[0] == b'1':
+            positive.append(l_element[1])
         else:
-            negative.append(tuple[1])
+            negative.append(l_element[1])
     return negative, positive
 
 

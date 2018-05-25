@@ -10,7 +10,6 @@ from re import match
 def _count_generic(list_element, list_words, weight=1):
     """
     Generic function to count the number of element from list_element in list_words.
-    Since we are going to call this function in thread we use a struct -> dict to store the result of the counting.
     We can also apply a weight on the counting (emoticons have somehow bigger impact on the sentiment).
     :param list_element: list of elements we need to confront to list_words
     :param list_words: list of words that we are trying to count in list_element
