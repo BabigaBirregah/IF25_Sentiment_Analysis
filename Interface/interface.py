@@ -13,6 +13,29 @@ from Interface.actions import (analyse_file, analyse_query, analyse_text, analys
 from Ressources.resource import Resource
 
 
+class ToolTip(object):
+
+    def __init__(self, widget, text='widget info'):
+        self.widget = widget
+        self.text = text
+        self.widget.bind("<Enter>", self.enter)
+        self.widget.bind("<Leave>", self.close)
+
+    def enter(self, event=None):
+        x, y, cx, cy = self.widget.bbox("insert")
+        x += self.widget.winfo_rootx()
+        y += self.widget.winfo_rooty() + 25
+        self.tw = Toplevel(self.widget)
+        self.tw.wm_overrideredirect(True)
+        self.tw.wm_geometry("+%d+%d" % (x, y))
+        Label(self.tw, text=self.text, justify='left', background='white', relief='solid', borderwidth=1,
+              wraplength=180).grid(ipadx=1)
+
+    def close(self, event=None):
+        if self.tw:
+            self.tw.destroy()
+
+
 class Application(Frame):
     def __init__(self, master=None, **kw):
         Frame.__init__(self, master)
@@ -83,6 +106,11 @@ class Application(Frame):
 
         Checkbutton(language_frame, textvariable=self.toggle_language, variable=self.toggle_language, onvalue="English",
                     offvalue="Français").grid()
+
+        ToolTip(language_frame,
+                text="French here is not relevant since this application has no data set available for french, "
+                     "but may be added")
+
         language_frame.grid(column=0, row=0, padx=10, pady=10)
 
         # Options for the default SVM classifier #
@@ -96,7 +124,7 @@ class Application(Frame):
         Checkbutton(sample_frame, textvariable=self.size_sample, variable=self.size_sample, onvalue="10 000 tweets",
                     offvalue="1 000 tweets", command=self._load_default_classifier).grid()
 
-        sample_frame.grid(column=1, row=0, padx=10, pady=10)
+        sample_frame.grid(column=1, row=0, padx=10, pady=10, sticky="n")
 
         # ---------- Choose to randomise the sample -------------
         random_frame = LabelFrame(default_classifier, text="Order of tweets")
@@ -104,10 +132,13 @@ class Application(Frame):
         self.toggle_randomness.set("Randomised")
 
         Checkbutton(random_frame, textvariable=self.toggle_randomness, variable=self.toggle_randomness,
-                    onvalue="Randomised", offvalue="Non-randomised", command=self._load_default_classifier).grid(padx=5,
-                                                                                                                 pady=5)
+                    onvalue="Randomised", offvalue="Non-randomised",
+                    command=self._load_default_classifier).grid(padx=5,
+                                                                pady=5)
+        ToolTip(random_frame,
+                text="If the data set is read randomly or we just pop the last item to populate the sample")
 
-        random_frame.grid(column=2, row=0, padx=10, pady=10)
+        random_frame.grid(column=2, row=0, padx=10, pady=10, sticky="n")
 
         # ---------- Choose either number of positive tweets should equal negative -------------
         nb_pos_neg_frame = LabelFrame(default_classifier, text="Number of positive equal negative tweets")
@@ -116,8 +147,9 @@ class Application(Frame):
 
         Checkbutton(nb_pos_neg_frame, textvariable=self.toggle_nb_pos_neg, variable=self.toggle_nb_pos_neg,
                     onvalue="Equal", offvalue="Non-equal", command=self._load_default_classifier).grid(padx=5, pady=5)
+        ToolTip(nb_pos_neg_frame, text="If the number of positive and negative tweets should be equal")
 
-        nb_pos_neg_frame.grid(column=3, row=0, padx=10, pady=10)
+        nb_pos_neg_frame.grid(column=3, row=0, padx=10, pady=10, sticky="n")
 
         # ---------- Choose the kernel used -------------
         kernel_frame = LabelFrame(default_classifier, text="Choose the kernel used")
@@ -125,16 +157,16 @@ class Application(Frame):
         self.analyse_kernel.set("linear")
 
         Radiobutton(kernel_frame, text="Linear", variable=self.analyse_kernel, value="linear",
-                    command=self._load_default_classifier).grid(padx=5, pady=5)
+                    command=self._load_default_classifier).grid(column=0, row=0, padx=5, pady=5, sticky="w")
         Radiobutton(kernel_frame, text="Polynomial", variable=self.analyse_kernel, value="poly_kernel",
-                    command=self._load_default_classifier).grid(padx=5,
-                                                                pady=5)
+                    command=self._load_default_classifier).grid(column=0, row=1, padx=5, pady=5, sticky="w")
         Radiobutton(kernel_frame, text="Gaussian", variable=self.analyse_kernel, value="gaussian",
-                    command=self._load_default_classifier).grid(padx=5, pady=5)
+                    command=self._load_default_classifier).grid(column=0, row=2, padx=5, pady=5, sticky="w")
         # Radiobutton(kernel_frame, text="Hyperbolic tangent", variable=self.analyse_kernel,
-        # value="hyperbolic_tangent", command=self._load_default_classifier).grid(padx=5, pady=5)
+        # value="hyperbolic_tangent", command=self._load_default_classifier).grid(column=1, row=0, padx=5, pady=5,
+        # sticky="w")
         # Radiobutton(kernel_frame, text="Radial basis", variable=self.analyse_kernel, value="radial_basis",
-        # command=self._load_default_classifier).grid(padx=5, pady=5)
+        # command=self._load_default_classifier).grid(column=1, row=1, padx=5, pady=5, sticky="w")
 
         kernel_frame.grid(column=4, row=0, padx=10, pady=10)
 
@@ -147,7 +179,10 @@ class Application(Frame):
     def _create_training_panel(self, display):
         fen_training = Frame(display, name="fen_visualiser")
 
-        options_frame = LabelFrame(fen_training, text="Create your own SVM classifier")
+        custom_SVM_frame = LabelFrame(fen_training, text="Create and use your own SVM classifier")
+
+        # Create your own tailored SVM classifier
+        options_frame = LabelFrame(custom_SVM_frame, text="Create custom SVM classifier")
 
         # ---------- Train by using 'x' tweets -------------
         size_frame = LabelFrame(options_frame, text="Size of the training sample")
@@ -157,7 +192,7 @@ class Application(Frame):
         Spinbox(size_frame, from_=100, to=1000000, increment=100, textvariable=self.nb_tweet_train,
                 justify='center').grid(column=1, row=0, padx=5, pady=5)
 
-        size_frame.grid(column=0, row=0, padx=10, pady=10)
+        size_frame.grid(column=0, row=0, padx=10, pady=10, sticky="n")
 
         # ---------- Choose to randomise the sample -------------
         random_frame = LabelFrame(options_frame, text="Order of tweets")
@@ -166,8 +201,10 @@ class Application(Frame):
 
         Checkbutton(random_frame, textvariable=self.toggle_randomness_t, variable=self.toggle_randomness_t,
                     onvalue="Randomised", offvalue="Non-randomised").grid(padx=5, pady=5)
+        ToolTip(random_frame,
+                text="If the data set is read randomly or we just pop the last item to populate the sample")
 
-        random_frame.grid(column=1, row=0, padx=10, pady=10)
+        random_frame.grid(column=1, row=0, padx=10, pady=10, sticky="n")
 
         # ---------- Choose either number of positive tweets should equal negative -------------
         nb_pos_neg_frame = LabelFrame(options_frame, text="Number of positive and negative tweets")
@@ -176,22 +213,25 @@ class Application(Frame):
 
         Checkbutton(nb_pos_neg_frame, textvariable=self.toggle_nb_pos_neg_t, variable=self.toggle_nb_pos_neg_t,
                     onvalue="Equal", offvalue="Non-equal").grid(padx=5, pady=5)
+        ToolTip(nb_pos_neg_frame, text="If the number of positive and negative tweets should be equal")
 
-        nb_pos_neg_frame.grid(column=2, row=0, padx=10, pady=10)
+        nb_pos_neg_frame.grid(column=2, row=0, padx=10, pady=10, sticky="n")
 
         # ---------- Choose the kernel to use -------------
         kernel_frame = LabelFrame(options_frame, text="Choose the kernel to use")
 
-        self.train_kernel.set("gaussian")
+        self.train_kernel.set("linear")
 
-        Radiobutton(kernel_frame, text="Linear", variable=self.train_kernel, value="linear").grid(padx=5, pady=5)
-        Radiobutton(kernel_frame, text="Polynomial", variable=self.train_kernel, value="poly_kernel").grid(padx=5,
-                                                                                                           pady=5)
-        Radiobutton(kernel_frame, text="Gaussian", variable=self.train_kernel, value="gaussian").grid(padx=5, pady=5)
+        Radiobutton(kernel_frame, text="Linear", variable=self.train_kernel,
+                    value="linear").grid(column=0, row=0, padx=5, pady=5, sticky="w")
+        Radiobutton(kernel_frame, text="Polynomial", variable=self.train_kernel,
+                    value="poly_kernel").grid(column=0, row=1, padx=5, pady=5, sticky="w")
+        Radiobutton(kernel_frame, text="Gaussian", variable=self.train_kernel,
+                    value="gaussian").grid(column=0, row=2, padx=5, pady=5, sticky="w")
         # Radiobutton(kernel_frame, text="Hyperbolic tangent", variable=self.train_kernel,
-        # value="hyperbolic_tangent").grid(padx=5, pady=5)
+        # value="hyperbolic_tangent").grid(column=1, row=0, padx=5, pady=5, sticky="w")
         # Radiobutton(kernel_frame, text="Radial basis", variable=self.train_kernel, value="radial_basis").grid(
-        # padx=5, pady=5)
+        # column=1, row=1, padx=5, pady=5, sticky="w")
 
         kernel_frame.grid(column=3, row=0, padx=10, pady=10)
 
@@ -202,7 +242,15 @@ class Application(Frame):
                                                         self.toggle_nb_pos_neg_t.get() == "Equal", self.toggle_language,
                                                         self.train_kernel.get(), self.Resource)
 
-        Button(options_frame, text="Create custom SVM", command=train_settings).grid(column=4, row=0, padx=5, pady=5)
+        b_frame_1 = Frame(options_frame)
+        Button(b_frame_1, text="Create custom SVM", command=train_settings).grid()
+        ToolTip(b_frame_1, text="Will instantiate a SVM classifier to further be used to predict")
+        b_frame_1.grid(column=4, row=0, padx=5, pady=5)
+
+        options_frame.grid(padx=10, pady=10)
+
+        # Special treatment for your own SVM classifier
+        existing_SVM_frame = LabelFrame(custom_SVM_frame, text="Treatment for an existing custom SVM")
 
         # ---------- Save custom SVM classifier -------------
         def save_custom_SVM():
@@ -211,16 +259,24 @@ class Application(Frame):
                                                 self.toggle_nb_pos_neg_t.get(), self.train_kernel.get())
                 self.custom_SVMClassifier.save_to_file(name_file)
 
-        Button(options_frame, text="Save custom SVM", command=save_custom_SVM).grid(column=1, row=1, padx=5, pady=5)
+        b_frame_2 = Frame(existing_SVM_frame)
+        Button(b_frame_2, text="Save custom SVM", command=save_custom_SVM).grid()
+        ToolTip(b_frame_2, text="Will save your custom SVM classifier to a json file, to load it afterwards")
+        b_frame_2.grid(column=1, row=1, padx=5, pady=5)
 
         # ---------- Load custom SVM classifier -------------
         def load_custom_SVM():
             file_name = askopenfile(title="Open file of tweets", filetypes=[('json files', '.json')])
             self.custom_SVMClassifier = get_from_file(file_name)
 
-        Button(options_frame, text="Load custom SVM", command=load_custom_SVM).grid(column=2, row=1, padx=5, pady=5)
+        b_frame_3 = Frame(existing_SVM_frame)
+        Button(b_frame_3, text="Load custom SVM", command=load_custom_SVM).grid()
+        ToolTip(b_frame_3, text="Will load a custom SVM classifier contained in a json file")
+        b_frame_3.grid(column=2, row=1, padx=5, pady=5)
 
-        options_frame.grid(padx=10, pady=10)
+        existing_SVM_frame.grid(padx=10, pady=10)
+
+        custom_SVM_frame.grid()
 
         display.add(fen_training, text="Training")
 
@@ -228,7 +284,7 @@ class Application(Frame):
         fen_actions = Frame(display, name="fen_actions")
 
         # Trigger some specific actions #
-        specific_actions = LabelFrame(fen_actions, text="Trigger specific actions")
+        specific_actions = LabelFrame(fen_actions, text="Trigger specific analysis")
 
         # ---------- Submit custom text -------------
         custom_text_frame = LabelFrame(specific_actions, text="Analyse custom text")
@@ -253,6 +309,11 @@ class Application(Frame):
                 self._create_viewer_panel(self.display, result)
 
         Button(custom_text_frame, text="Analyse text", command=text_analysis).grid(padx=5, pady=5)
+
+        ToolTip(custom_text_frame,
+                text="Will analyse and predict the sentiment of the text.\nIt will open another tab to visualize the "
+                     "result")
+
         custom_text_frame.grid(column=0, row=0, padx=10, pady=10)
 
         # ---------- Submit custom text/csv file -------------
@@ -264,8 +325,16 @@ class Application(Frame):
             result = analyse_file(open(file_name, "rb").readlines(), self._get_classifier(), self.Resource)
             self._create_viewer_panel(self.display, result)
 
-        Button(custom_file_frame, text="Open file & Analyse", command=ask_file).grid(padx=5, pady=5)
-        custom_file_frame.grid(column=1, row=0, padx=10, pady=10)
+        Label(custom_file_frame).grid(row=0, padx=5, pady=5, )
+
+        Button(custom_file_frame, text="Open file & Analyse", command=ask_file).grid(row=1, padx=5, pady=5,
+                                                                                     sticky="s")
+
+        ToolTip(custom_file_frame,
+                text="Will analyse and predict the sentiment of the file. The file is supposed to contain one tweet "
+                     "per line.\nIt will open another tab to visualize the result")
+
+        custom_file_frame.grid(column=1, row=0, padx=10, pady=10, sticky="n")
 
         # ---------- Get and analyse specific tweet -------------
         query_frame = LabelFrame(specific_actions, text="Analyse few trend tweets related topic")
@@ -294,6 +363,11 @@ class Application(Frame):
                 self._create_viewer_panel(self.display, result)
 
         Button(query_frame, text="Analyse trend", command=query_analysis).grid(padx=5, pady=5)
+
+        ToolTip(query_frame,
+                text="Will analyse and predict the sentiment of some tweets regarding the '#'.\nIt will open another "
+                     "tab to visualize the result")
+
         query_frame.grid(column=2, row=0, padx=10, pady=10)
 
         # ---------- Get and analyse 'x' tweets -------------
@@ -309,6 +383,11 @@ class Application(Frame):
             self._create_viewer_panel(self.display, result)
 
         Button(number_frame, text="Analyse 'x' tweets", command=analyse_stream_tweet).grid(padx=5, pady=5)
+
+        ToolTip(number_frame,
+                text="Will analyse and predict the sentiment of 'x' tweets from the Twitter API stream.\nIt will open "
+                     "another tab to visualize the result")
+
         number_frame.grid(column=3, row=0, padx=10, pady=10)
 
         specific_actions.grid(padx=10, pady=10)
