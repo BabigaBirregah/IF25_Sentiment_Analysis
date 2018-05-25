@@ -3,7 +3,7 @@ from numpy import array
 from Classifier.SVM import SVM
 from Classifier.features import characteristic_vector
 from Data.clean_data import clean_text
-from Data.dataset import clean_line, get_randomised_sample
+from Data.dataset import get_randomised_sample
 from Ressources.resource import Resource, get_correct_stop_word
 
 # Collect some tweets from the data set
@@ -13,7 +13,7 @@ tweets = get_randomised_sample(256)
 Resources = Resource()
 
 # Create the cleaned list of label and text contained in the collection
-clean_list_tweet = [clean_line(x) for x in tweets]
+clean_list_tweet = [x for x in tweets]
 l_label = [float(x[0]) for x in clean_list_tweet]
 l_text = [clean_text(x[1], get_correct_stop_word(Resources)) for x in clean_list_tweet]
 
@@ -34,8 +34,12 @@ Classifier = SVM()
 Classifier.fit(m_f_train, m_l_train)
 
 # Predict the labels of the testing collection
-y_predict = Classifier.predict(m_f_test)
+result = [Classifier.predict(array([x.tolist()])) for x in m_f_test]
 
 # Result of the prediction
-correct = sum(y_predict == m_l_test)
-print("{} out of {} predictions correct : {} %".format(correct, len(y_predict), correct / len(y_predict) * 100))
+correct = 0
+for idx, value in enumerate(result):
+    if result[idx] == "Positive" and m_l_test[idx] == 1.0 or result[idx] == "Negative" and m_l_test[idx] == 0.0 or \
+            result[idx] == "Neutral":
+        correct += 1
+print("{} out of {} predictions correct : {} %".format(correct, len(result), correct / len(result) * 100))

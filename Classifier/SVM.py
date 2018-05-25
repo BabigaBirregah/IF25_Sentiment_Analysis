@@ -112,7 +112,6 @@ class SVM(object):
         :return: Corresponding labels ('Negative' 'Neutral' 'Positive')
         """
         if self.weights is not None:
-            print("_project dot(features, self.weights) + self.bias", dot(features, self.weights) + self.bias)
             result = dot(features, self.weights) + self.bias
         else:
             y_predict = zeros(len(features))
