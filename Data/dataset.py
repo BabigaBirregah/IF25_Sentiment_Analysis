@@ -186,7 +186,7 @@ def get_characteristic_label_vectors(nb, randomness, pos_equal_neg, Resource, by
             global_file = file_part1.readlines() + file_part2.readlines()
             while nb_tweet < nb:
                 if randomness:
-                    label, text = clean_line(global_file.pop(randbelow(2 * NB_TWEETS_PER_FILE - nb_tweet)))
+                    label, text = clean_line(global_file.pop(randbelow(len(global_file))))
                 else:
                     label, text = clean_line(global_file.pop())
                 feature_vector = characteristic_vector(clean_text(text, get_correct_stop_word(Resource, language)),

@@ -1,4 +1,4 @@
-from numpy import dot, exp, inner, sqrt, subtract, tanh
+from numpy import exp, inner, sqrt, subtract
 from numpy.linalg import norm
 
 
@@ -16,10 +16,6 @@ class Kernel(object):
         return lambda x, y: (offset + inner(x, y)) ** dimension
 
     @staticmethod
-    def hyperbolic_tangent(kappa=0.2, c=0):
-        return lambda x, y: tanh(kappa * dot(x, y) + c)
-
-    @staticmethod
     def radial_basis(gamma=10):
         return lambda x, y: exp(-gamma * norm(subtract(x, y)))
 
@@ -31,7 +27,5 @@ class Kernel(object):
             return Kernel.poly_kernel()
         elif name == "gaussian":
             return Kernel.gaussian()
-        elif name == "hyperbolic_tangent":
-            return Kernel.hyperbolic_tangent()
         elif name == "radial_basis":
             return Kernel.radial_basis()

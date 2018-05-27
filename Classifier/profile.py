@@ -84,13 +84,13 @@ def generate_profiles(Resource, name_kernel=None, l_size=None, l_random=None, l_
             for pos_eq_neg in l_pos_eq_neg:
                 m_features, m_labels = get_characteristic_label_vectors(size_sample, randomness, pos_eq_neg, Resource,
                                                                         False, language)
-                if name_kernel is not None:
+                if type(name_kernel) is str:
                     kernel = Kernel.get_correct_kernel(name_kernel)
-                    try:
+                    create_SVM_profile(size_sample, randomness, pos_eq_neg, kernel, Resource, m_features, m_labels)
+                elif type(name_kernel) is list:
+                    for name in name_kernel:
+                        kernel = Kernel.get_correct_kernel(name)
                         create_SVM_profile(size_sample, randomness, pos_eq_neg, kernel, Resource, m_features, m_labels)
-                    except:
-                        print("fail : " + construct_name_file(size_sample, randomness, pos_eq_neg,
-                                                              str(kernel).split('.')[1]))
                 else:
                     create_SVM_profile(size_sample, randomness, pos_eq_neg, Kernel.linear(), Resource, m_features,
                                        m_labels)
@@ -98,12 +98,5 @@ def generate_profiles(Resource, name_kernel=None, l_size=None, l_random=None, l_
                                        m_labels)
                     create_SVM_profile(size_sample, randomness, pos_eq_neg, Kernel.gaussian(), Resource, m_features,
                                        m_labels)
-                    create_SVM_profile(size_sample, randomness, pos_eq_neg, Kernel.hyperbolic_tangent(), Resource,
-                                       m_features, m_labels)
                     create_SVM_profile(size_sample, randomness, pos_eq_neg, Kernel.radial_basis(), Resource, m_features,
                                        m_labels)
-
-# from Ressources.resource import Resource
-#
-# generate_profiles(Resource(), Kernel.hyperbolic_tangent())
-# generate_profiles(Resource(), Kernel.radial_basis())

@@ -161,12 +161,9 @@ class Application(Frame):
         Radiobutton(kernel_frame, text="Polynomial", variable=self.analyse_kernel, value="poly_kernel",
                     command=self._load_default_classifier).grid(column=0, row=1, padx=5, pady=5, sticky="w")
         Radiobutton(kernel_frame, text="Gaussian", variable=self.analyse_kernel, value="gaussian",
-                    command=self._load_default_classifier).grid(column=0, row=2, padx=5, pady=5, sticky="w")
-        # Radiobutton(kernel_frame, text="Hyperbolic tangent", variable=self.analyse_kernel,
-        # value="hyperbolic_tangent", command=self._load_default_classifier).grid(column=1, row=0, padx=5, pady=5,
-        # sticky="w")
-        # Radiobutton(kernel_frame, text="Radial basis", variable=self.analyse_kernel, value="radial_basis",
-        # command=self._load_default_classifier).grid(column=1, row=1, padx=5, pady=5, sticky="w")
+                    command=self._load_default_classifier).grid(column=1, row=0, padx=5, pady=5, sticky="w")
+        Radiobutton(kernel_frame, text="Radial basis", variable=self.analyse_kernel, value="radial_basis",
+                    command=self._load_default_classifier).grid(column=1, row=1, padx=5, pady=5, sticky="w")
 
         kernel_frame.grid(column=4, row=0, padx=10, pady=10)
 
@@ -227,11 +224,9 @@ class Application(Frame):
         Radiobutton(kernel_frame, text="Polynomial", variable=self.train_kernel,
                     value="poly_kernel").grid(column=0, row=1, padx=5, pady=5, sticky="w")
         Radiobutton(kernel_frame, text="Gaussian", variable=self.train_kernel,
-                    value="gaussian").grid(column=0, row=2, padx=5, pady=5, sticky="w")
-        # Radiobutton(kernel_frame, text="Hyperbolic tangent", variable=self.train_kernel,
-        # value="hyperbolic_tangent").grid(column=1, row=0, padx=5, pady=5, sticky="w")
-        # Radiobutton(kernel_frame, text="Radial basis", variable=self.train_kernel, value="radial_basis").grid(
-        # column=1, row=1, padx=5, pady=5, sticky="w")
+                    value="gaussian").grid(column=1, row=0, padx=5, pady=5, sticky="w")
+        Radiobutton(kernel_frame, text="Radial basis", variable=self.train_kernel, value="radial_basis").grid(
+                column=1, row=1, padx=5, pady=5, sticky="w")
 
         kernel_frame.grid(column=3, row=0, padx=10, pady=10)
 

@@ -1,8 +1,8 @@
 from json import dumps, loads
 
+from numpy import (arange, array, diag, dot, hstack, identity, ones, outer, ravel, vstack, zeros)
 from cvxopt import matrix
 from cvxopt.solvers import qp
-from numpy import (arange, array, diag, dot, hstack, identity, ones, outer, ravel, vstack, zeros)
 
 from Classifier.Kernel import Kernel
 from Classifier.Profile.profile_file import get_path_profile
@@ -53,7 +53,7 @@ class SVM(object):
         # 2) Resolve QP problem
         options = dict()
         options['maxiters'] = iters
-        # options['show_progress'] = False
+        options['show_progress'] = False
         solution = qp(P, q, G, h, A, b, options=options)['x']
 
         # 3) Lagrange multipliers
@@ -159,8 +159,6 @@ def get_from_file(name_file):
         kernel = Kernel.gaussian()
     elif dic_attribute["kernel"] == "poly_kernel":
         kernel = Kernel.poly_kernel()
-    elif dic_attribute["kernel"] == "hyperbolic_tangent":
-        kernel = Kernel.hyperbolic_tangent()
     else:
         kernel = Kernel.radial_basis()
 

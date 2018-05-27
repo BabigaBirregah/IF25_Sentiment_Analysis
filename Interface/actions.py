@@ -108,7 +108,7 @@ def custom_training(nb_tweet_sample, randomised, equal_pos_neg, language, name_k
     negative emoticons, stop words)
     :return:
     """
-    m_features, m_labels = get_characteristic_label_vectors(nb_tweet_sample, randomised, equal_pos_neg, Resource, True,
+    m_features, m_labels = get_characteristic_label_vectors(nb_tweet_sample, randomised, equal_pos_neg, Resource, False,
                                                             language)
 
     kernel = Kernel.get_correct_kernel(name_kernel)
