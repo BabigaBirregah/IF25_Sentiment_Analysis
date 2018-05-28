@@ -105,7 +105,7 @@ class SVM(object):
         with open(get_path_profile(name_file), 'w') as profile:
             profile.write(dumps(self.attributes()))
 
-    def predict(self, features):
+    def predict(self, features, range_neutral=0.25):
         """
         Given an array of features, predict the label of each vector
         :param features: array of features vectors
@@ -124,9 +124,9 @@ class SVM(object):
                 y_predict[i] = score
             result = y_predict + self.bias
 
-        if result < -0.25:
+        if result < - range_neutral:
             return "Negative"
-        elif result < 0.25:
+        elif result < range_neutral:
             return "Neutral"
         else:
             return "Positive"

@@ -14,10 +14,9 @@ NB_TOTAL_NEGATIVE_TWEETS = 788442
 
 def clean_line(line):
     """
+    Extract the label and the text only from a line of the data set
     The line of the sample is constructed like this :
-        Number_line,label_sentiment,Sentiment140,text_tweet
-        Number_line,label_sentiment,Kaggle,text_tweet
-    We need to extract the label and the text only
+        'Number_line,label_sentiment,Sentiment140,text_tweet' | 'Number_line,label_sentiment,Kaggle,text_tweet'
     :param line: line extracted from the data set
     :return: tuple containing the label and the text
     """

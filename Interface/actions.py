@@ -26,13 +26,15 @@ def load_classifier(size_sample, randomness, pos_eq_neg, kernel):
 
 def _minimal_analysis(text, classifier, Resource, language='en'):
     """
-
-    :param text:
-    :param classifier:
+    Analyse a simple text / tweet with the classifier and the resources provided
+    :param text: string containing the text to predict the sentiment of
+    :param classifier: SVM classifier to use to predict the sentiment
     :param Resource: class object containing all the resources (positive words, negative words, positive emoticons,
     negative emoticons, stop words)
-    :param language:
-    :return:
+    :param language: not used, choose between french and english
+        'fr' | 'en'
+    :return: sentiment label of the text
+        'Negative' | 'Neutral' | 'Positive'
     """
     list_text = clean_text(bytes(text, 'utf-8'), get_correct_stop_word(Resource, language))
     m_features = list()
@@ -42,13 +44,15 @@ def _minimal_analysis(text, classifier, Resource, language='en'):
 
 def analyse_text(custom_text, classifier, Resource, language='en'):
     """
-
-    :param custom_text:
-    :param classifier:
+    Predict the sentiment of the text
+    :param custom_text: string containg the text to analyse
+    :param classifier: SVM classifier to use to predict the sentiment
     :param Resource: class object containing all the resources (positive words, negative words, positive emoticons,
     negative emoticons, stop words)
-    :param language:
-    :return:
+    :param language: not used, choose between french and english
+        'fr' | 'en'
+    :return: list of sentiments label of the text
+        'Negative' | 'Neutral' | 'Positive'
     """
     result = _minimal_analysis(custom_text, classifier, Resource, language)
     return [(custom_text, result)]
@@ -56,13 +60,15 @@ def analyse_text(custom_text, classifier, Resource, language='en'):
 
 def analyse_file(file_content, classifier, Resource, language='en'):
     """
-
-    :param file_content:
-    :param classifier:
+    Predict the sentiment for every line, representing a text / tweet, in the file
+    :param file_content: list of text / tweet described by one line in the file
+    :param classifier: SVM classifier to use to predict the sentiment
     :param Resource: class object containing all the resources (positive words, negative words, positive emoticons,
     negative emoticons, stop words)
-    :param language:
-    :return:
+    :param language: not used, choose between french and english
+        'fr' | 'en'
+    :return: generator of sentiments label of the text
+        'Negative' | 'Neutral' | 'Positive'
     """
     for line in file_content:
         yield (line, _minimal_analysis(line, classifier, Resource, language))
@@ -70,13 +76,15 @@ def analyse_file(file_content, classifier, Resource, language='en'):
 
 def analyse_query(query, classifier, Resource, language='en'):
     """
-
-    :param query:
-    :param classifier:
+    Predict the sentiment of some trending tweets around the query
+    :param query: '#...' to look for
+    :param classifier: SVM classifier to use to predict the sentiment
     :param Resource: class object containing all the resources (positive words, negative words, positive emoticons,
     negative emoticons, stop words)
-    :param language:
-    :return:
+    :param language: not used, choose between french and english
+        'fr' | 'en'
+    :return: generator of sentiments label of the text
+        'Negative' | 'Neutral' | 'Positive'
     """
     for line in search_sample(query):
         yield (line, _minimal_analysis(line, classifier, Resource, language))
@@ -84,13 +92,15 @@ def analyse_query(query, classifier, Resource, language='en'):
 
 def analyse_tweets(nb_tweets, classifier, Resource, language='en'):
     """
-
-    :param nb_tweets:
-    :param classifier:
+    Predict the sentiment of the desired number of tweets from the Twitter stream
+    :param nb_tweets: number of tweets to collect from the Twitter stream
+    :param classifier: SVM classifier to use to predict the sentiment
     :param Resource: class object containing all the resources (positive words, negative words, positive emoticons,
     negative emoticons, stop words)
-    :param language:
-    :return:
+    :param language: not used, choose between french and english
+        'fr' | 'en'
+    :return: generator of sentiments label of the text
+        'Negative' | 'Neutral' | 'Positive'
     """
     for line in collect_tweet(nb_tweets):
         yield (line, _minimal_analysis(line, classifier, Resource, language))
@@ -98,12 +108,13 @@ def analyse_tweets(nb_tweets, classifier, Resource, language='en'):
 
 def custom_training(nb_tweet_sample, randomised, equal_pos_neg, language, name_kernel, Resource):
     """
-
-    :param nb_tweet_sample:
-    :param randomised:
-    :param equal_pos_neg:
-    :param language:
-    :param name_kernel:
+    Create a tailored SVM classifier to further use to predict
+    :param nb_tweet_sample: size of the desired characteristic vector to be used to train the classifier
+    :param randomised: boolean to get tweets randomly from the data set or use pop
+    :param equal_pos_neg: boolean to get the same amount of positive and negative tweets from the data set
+    :param language: not yet used, choose between french and english
+        'fr' | 'en'
+    :param name_kernel: name of the kernel to use to create the desired SVM classifier
     :param Resource: class object containing all the resources (positive words, negative words, positive emoticons,
     negative emoticons, stop words)
     :return:
