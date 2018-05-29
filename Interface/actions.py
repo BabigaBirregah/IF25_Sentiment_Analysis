@@ -109,21 +109,22 @@ def analyse_tweets(nb_tweets, classifier, Resource, language='en'):
 
 def _minimal_predict(Classifier, vector):
     """
-
-    :param Classifier:
-    :param vector:
-    :return:
+    Analyse one feature vector and predict the sentiment of this vector
+    :param Classifier: SVM classifier to use to predict the sentiment
+    :param vector: array containing the features (in a vector) of a corresponding tweet / text
+    :return: string containing the label of the features vector
     """
     return Classifier.predict(array([vector.tolist()]))
 
 
 def _performance(Classifier, features, labels):
     """
-
-    :param Classifier:
-    :param features:
-    :param labels:
-    :return:
+    For an array containing multiple features vector with the supposed label, compute the score (%) of the SVM
+    classifier to predict the correct label
+    :param Classifier: SVM classifier to use and measure the performance
+    :param features: array of multiple characteristic vectors
+    :param labels: array containing the labels of each characteristic vector
+    :return: float containing the score of the classifier
     """
     correct = 0
     for index, vector in enumerate(features):
@@ -136,14 +137,15 @@ def _performance(Classifier, features, labels):
 
 def _prediction(features, labels, size_sample, randomised, equal_pos_neg, name_kernel):
     """
-
-    :param features:
-    :param labels:
-    :param size_sample:
-    :param randomised:
-    :param equal_pos_neg:
-    :param name_kernel:
-    :return:
+    Generic method to compute the performance score of a designated classifier
+    :param features: array containing multiple features vectors
+    :param labels: array containing the labels of the features
+    :param size_sample: size of the sample use to build and save the SVM classifier
+    :param randomised: boolean to indicate the randomised reading of the sample use to build and save the SVM classifier
+    :param equal_pos_neg: boolean to indicate if the number of positive and negative tweets of the sample use to
+    build and save the SVM classifier
+    :param name_kernel: name of the kernel use to build and save the SVM classifier
+    :return: tuple containing the general name of the classifier and the performance score of this classifier
     """
     Classifier = load_classifier(size_sample, randomised, equal_pos_neg, name_kernel)
     name_file = str(construct_name_file(size_sample, randomised, equal_pos_neg, name_kernel).split(".json")[0])
@@ -153,15 +155,18 @@ def _prediction(features, labels, size_sample, randomised, equal_pos_neg, name_k
 def predict_test(nb_tweet_sample, Resource, size_sample=None, randomised=None, equal_pos_neg=None, name_kernel=None,
                  language='en'):
     """
-
-    :param nb_tweet_sample:
-    :param Resource:
-    :param size_sample:
-    :param randomised:
-    :param equal_pos_neg:
-    :param name_kernel:
-    :param language:
-    :return:
+    Measure the performance score for one specific classifier or all the default profiles
+    :param nb_tweet_sample: size of the sample to test against the classifier
+    :param Resource: class object containing all the resources (positive words, negative words, positive emoticons,
+    negative emoticons, stop words)
+    :param size_sample: size of the sample use to build and save the SVM classifier
+    :param randomised: boolean to indicate the randomised reading of the sample use to build and save the SVM classifier
+    :param equal_pos_neg: boolean to indicate if the number of positive and negative tweets of the sample use to
+    build and save the SVM classifier
+    :param name_kernel: name of the kernel use to build and save the SVM classifier
+    :param language: not used, choose between english and french
+        'en' | 'fr'
+    :return: generator containing tuples of the name of the classifier and its performance score
     """
     m_features, m_labels = get_characteristic_label_vectors(nb_tweet_sample, randomised, equal_pos_neg, Resource, False,
                                                             language)
