@@ -126,7 +126,7 @@ class SVM(object):
 
         if result < - range_neutral:
             return "Negative"
-        elif result < range_neutral:
+        elif result <= range_neutral:
             return "Neutral"
         else:
             return "Positive"

@@ -3,6 +3,30 @@ from Classifier.SVM import SVM
 from Data.dataset import get_characteristic_label_vectors
 
 
+def readable_name_classifier(name_file):
+    """
+
+    :param name_file:
+    :return:
+    """
+    try:
+        size, randomness, pos_equal_neg, kernel = name_file.split('_')
+    except:
+        size, randomness, pos_equal_neg, kernel, poly = name_file.split('_')
+        kernel = kernel + '-' + poly
+    classifier_name = str(size) + " characteristic vectors ; "
+    if randomness == "rand":
+        classifier_name += "sample read randomly ; "
+    else:
+        classifier_name += "sample read non-randomly ; "
+
+    if pos_equal_neg == "pos-neg-eq":
+        classifier_name += "number positive = number negative ; "
+    else:
+        classifier_name += "number positive != number negative ; "
+
+    return classifier_name + kernel + " kernel"
+
 def construct_name_file(size_sample, randomness, pos_equal_neg, kernel):
     """
     Build the name of the file to save the SVM classifier attributes to create a SVM classifier later

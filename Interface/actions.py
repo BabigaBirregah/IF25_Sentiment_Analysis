@@ -12,14 +12,15 @@ from Ressources.resource import get_correct_stop_word
 
 def load_classifier(size_sample, randomness, pos_eq_neg, kernel):
     """
-    Load th desired SVM classifier saved in a file
+    Load the desired SVM classifier saved in a file
     :param size_sample: size of the sample used
     :param randomness: boolean indicating the randomness of the sample
     :param pos_eq_neg: boolean indicating if the number of positive and negative features vectors is equal
     :param kernel: name of the kernel used
     :return: SVM Predictor (SVM classifier ready to predict)
     """
-    size_sample = int("".join(size_sample.split(" tweets")[0].split()))
+    if type(size_sample) is str:
+        size_sample = int("".join(size_sample.split(" tweets")[0].split()))
 
     return get_from_file(construct_name_file(size_sample, randomness, pos_eq_neg, kernel))
 
@@ -104,6 +105,75 @@ def analyse_tweets(nb_tweets, classifier, Resource, language='en'):
     """
     for line in collect_tweet(nb_tweets):
         yield (line, _minimal_analysis(line, classifier, Resource, language))
+
+
+def _minimal_predict(Classifier, vector):
+    """
+
+    :param Classifier:
+    :param vector:
+    :return:
+    """
+    return Classifier.predict(array([vector.tolist()]))
+
+
+def _performance(Classifier, features, labels):
+    """
+
+    :param Classifier:
+    :param features:
+    :param labels:
+    :return:
+    """
+    correct = 0
+    for index, vector in enumerate(features):
+        result = _minimal_predict(Classifier, vector)
+        if result == "Positive" and labels[index] == 1.0 or result == "Negative" and labels[
+            index] == 0.0 or result == "Neutral":
+            correct += 1
+    return correct / len(labels) * 100
+
+
+def _prediction(features, labels, size_sample, randomised, equal_pos_neg, name_kernel):
+    """
+
+    :param features:
+    :param labels:
+    :param size_sample:
+    :param randomised:
+    :param equal_pos_neg:
+    :param name_kernel:
+    :return:
+    """
+    Classifier = load_classifier(size_sample, randomised, equal_pos_neg, name_kernel)
+    name_file = str(construct_name_file(size_sample, randomised, equal_pos_neg, name_kernel).split(".json")[0])
+    return (name_file, _performance(Classifier, features, labels))
+
+
+def predict_test(nb_tweet_sample, Resource, size_sample=None, randomised=None, equal_pos_neg=None, name_kernel=None,
+                 language='en'):
+    """
+
+    :param nb_tweet_sample:
+    :param Resource:
+    :param size_sample:
+    :param randomised:
+    :param equal_pos_neg:
+    :param name_kernel:
+    :param language:
+    :return:
+    """
+    m_features, m_labels = get_characteristic_label_vectors(nb_tweet_sample, randomised, equal_pos_neg, Resource, False,
+                                                            language)
+
+    if name_kernel is not None:
+        yield _prediction(m_features, m_labels, size_sample, randomised, equal_pos_neg, name_kernel)
+    else:
+        for size_sample in [1000, 10000]:
+            for randomised in [True, False]:
+                for equal_pos_neg in [True, False]:
+                    for name_kernel in ["linear", "poly_kernel", "gaussian", "radial_basis"]:
+                        yield _prediction(m_features, m_labels, size_sample, randomised, equal_pos_neg, name_kernel)
 
 
 def custom_training(nb_tweet_sample, randomised, equal_pos_neg, language, name_kernel, Resource):

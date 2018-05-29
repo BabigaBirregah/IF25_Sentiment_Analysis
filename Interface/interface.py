@@ -7,9 +7,9 @@ from tkinter.filedialog import *
 from tkinter.ttk import *
 
 from Classifier.SVM import get_from_file
-from Classifier.profile import construct_name_file
+from Classifier.profile import construct_name_file, readable_name_classifier
 from Interface.actions import (analyse_file, analyse_query, analyse_text, analyse_tweets, custom_training,
-                               load_classifier)
+                               load_classifier, predict_test)
 from Ressources.resource import Resource
 
 
@@ -47,15 +47,20 @@ class Application(Frame):
         self.toggle_language = StringVar()
         self.analyse_kernel = StringVar()
         self.size_sample = StringVar()
+        self.size_sample_p = StringVar()
         self.value_submit = StringVar()
         self.user_query = StringVar()
         self.nb_tweet_collect = IntVar()
         self.nb_tweet_train = IntVar()
+        self.nb_tweet_predict = IntVar()
         self.toggle_randomness = StringVar()
         self.toggle_randomness_t = StringVar()
+        self.toggle_randomness_p = StringVar()
         self.toggle_nb_pos_neg = StringVar()
         self.toggle_nb_pos_neg_t = StringVar()
+        self.toggle_nb_pos_neg_p = StringVar()
         self.train_kernel = StringVar()
+        self.predict_kernel = StringVar()
         self.SVMClassifier = None
         self.custom_SVMClassifier = None
         self.Resource = Resource()
@@ -90,6 +95,9 @@ class Application(Frame):
         # create the tab where the user can perform another custom training
         self._create_training_panel(self.display)
 
+        # create the tab where the user can test the different profile of SVM
+        self._create_predict_panel(self.display)
+
         # create the actions that the user can trigger
         self._create_actions_panel(self.display)
 
@@ -105,7 +113,7 @@ class Application(Frame):
         self.toggle_language.set("English")
 
         Checkbutton(language_frame, textvariable=self.toggle_language, variable=self.toggle_language, onvalue="English",
-                    offvalue="Français").grid()
+                    offvalue="Français").grid(padx=5, pady=5)
 
         ToolTip(language_frame,
                 text="French here is not relevant since this application has no data set available for french, "
@@ -122,7 +130,7 @@ class Application(Frame):
         self.size_sample.set("10 000 tweets")
 
         Checkbutton(sample_frame, textvariable=self.size_sample, variable=self.size_sample, onvalue="10 000 tweets",
-                    offvalue="1 000 tweets", command=self._load_default_classifier).grid()
+                    offvalue="1 000 tweets", command=self._load_default_classifier).grid(padx=5, pady=5)
 
         sample_frame.grid(column=1, row=0, padx=10, pady=10, sticky="n")
 
@@ -250,8 +258,9 @@ class Application(Frame):
         # ---------- Save custom SVM classifier -------------
         def save_custom_SVM():
             if self.custom_SVMClassifier:
-                name_file = construct_name_file(self.nb_tweet_train.get(), self.toggle_randomness_t.get(),
-                                                self.toggle_nb_pos_neg_t.get(), self.train_kernel.get())
+                name_file = construct_name_file(self.nb_tweet_train.get(),
+                                                self.toggle_randomness_t.get() == "Randomised",
+                                                self.toggle_nb_pos_neg_t.get() == "Equal", self.train_kernel.get())
                 self.custom_SVMClassifier.save_to_file(name_file)
 
         b_frame_2 = Frame(existing_SVM_frame)
@@ -274,6 +283,118 @@ class Application(Frame):
         custom_SVM_frame.grid()
 
         display.add(fen_training, text="Training")
+
+    def _create_predict_panel(self, display):
+        fen_predict = Frame(display, name="fen_predict")
+
+        # Test  SVM classifier
+        options_frame = LabelFrame(fen_predict, text="Test SVM classifier")
+
+        # Test all SVMs classifier
+        test_all_frame = LabelFrame(options_frame, text="Test all the SVM profiles")
+
+        # ---------- Train by using 'x' tweets -------------
+        size_frame = LabelFrame(test_all_frame, text="Size of the sample to test")
+
+        self.nb_tweet_predict.set(100)
+
+        Spinbox(size_frame, from_=10, to=1000000, increment=100, textvariable=self.nb_tweet_predict,
+                justify='center').grid(column=0, row=0, padx=5, pady=5)
+
+        size_frame.grid(column=0, row=0, padx=10, pady=10, sticky="w")
+
+        # Test all SVM default profiles
+        def test_all():
+            result = predict_test(self.nb_tweet_predict.get(), self.Resource)
+            self._create_viewer_panel(self.display, result)
+
+        b_frame_1 = Frame(test_all_frame)
+        Button(b_frame_1, text="Test all SVMs", command=test_all).grid(padx=5, pady=5)
+        ToolTip(b_frame_1, text="Will test all the default SVM classifiers and measure their performances")
+        b_frame_1.grid(column=1, row=0, padx=10, pady=10)
+
+        test_all_frame.grid(padx=10, pady=10, sticky="w")
+
+        # Test a specific SVM classifier
+        specific_frame = LabelFrame(options_frame, text="Test a specific classifier")
+
+        # ---------- Train by using 'x' tweets -------------
+        size_frame = LabelFrame(specific_frame, text="Size of the sample to test")
+
+        self.nb_tweet_predict.set(100)
+
+        Spinbox(size_frame, from_=10, to=1000000, increment=100, textvariable=self.nb_tweet_predict,
+                justify='center').grid(column=0, row=0, padx=5, pady=5)
+
+        size_frame.grid(column=0, row=0, padx=10, pady=10, sticky="n")
+
+        # ---------- Choose the sample used -------------
+        sample_frame = LabelFrame(specific_frame, text="Choose the sample used")
+
+        self.size_sample_p.set("10 000 tweets")
+
+        Checkbutton(sample_frame, textvariable=self.size_sample_p, variable=self.size_sample_p, onvalue="10 000 tweets",
+                    offvalue="1 000 tweets").grid(padx=5, pady=5)
+
+        sample_frame.grid(column=1, row=0, padx=10, pady=10, sticky="n")
+
+        # ---------- Choose to use a randomised sample -------------
+        random_frame = LabelFrame(specific_frame, text="Order of tweets")
+
+        self.toggle_randomness_p.set("Randomised")
+
+        Checkbutton(random_frame, textvariable=self.toggle_randomness_p, variable=self.toggle_randomness_p,
+                    onvalue="Randomised", offvalue="Non-randomised").grid(padx=5, pady=5)
+        ToolTip(random_frame,
+                text="If the data set is read randomly or we just pop the last item to populate the sample")
+
+        random_frame.grid(column=2, row=0, padx=10, pady=10, sticky="n")
+
+        # ---------- Choose either number of positive tweets should equal negative -------------
+        nb_pos_neg_frame = LabelFrame(specific_frame, text="Number of positive and negative tweets")
+
+        self.toggle_nb_pos_neg_p.set("Equal")
+
+        Checkbutton(nb_pos_neg_frame, textvariable=self.toggle_nb_pos_neg_p, variable=self.toggle_nb_pos_neg_p,
+                    onvalue="Equal", offvalue="Non-equal").grid(padx=5, pady=5)
+        ToolTip(nb_pos_neg_frame, text="If the number of positive and negative tweets should be equal")
+
+        nb_pos_neg_frame.grid(column=3, row=0, padx=10, pady=10, sticky="n")
+
+        # ---------- Choose the kernel to use -------------
+        kernel_frame = LabelFrame(specific_frame, text="Choose the kernel to use")
+
+        self.predict_kernel.set("linear")
+
+        Radiobutton(kernel_frame, text="Linear", variable=self.predict_kernel,
+                    value="linear").grid(column=0, row=0, padx=5, pady=5, sticky="w")
+        Radiobutton(kernel_frame, text="Polynomial", variable=self.predict_kernel,
+                    value="poly_kernel").grid(column=0, row=1, padx=5, pady=5, sticky="w")
+        Radiobutton(kernel_frame, text="Gaussian", variable=self.predict_kernel,
+                    value="gaussian").grid(column=1, row=0, padx=5, pady=5, sticky="w")
+        Radiobutton(kernel_frame, text="Radial basis", variable=self.predict_kernel, value="radial_basis").grid(
+                column=1, row=1, padx=5, pady=5, sticky="w")
+
+        kernel_frame.grid(column=4, row=0, padx=10, pady=10)
+
+        # ---------- Test the desired custom SVM classifier -------------
+        def test_specific():
+            result = predict_test(self.nb_tweet_predict.get(), self.Resource, self.size_sample_p.get(),
+                                  self.toggle_randomness_p.get() == "Randomised",
+                                  self.toggle_nb_pos_neg_p.get() == "Equal", self.predict_kernel.get())
+            self._create_viewer_panel(self.display, result)
+
+        b_frame_2 = Frame(specific_frame)
+        Button(b_frame_2, text="Test a specific SVM", command=test_specific).grid()
+        ToolTip(b_frame_2, text="Will test the chosen SVM classifier and measure its performance")
+        b_frame_2.grid(column=5, row=0, padx=5, pady=5)
+
+        specific_frame.grid(padx=10, pady=10)
+
+        options_frame.grid(padx=10, pady=10)
+
+        display.add(fen_predict, text="Predict")
+
 
     def _create_actions_panel(self, display):
         fen_actions = Frame(display, name="fen_actions")
@@ -396,7 +517,7 @@ class Application(Frame):
         global_frame = Frame(display, width=900, height=600)
 
         def close_tab():
-            display.forget(self.count_visualiser + 2)
+            display.forget(self.count_visualiser + 3)
 
         Button(global_frame, command=close_tab, text="Close tab").grid()
 
@@ -407,16 +528,23 @@ class Application(Frame):
         canvas_result.create_window(0, 0, window=fen_visualiser)
 
         for idx, value in enumerate(result):
-            group_tweet = LabelFrame(fen_visualiser, text="Tweet {}".format(idx))
-            Label(group_tweet, text="Text :").grid(column=0, row=idx // 2, sticky="e")
-            Label(group_tweet, text=bytes(value[0], 'utf-8')).grid(column=1, row=idx // 2, sticky="w")
-            Label(group_tweet, text="Label :").grid(column=0, row=idx // 2 + 1, sticky="e")
-            if value[1] == "Negative":
-                Label(group_tweet, text=value[1], foreground="red").grid(column=1, row=idx // 2 + 1, sticky="w")
-            elif value[1] == "Neutral":
-                Label(group_tweet, text=value[1], foreground="gray").grid(column=1, row=idx // 2 + 1, sticky="w")
-            elif value[1] == "Positive":
-                Label(group_tweet, text=value[1], foreground="green").grid(column=1, row=idx // 2 + 1, sticky="w")
+            if value[1] in ["Negative", "Neutral", "Positive"]:
+                group_tweet = LabelFrame(fen_visualiser, text="Tweet {}".format(idx + 1))
+                Label(group_tweet, text="Text :").grid(column=0, row=idx // 2, sticky="e")
+                Label(group_tweet, text=bytes(value[0], 'utf-8')).grid(column=1, row=idx // 2, sticky="w")
+                Label(group_tweet, text="Label :").grid(column=0, row=idx // 2 + 1, sticky="e")
+                if value[1] == "Negative":
+                    Label(group_tweet, text=value[1], foreground="red").grid(column=1, row=idx // 2 + 1, sticky="w")
+                elif value[1] == "Neutral":
+                    Label(group_tweet, text=value[1], foreground="gray").grid(column=1, row=idx // 2 + 1, sticky="w")
+                elif value[1] == "Positive":
+                    Label(group_tweet, text=value[1], foreground="green").grid(column=1, row=idx // 2 + 1, sticky="w")
+            else:
+                group_tweet = LabelFrame(fen_visualiser, text="Classifier {}".format(idx + 1))
+                Label(group_tweet, text="Classifier :").grid(column=0, row=idx // 2, sticky="e")
+                Label(group_tweet, text=readable_name_classifier(value[0])).grid(column=1, row=idx // 2, sticky="w")
+                Label(group_tweet, text="Score (%) :").grid(column=0, row=idx // 2 + 1, sticky="e")
+                Label(group_tweet, text=value[1], foreground="blue").grid(column=1, row=idx // 2 + 1, sticky="w")
             group_tweet.grid(sticky="w")
 
         vertical_scrollbar = Scrollbar(global_frame, command=canvas_result.yview)
