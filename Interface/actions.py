@@ -107,17 +107,17 @@ def analyse_tweets(nb_tweets, classifier, Resource, language='en'):
         yield (line, _minimal_analysis(line, classifier, Resource, language))
 
 
-def _minimal_predict(Classifier, vector):
+def _minimal_predict(Classifier, vector, threshold):
     """
     Analyse one feature vector and predict the sentiment of this vector
     :param Classifier: SVM classifier to use to predict the sentiment
     :param vector: array containing the features (in a vector) of a corresponding tweet / text
     :return: string containing the label of the features vector
     """
-    return Classifier.predict(array([vector.tolist()]))
+    return Classifier.predict(array([vector.tolist()]), threshold)
 
 
-def _performance(Classifier, features, labels):
+def _performance(Classifier, features, labels, threshold):
     """
     For an array containing multiple features vector with the supposed label, compute the score (%) of the SVM
     classifier to predict the correct label
@@ -128,14 +128,14 @@ def _performance(Classifier, features, labels):
     """
     correct = 0
     for index, vector in enumerate(features):
-        result = _minimal_predict(Classifier, vector)
+        result = _minimal_predict(Classifier, vector, threshold)
         if result == "Positive" and labels[index] == 1.0 or result == "Negative" and labels[
             index] == 0.0 or result == "Neutral":
             correct += 1
     return correct / len(labels) * 100
 
 
-def _prediction(features, labels, size_sample, randomised, equal_pos_neg, name_kernel):
+def _prediction(features, labels, threshold, size_sample, randomised, equal_pos_neg, name_kernel):
     """
     Generic method to compute the performance score of a designated classifier
     :param features: array containing multiple features vectors
@@ -149,16 +149,18 @@ def _prediction(features, labels, size_sample, randomised, equal_pos_neg, name_k
     """
     Classifier = load_classifier(size_sample, randomised, equal_pos_neg, name_kernel)
     name_file = str(construct_name_file(size_sample, randomised, equal_pos_neg, name_kernel).split(".json")[0])
-    return (name_file, _performance(Classifier, features, labels))
+    return (name_file, _performance(Classifier, features, labels, threshold))
 
 
-def predict_test(nb_tweet_sample, Resource, size_sample=None, randomised=None, equal_pos_neg=None, name_kernel=None,
+def predict_test(nb_tweet_sample, Resource, threshold, size_sample=None, randomised=None, equal_pos_neg=None,
+                 name_kernel=None,
                  language='en'):
     """
     Measure the performance score for one specific classifier or all the default profiles
     :param nb_tweet_sample: size of the sample to test against the classifier
     :param Resource: class object containing all the resources (positive words, negative words, positive emoticons,
     negative emoticons, stop words)
+    :param threshold:
     :param size_sample: size of the sample use to build and save the SVM classifier
     :param randomised: boolean to indicate the randomised reading of the sample use to build and save the SVM classifier
     :param equal_pos_neg: boolean to indicate if the number of positive and negative tweets of the sample use to
@@ -172,13 +174,14 @@ def predict_test(nb_tweet_sample, Resource, size_sample=None, randomised=None, e
                                                             language)
 
     if name_kernel is not None:
-        yield _prediction(m_features, m_labels, size_sample, randomised, equal_pos_neg, name_kernel)
+        yield _prediction(m_features, m_labels, threshold, size_sample, randomised, equal_pos_neg, name_kernel)
     else:
         for size_sample in [1000, 10000]:
             for randomised in [True, False]:
                 for equal_pos_neg in [True, False]:
                     for name_kernel in ["linear", "poly_kernel", "gaussian", "radial_basis"]:
-                        yield _prediction(m_features, m_labels, size_sample, randomised, equal_pos_neg, name_kernel)
+                        yield _prediction(m_features, m_labels, threshold, size_sample, randomised, equal_pos_neg,
+                                          name_kernel)
 
 
 def custom_training(nb_tweet_sample, randomised, equal_pos_neg, language, name_kernel, Resource):

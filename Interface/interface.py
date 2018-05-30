@@ -53,6 +53,7 @@ class Application(Frame):
         self.nb_tweet_collect = IntVar()
         self.nb_tweet_train = IntVar()
         self.nb_tweet_predict = IntVar()
+        self.threshold_neutral = IntVar()
         self.toggle_randomness = StringVar()
         self.toggle_randomness_t = StringVar()
         self.toggle_randomness_p = StringVar()
@@ -290,43 +291,37 @@ class Application(Frame):
         # Test  SVM classifier
         options_frame = LabelFrame(fen_predict, text="Test SVM classifier")
 
-        # Test all SVMs classifier
-        test_all_frame = LabelFrame(options_frame, text="Test all the SVM profiles")
+        # For all SVMs classifier
+        for_all_frame = LabelFrame(options_frame, text="For all the SVM profiles")
 
         # ---------- Train by using 'x' tweets -------------
-        size_frame = LabelFrame(test_all_frame, text="Size of the sample to test")
+        size_frame = LabelFrame(for_all_frame, text="Size of the sample to test")
 
         self.nb_tweet_predict.set(100)
 
         Spinbox(size_frame, from_=10, to=1000000, increment=100, textvariable=self.nb_tweet_predict,
                 justify='center').grid(column=0, row=0, padx=5, pady=5)
 
-        size_frame.grid(column=0, row=0, padx=10, pady=10, sticky="w")
+        size_frame.grid(column=0, row=0, padx=10, pady=10)
 
-        # Test all SVM default profiles
-        def test_all():
-            result = predict_test(self.nb_tweet_predict.get(), self.Resource)
-            self._create_viewer_panel(self.display, result)
+        # ---------- Threshold for 'Neutral' class -------------
+        threshold_frame = LabelFrame(for_all_frame, text="Tolerance 'Neutral'")
 
-        b_frame_1 = Frame(test_all_frame)
-        Button(b_frame_1, text="Test all SVMs", command=test_all).grid(padx=5, pady=5)
-        ToolTip(b_frame_1, text="Will test all the default SVM classifiers and measure their performances")
-        b_frame_1.grid(column=1, row=0, padx=10, pady=10)
+        self.threshold_neutral.set(0.25)
 
-        test_all_frame.grid(padx=10, pady=10, sticky="w")
+        threshold_spinbox = Spinbox(threshold_frame, from_=0.0, to=0.80, increment=0.05, justify='center')
+        ToolTip(threshold_frame,
+                text="From -'x' to +'x', where 'x' is the value selected, the label of the text will be "
+                     "'Neutral'.\nIn the computation of the performance score, 'Neutral' is both considered "
+                     "'Positive' and 'Negative'")
+        threshold_spinbox.grid(column=0, row=0, padx=5, pady=5)
+
+        threshold_frame.grid(column=1, row=0, padx=10, pady=10)
+
+        for_all_frame.grid(padx=10, pady=10)
 
         # Test a specific SVM classifier
         specific_frame = LabelFrame(options_frame, text="Test a specific classifier")
-
-        # ---------- Train by using 'x' tweets -------------
-        size_frame = LabelFrame(specific_frame, text="Size of the sample to test")
-
-        self.nb_tweet_predict.set(100)
-
-        Spinbox(size_frame, from_=10, to=1000000, increment=100, textvariable=self.nb_tweet_predict,
-                justify='center').grid(column=0, row=0, padx=5, pady=5)
-
-        size_frame.grid(column=0, row=0, padx=10, pady=10, sticky="n")
 
         # ---------- Choose the sample used -------------
         sample_frame = LabelFrame(specific_frame, text="Choose the sample used")
@@ -336,7 +331,7 @@ class Application(Frame):
         Checkbutton(sample_frame, textvariable=self.size_sample_p, variable=self.size_sample_p, onvalue="10 000 tweets",
                     offvalue="1 000 tweets").grid(padx=5, pady=5)
 
-        sample_frame.grid(column=1, row=0, padx=10, pady=10, sticky="n")
+        sample_frame.grid(column=0, row=0, padx=10, pady=10, sticky="n")
 
         # ---------- Choose to use a randomised sample -------------
         random_frame = LabelFrame(specific_frame, text="Order of tweets")
@@ -348,7 +343,7 @@ class Application(Frame):
         ToolTip(random_frame,
                 text="If the data set is read randomly or we just pop the last item to populate the sample")
 
-        random_frame.grid(column=2, row=0, padx=10, pady=10, sticky="n")
+        random_frame.grid(column=1, row=0, padx=10, pady=10, sticky="n")
 
         # ---------- Choose either number of positive tweets should equal negative -------------
         nb_pos_neg_frame = LabelFrame(specific_frame, text="Number of positive and negative tweets")
@@ -359,7 +354,7 @@ class Application(Frame):
                     onvalue="Equal", offvalue="Non-equal").grid(padx=5, pady=5)
         ToolTip(nb_pos_neg_frame, text="If the number of positive and negative tweets should be equal")
 
-        nb_pos_neg_frame.grid(column=3, row=0, padx=10, pady=10, sticky="n")
+        nb_pos_neg_frame.grid(column=2, row=0, padx=10, pady=10, sticky="n")
 
         # ---------- Choose the kernel to use -------------
         kernel_frame = LabelFrame(specific_frame, text="Choose the kernel to use")
@@ -375,21 +370,36 @@ class Application(Frame):
         Radiobutton(kernel_frame, text="Radial basis", variable=self.predict_kernel, value="radial_basis").grid(
                 column=1, row=1, padx=5, pady=5, sticky="w")
 
-        kernel_frame.grid(column=4, row=0, padx=10, pady=10)
+        kernel_frame.grid(column=3, row=0, padx=10, pady=10)
 
+        specific_frame.grid(padx=10, pady=10)
+
+        # Test
+        test_frame = LabelFrame(options_frame, text="Trigger the test")
+        
         # ---------- Test the desired custom SVM classifier -------------
         def test_specific():
-            result = predict_test(self.nb_tweet_predict.get(), self.Resource, self.size_sample_p.get(),
-                                  self.toggle_randomness_p.get() == "Randomised",
+            result = predict_test(self.nb_tweet_predict.get(), self.Resource, float(threshold_spinbox.get()),
+                                  self.size_sample_p.get(), self.toggle_randomness_p.get() == "Randomised",
                                   self.toggle_nb_pos_neg_p.get() == "Equal", self.predict_kernel.get())
             self._create_viewer_panel(self.display, result)
 
-        b_frame_2 = Frame(specific_frame)
+        b_frame_2 = Frame(test_frame)
         Button(b_frame_2, text="Test a specific SVM", command=test_specific).grid()
         ToolTip(b_frame_2, text="Will test the chosen SVM classifier and measure its performance")
-        b_frame_2.grid(column=5, row=0, padx=5, pady=5)
+        b_frame_2.grid(column=0, row=0, padx=5, pady=5)
 
-        specific_frame.grid(padx=10, pady=10)
+        # Test all SVM default profiles
+        def test_all():
+            result = predict_test(self.nb_tweet_predict.get(), self.Resource, float(threshold_spinbox.get()))
+            self._create_viewer_panel(self.display, result)
+
+        b_frame_1 = Frame(test_frame)
+        Button(b_frame_1, text="Test all SVMs", command=test_all).grid(padx=5, pady=5)
+        ToolTip(b_frame_1, text="Will test all the default SVM classifiers and measure their performances")
+        b_frame_1.grid(column=1, row=0, padx=10, pady=10)
+
+        test_frame.grid(padx=10, pady=10)
 
         options_frame.grid(padx=10, pady=10)
 
