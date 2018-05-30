@@ -108,6 +108,7 @@ class SVM(object):
     def predict(self, features, range_neutral=0.25):
         """
         Given an array of features, predict the label of each vector
+        :param range_neutral: float number use to determine the range in which the label will be 'Neutral'
         :param features: array of features vectors
         :return: Corresponding labels ('Negative' 'Neutral' 'Positive')
         """

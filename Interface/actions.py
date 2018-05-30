@@ -112,6 +112,7 @@ def _minimal_predict(Classifier, vector, threshold):
     Analyse one feature vector and predict the sentiment of this vector
     :param Classifier: SVM classifier to use to predict the sentiment
     :param vector: array containing the features (in a vector) of a corresponding tweet / text
+    :param threshold: float number use to determine the range in which the label will be 'Neutral'
     :return: string containing the label of the features vector
     """
     return Classifier.predict(array([vector.tolist()]), threshold)
@@ -124,6 +125,7 @@ def _performance(Classifier, features, labels, threshold):
     :param Classifier: SVM classifier to use and measure the performance
     :param features: array of multiple characteristic vectors
     :param labels: array containing the labels of each characteristic vector
+    :param threshold: float number use to determine the range in which the label will be 'Neutral'
     :return: float containing the score of the classifier
     """
     correct = 0
@@ -140,6 +142,7 @@ def _prediction(features, labels, threshold, size_sample, randomised, equal_pos_
     Generic method to compute the performance score of a designated classifier
     :param features: array containing multiple features vectors
     :param labels: array containing the labels of the features
+    :param threshold: float number use to determine the range in which the label will be 'Neutral'
     :param size_sample: size of the sample use to build and save the SVM classifier
     :param randomised: boolean to indicate the randomised reading of the sample use to build and save the SVM classifier
     :param equal_pos_neg: boolean to indicate if the number of positive and negative tweets of the sample use to
@@ -160,7 +163,7 @@ def predict_test(nb_tweet_sample, Resource, threshold, size_sample=None, randomi
     :param nb_tweet_sample: size of the sample to test against the classifier
     :param Resource: class object containing all the resources (positive words, negative words, positive emoticons,
     negative emoticons, stop words)
-    :param threshold:
+    :param threshold: float number use to determine the range in which the label will be 'Neutral'
     :param size_sample: size of the sample use to build and save the SVM classifier
     :param randomised: boolean to indicate the randomised reading of the sample use to build and save the SVM classifier
     :param equal_pos_neg: boolean to indicate if the number of positive and negative tweets of the sample use to
