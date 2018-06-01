@@ -110,6 +110,8 @@ class SVM(object):
         Given an array of features, predict the label of each vector
         :param range_neutral: float number use to determine the range in which the label will be 'Neutral'
         :param features: array of features vectors
+        :param range_neutral: From -range_neutral to + range_neutral, the class label will be 'Neutral'. In the
+        computation of the performance score, 'Neutral' is both considered 'Positive' and 'Negative'
         :return: Corresponding labels ('Negative' 'Neutral' 'Positive')
         """
         if self.weights is not None:
