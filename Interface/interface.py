@@ -53,7 +53,6 @@ class Application(Frame):
         self.nb_tweet_collect = IntVar()
         self.nb_tweet_train = IntVar()
         self.nb_tweet_predict = IntVar()
-        self.threshold_neutral = IntVar()
         self.toggle_randomness = StringVar()
         self.toggle_randomness_t = StringVar()
         self.toggle_randomness_p = StringVar()
@@ -307,8 +306,6 @@ class Application(Frame):
         # ---------- Threshold for 'Neutral' class -------------
         threshold_frame = LabelFrame(for_all_frame, text="Tolerance 'Neutral'")
 
-        self.threshold_neutral.set(0.25)
-
         threshold_spinbox = Spinbox(threshold_frame, from_=0.0, to=0.80, increment=0.05, justify='center')
         ToolTip(threshold_frame,
                 text="From -'x' to +'x', where 'x' is the value selected, the label of the text will be "
@@ -412,6 +409,18 @@ class Application(Frame):
         # Trigger some specific actions #
         specific_actions = LabelFrame(fen_actions, text="Trigger specific analysis")
 
+        # ---------- Threshold for 'Neutral' class -------------
+        threshold_frame = LabelFrame(specific_actions, text="Tolerance 'Neutral'")
+
+        threshold_spinbox = Spinbox(threshold_frame, from_=0.0, to=0.80, increment=0.05, justify='center')
+        ToolTip(threshold_frame,
+                text="From -'x' to +'x', where 'x' is the value selected, the label of the text will be "
+                     "'Neutral'.\nIn the computation of the performance score, 'Neutral' is both considered "
+                     "'Positive' and 'Negative'")
+        threshold_spinbox.grid(column=0, row=0, padx=5, pady=5)
+
+        threshold_frame.grid(row=0, padx=10, pady=10)
+
         # ---------- Submit custom text -------------
         custom_text_frame = LabelFrame(specific_actions, text="Analyse custom text")
 
@@ -431,7 +440,8 @@ class Application(Frame):
 
         def text_analysis():
             if self.value_submit.get() != "Text to analyse":
-                result = analyse_text(self.value_submit.get(), self._get_classifier(), self.Resource)
+                result = analyse_text(self.value_submit.get(), self._get_classifier(), self.Resource,
+                                      float(threshold_spinbox.get()))
                 self._create_viewer_panel(self.display, result)
 
         Button(custom_text_frame, text="Analyse text", command=text_analysis).grid(padx=5, pady=5)
@@ -440,7 +450,7 @@ class Application(Frame):
                 text="Will analyse and predict the sentiment of the text.\nIt will open another tab to visualize the "
                      "result")
 
-        custom_text_frame.grid(column=0, row=0, padx=10, pady=10)
+        custom_text_frame.grid(column=0, row=1, padx=10, pady=10)
 
         # ---------- Submit custom text/csv file -------------
         custom_file_frame = LabelFrame(specific_actions, text="Analyse custom file")
@@ -448,7 +458,8 @@ class Application(Frame):
         def ask_file():
             file_name = askopenfile(title="Open file of tweets",
                                     filetypes=[('txt files', '.txt'), ('csv files', '.csv')])
-            result = analyse_file(open(file_name, "rb").readlines(), self._get_classifier(), self.Resource)
+            result = analyse_file(open(file_name, "rb").readlines(), self._get_classifier(), self.Resource,
+                                  float(threshold_spinbox.get()))
             self._create_viewer_panel(self.display, result)
 
         Label(custom_file_frame).grid(row=0, padx=5, pady=5, )
@@ -460,7 +471,7 @@ class Application(Frame):
                 text="Will analyse and predict the sentiment of the file. The file is supposed to contain one tweet "
                      "per line.\nIt will open another tab to visualize the result")
 
-        custom_file_frame.grid(column=1, row=0, padx=10, pady=10, sticky="n")
+        custom_file_frame.grid(column=1, row=1, padx=10, pady=10, sticky="n")
 
         # ---------- Get and analyse specific tweet -------------
         query_frame = LabelFrame(specific_actions, text="Analyse few trend tweets related topic")
@@ -482,10 +493,12 @@ class Application(Frame):
 
         def query_analysis():
             if self.user_query.get() != "'#ITAR'" and '#' in self.user_query.get():
-                result = analyse_query(self.user_query.get(), self._get_classifier(), self.Resource)
+                result = analyse_query(self.user_query.get(), self._get_classifier(), self.Resource,
+                                       float(threshold_spinbox.get()))
                 self._create_viewer_panel(self.display, result)
             elif self.user_query.get() != "'#ITAR'":
-                result = analyse_query('#' + self.user_query.get(), self._get_classifier(), self.Resource)
+                result = analyse_query('#' + self.user_query.get(), self._get_classifier(), self.Resource,
+                                       float(threshold_spinbox.get()))
                 self._create_viewer_panel(self.display, result)
 
         Button(query_frame, text="Analyse trend", command=query_analysis).grid(padx=5, pady=5)
@@ -494,7 +507,7 @@ class Application(Frame):
                 text="Will analyse and predict the sentiment of some tweets regarding the '#'.\nIt will open another "
                      "tab to visualize the result")
 
-        query_frame.grid(column=2, row=0, padx=10, pady=10)
+        query_frame.grid(column=2, row=1, padx=10, pady=10)
 
         # ---------- Get and analyse 'x' tweets -------------
         number_frame = LabelFrame(specific_actions, text="Collect and analyse 'x' tweets")
@@ -505,7 +518,8 @@ class Application(Frame):
                 padx=5, pady=5)
 
         def analyse_stream_tweet():
-            result = analyse_tweets(self.nb_tweet_collect.get(), self._get_classifier(), self.Resource)
+            result = analyse_tweets(self.nb_tweet_collect.get(), self._get_classifier(), self.Resource,
+                                    float(threshold_spinbox.get()))
             self._create_viewer_panel(self.display, result)
 
         Button(number_frame, text="Analyse 'x' tweets", command=analyse_stream_tweet).grid(padx=5, pady=5)
@@ -514,7 +528,7 @@ class Application(Frame):
                 text="Will analyse and predict the sentiment of 'x' tweets from the Twitter API stream.\nIt will open "
                      "another tab to visualize the result")
 
-        number_frame.grid(column=3, row=0, padx=10, pady=10)
+        number_frame.grid(column=3, row=1, padx=10, pady=10)
 
         specific_actions.grid(padx=10, pady=10)
 

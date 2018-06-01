@@ -25,7 +25,7 @@ def load_classifier(size_sample, randomness, pos_eq_neg, kernel):
     return get_from_file(construct_name_file(size_sample, randomness, pos_eq_neg, kernel))
 
 
-def _minimal_analysis(text, classifier, Resource, language='en'):
+def _minimal_analysis(text, classifier, Resource, threshold, language='en'):
     """
     Analyse a simple text / tweet with the classifier and the resources provided
     :param text: string containing the text to predict the sentiment of
@@ -40,10 +40,10 @@ def _minimal_analysis(text, classifier, Resource, language='en'):
     list_text = clean_text(bytes(text, 'utf-8'), get_correct_stop_word(Resource, language))
     m_features = list()
     m_features.append(characteristic_vector(list_text, Resource))
-    return classifier.predict(array(m_features))
+    return classifier.predict(array(m_features), threshold)
 
 
-def analyse_text(custom_text, classifier, Resource, language='en'):
+def analyse_text(custom_text, classifier, Resource, threshold, language='en'):
     """
     Predict the sentiment of the text
     :param custom_text: string containg the text to analyse
@@ -55,11 +55,11 @@ def analyse_text(custom_text, classifier, Resource, language='en'):
     :return: list of sentiments label of the text
         'Negative' | 'Neutral' | 'Positive'
     """
-    result = _minimal_analysis(custom_text, classifier, Resource, language)
+    result = _minimal_analysis(custom_text, classifier, Resource, threshold, language)
     return [(custom_text, result)]
 
 
-def analyse_file(file_content, classifier, Resource, language='en'):
+def analyse_file(file_content, classifier, Resource, threshold, language='en'):
     """
     Predict the sentiment for every line, representing a text / tweet, in the file
     :param file_content: list of text / tweet described by one line in the file
@@ -72,10 +72,10 @@ def analyse_file(file_content, classifier, Resource, language='en'):
         'Negative' | 'Neutral' | 'Positive'
     """
     for line in file_content:
-        yield (line, _minimal_analysis(line, classifier, Resource, language))
+        yield (line, _minimal_analysis(line, classifier, Resource, threshold, language))
 
 
-def analyse_query(query, classifier, Resource, language='en'):
+def analyse_query(query, classifier, Resource, threshold, language='en'):
     """
     Predict the sentiment of some trending tweets around the query
     :param query: '#...' to look for
@@ -88,10 +88,10 @@ def analyse_query(query, classifier, Resource, language='en'):
         'Negative' | 'Neutral' | 'Positive'
     """
     for line in search_sample(query):
-        yield (line, _minimal_analysis(line, classifier, Resource, language))
+        yield (line, _minimal_analysis(line, classifier, Resource, threshold, language))
 
 
-def analyse_tweets(nb_tweets, classifier, Resource, language='en'):
+def analyse_tweets(nb_tweets, classifier, Resource, threshold, language='en'):
     """
     Predict the sentiment of the desired number of tweets from the Twitter stream
     :param nb_tweets: number of tweets to collect from the Twitter stream
@@ -104,7 +104,7 @@ def analyse_tweets(nb_tweets, classifier, Resource, language='en'):
         'Negative' | 'Neutral' | 'Positive'
     """
     for line in collect_tweet(nb_tweets):
-        yield (line, _minimal_analysis(line, classifier, Resource, language))
+        yield (line, _minimal_analysis(line, classifier, Resource, threshold, language))
 
 
 def _minimal_predict(Classifier, vector, threshold):
