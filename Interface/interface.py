@@ -8,6 +8,8 @@ from tkinter.ttk import *
 
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from mpl_toolkits.mplot3d import Axes3D
+from numpy.random import randint
 
 from functools import partial
 
@@ -605,31 +607,63 @@ class Application(Frame):
         # ---------- Creating the graphic view -------------
         self.graphic_frame = Frame(global_frame, width=900, height=600)
 
+        self.fig = Figure(figsize=(11, 7), dpi=96, tight_layout=True)
+
         if result[0][1][0] not in ["Negative", "Neutral", "Positive"]:
-            fig = Figure(figsize=(11, 7), dpi=96, tight_layout=True)
-            ax = fig.add_subplot(111)
+            ax = self.fig.add_subplot(111)
             ax.grid(True)
 
             for idx, value in enumerate(result):
                 ax.barh(value[0], value[1])
                 ax.text(value[1], idx, str(value[1]))
-            graph = FigureCanvasTkAgg(fig, self.graphic_frame)
+            graph = FigureCanvasTkAgg(self.fig, self.graphic_frame)
             canvas = graph.get_tk_widget()
             canvas.grid()
 
         else:
-            select_frame = LabelFrame(self.graphic_frame, text="Select 3 variables")
-
             def create_graphic(result, dic):
-                x, y, z = list(), list(), list()
-                result = [x[1] for x in result]
+                try:
+                    self.canvas.grid_forget()
+                except:
+                    pass
+
+                labels, vectors, graph_values = list(), list(), list()
+                for element in result:
+                    labels.append(element[1][0])
+                    vectors.append(element[1][1][0])
+                for index, key in enumerate(dic):
+                    if key is not "count":
+                        if dic[key].get():
+                            graph_values.append([t[index] for t in vectors])
+
                 if dic["count"] == 2:
-                    if dict_variable["pos_word"]:
-                        print(result)
-                        x = [x[1][0] for x in result]
-                        print(x)
-                    if dic["count"] == 3:
-                        pass
+                    ax = self.fig.add_subplot(111)
+                    for index, label in enumerate(labels):
+                        if label == "Negative":
+                            color = "red"
+                        elif label == "Positive":
+                            color = "green"
+                        else:
+                            color = "gray"
+                        ax.scatter(graph_values[0][index], graph_values[1][index], s=randint(50, 1000), c=color,
+                                   alpha=0.3)
+                else:
+                    ax = self.fig.add_subplot(111, projection="3d")
+                    for index, label in enumerate(labels):
+                        if label == "Negative":
+                            color = "red"
+                        elif label == "Positive":
+                            color = "green"
+                        else:
+                            color = "gray"
+                        ax.scatter(graph_values[0][index], graph_values[1][index], graph_values[2][index],
+                                   s=randint(50, 1000), c=color, alpha=0.3)
+                ax.set_xlabel("X")
+                ax.set_ylabel("Y")
+                graph = FigureCanvasTkAgg(self.fig, self.graphic_frame)
+                self.canvas = graph.get_tk_widget()
+                self.canvas.grid()
+
 
             def select_variable(value, dic, result):
                 if value.get() and dic["count"] == 3:
@@ -639,15 +673,17 @@ class Application(Frame):
                 else:
                     dic["count"] -= 1
 
-                create_graphic(result, dic)
+                if 2 <= dic["count"] <= 3:
+                    create_graphic(result, dic)
 
+            select_frame = LabelFrame(self.graphic_frame, text="Select 3 variables")
             dict_variable = {
-                "pos_word"    : IntVar(),
-                "neg_word"    : IntVar(),
+                "pos_word":     IntVar(),
+                "neg_word":     IntVar(),
                 "pos_emoticon": IntVar(),
                 "neg_emoticon": IntVar(),
-                "negation"    : IntVar(),
-                "count"       : 0
+                "negation":     IntVar(),
+                "count":        0
             }
             dict_variable["pos_word"].set(1)
             dict_variable["count"] += 1
@@ -672,7 +708,20 @@ class Application(Frame):
             Checkbutton(select_frame, text="Negation",
                         command=partial(select_variable, dict_variable["negation"], dict_variable, result),
                         variable=dict_variable["negation"]).grid(row=0, column=4, padx=5, pady=5)
-            select_frame.grid()
+
+            select_frame.grid(padx=10, pady=10)
+
+            legend_frame = LabelFrame(self.graphic_frame, text="Legend about color")
+            Label(legend_frame, background="red", width=3).grid(row=0, column=0, padx=5, pady=5)
+            Label(legend_frame, text="Negative").grid(row=0, column=1, padx=5, pady=5)
+            Label(legend_frame, background="gray", width=3).grid(row=0, column=2, padx=5, pady=5)
+            Label(legend_frame, text="Neutral").grid(row=0, column=3, padx=5, pady=5)
+            Label(legend_frame, background="green", width=3).grid(row=0, column=4, padx=5, pady=5)
+            Label(legend_frame, text="Positive").grid(row=0, column=5, padx=5, pady=5)
+
+            legend_frame.grid(padx=10, pady=10)
+
+            create_graphic(result, dict_variable)
 
         # ---------- Action to change the view and close tab -------------
         action_frame = LabelFrame(global_frame, text="Tab actions")
@@ -687,8 +736,8 @@ class Application(Frame):
                 self.list_frame.grid_forget()
                 self.graphic_frame.grid()
 
-        Checkbutton(action_frame, textvariable=self.active_view, variable=self.active_view, onvalue="List view",
-                    offvalue="Graphic vew", command=activate_view).grid(column=0, row=0, padx=5, pady=5)
+        Checkbutton(action_frame, textvariable=self.active_view, variable=self.active_view, onvalue="Graphic view",
+                    offvalue="List vew", command=activate_view).grid(column=0, row=0, padx=5, pady=5)
 
         def close_tab():
             display.forget(self.count_visualiser + 3)
