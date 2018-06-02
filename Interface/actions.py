@@ -42,7 +42,7 @@ def _minimal_analysis(text, classifier, Resource, threshold, language='en'):
     list_text = clean_text(bytes(text, 'utf-8'), get_correct_stop_word(Resource, language))
     m_features = list()
     m_features.append(characteristic_vector(list_text, Resource))
-    return classifier.predict(array(m_features), threshold)
+    return classifier.predict(array(m_features), threshold), m_features
 
 
 def analyse_text(custom_text, classifier, Resource, threshold, language='en'):
@@ -59,8 +59,7 @@ def analyse_text(custom_text, classifier, Resource, threshold, language='en'):
     :return: list of sentiments label of the text
         'Negative' | 'Neutral' | 'Positive'
     """
-    result = _minimal_analysis(custom_text, classifier, Resource, threshold, language)
-    return [(custom_text, result)]
+    return [(custom_text, _minimal_analysis(custom_text, classifier, Resource, threshold, language))]
 
 
 def analyse_file(file_content, classifier, Resource, threshold, language='en'):
@@ -77,8 +76,7 @@ def analyse_file(file_content, classifier, Resource, threshold, language='en'):
     :return: generator of sentiments label of the text
         'Negative' | 'Neutral' | 'Positive'
     """
-    for line in file_content:
-        yield (line, _minimal_analysis(line, classifier, Resource, threshold, language))
+    return [(line, _minimal_analysis(line, classifier, Resource, threshold, language)) for line in file_content]
 
 
 def analyse_query(query, classifier, Resource, threshold, language='en'):
@@ -95,8 +93,7 @@ def analyse_query(query, classifier, Resource, threshold, language='en'):
     :return: generator of sentiments label of the text
         'Negative' | 'Neutral' | 'Positive'
     """
-    for line in search_sample(query):
-        yield (line, _minimal_analysis(line, classifier, Resource, threshold, language))
+    return [(line, _minimal_analysis(line, classifier, Resource, threshold, language)) for line in search_sample(query)]
 
 
 def analyse_tweets(nb_tweets, classifier, Resource, threshold, language='en'):
@@ -113,8 +110,8 @@ def analyse_tweets(nb_tweets, classifier, Resource, threshold, language='en'):
     :return: generator of sentiments label of the text
         'Negative' | 'Neutral' | 'Positive'
     """
-    for line in collect_tweet(nb_tweets):
-        yield (line, _minimal_analysis(line, classifier, Resource, threshold, language))
+    return [(line, _minimal_analysis(line, classifier, Resource, threshold, language)) for line in
+            collect_tweet(nb_tweets)]
 
 
 def _minimal_predict(Classifier, vector, threshold):
@@ -165,7 +162,7 @@ def _prediction(features, labels, threshold, size_sample, randomised, equal_pos_
     """
     Classifier = load_classifier(size_sample, randomised, equal_pos_neg, name_kernel)
     name_file = str(construct_name_file(size_sample, randomised, equal_pos_neg, name_kernel).split(".json")[0])
-    return (name_file, _performance(Classifier, features, labels, threshold))
+    return name_file, _performance(Classifier, features, labels, threshold)
 
 
 def predict_test(nb_tweet_sample, Resource, threshold, size_sample=None, randomised=None, equal_pos_neg=None,
@@ -190,15 +187,18 @@ def predict_test(nb_tweet_sample, Resource, threshold, size_sample=None, randomi
     m_features, m_labels = get_characteristic_label_vectors(nb_tweet_sample, randomised, equal_pos_neg, Resource, False,
                                                             language)
 
+    result = list()
     if name_kernel is not None:
-        yield _prediction(m_features, m_labels, threshold, size_sample, randomised, equal_pos_neg, name_kernel)
+        result.append(_prediction(m_features, m_labels, threshold, size_sample, randomised, equal_pos_neg, name_kernel))
     else:
         for size_sample in [1000, 10000]:
             for randomised in [True, False]:
                 for equal_pos_neg in [True, False]:
                     for name_kernel in ["linear", "poly_kernel", "gaussian", "radial_basis"]:
-                        yield _prediction(m_features, m_labels, threshold, size_sample, randomised, equal_pos_neg,
-                                          name_kernel)
+                        result.append(
+                            _prediction(m_features, m_labels, threshold, size_sample, randomised, equal_pos_neg,
+                                        name_kernel))
+    return result
 
 
 def custom_training(nb_tweet_sample, randomised, equal_pos_neg, language, name_kernel, Resource):

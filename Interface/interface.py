@@ -6,6 +6,11 @@
 from tkinter.filedialog import *
 from tkinter.ttk import *
 
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+
+from functools import partial
+
 from Classifier.SVM import get_from_file
 from Classifier.profile import construct_name_file, readable_name_classifier
 from Interface.actions import (analyse_file, analyse_query, analyse_text, analyse_tweets, custom_training,
@@ -65,6 +70,7 @@ class Application(Frame):
         self.custom_SVMClassifier = None
         self.Resource = Resource()
         self.count_visualiser = 0
+        self.active_view = StringVar()
 
         # Populate the window
         self._create_widgets()
@@ -306,7 +312,10 @@ class Application(Frame):
         # ---------- Threshold for 'Neutral' class -------------
         threshold_frame = LabelFrame(for_all_frame, text="Tolerance 'Neutral'")
 
-        threshold_spinbox = Spinbox(threshold_frame, from_=0.0, to=0.80, increment=0.05, justify='center')
+        default_value = StringVar()
+        default_value.set("0.25")
+        threshold_spinbox = Spinbox(threshold_frame, from_=0.0, to=0.80, increment=0.05, justify='center',
+                                    textvariable=default_value)
         ToolTip(threshold_frame,
                 text="From -'x' to +'x', where 'x' is the value selected, the label of the text will be "
                      "'Neutral'.\nIn the computation of the performance score, 'Neutral' is both considered "
@@ -384,7 +393,7 @@ class Application(Frame):
         b_frame_2 = Frame(test_frame)
         Button(b_frame_2, text="Test a specific SVM", command=test_specific).grid()
         ToolTip(b_frame_2, text="Will test the chosen SVM classifier and measure its performance")
-        b_frame_2.grid(column=0, row=0, padx=5, pady=5)
+        b_frame_2.grid(column=0, row=0, padx=10, pady=10)
 
         # Test all SVM default profiles
         def test_all():
@@ -392,7 +401,7 @@ class Application(Frame):
             self._create_viewer_panel(self.display, result)
 
         b_frame_1 = Frame(test_frame)
-        Button(b_frame_1, text="Test all SVMs", command=test_all).grid(padx=5, pady=5)
+        Button(b_frame_1, text="Test all SVMs", command=test_all).grid()
         ToolTip(b_frame_1, text="Will test all the default SVM classifiers and measure their performances")
         b_frame_1.grid(column=1, row=0, padx=10, pady=10)
 
@@ -412,7 +421,10 @@ class Application(Frame):
         # ---------- Threshold for 'Neutral' class -------------
         threshold_frame = LabelFrame(specific_actions, text="Tolerance 'Neutral'")
 
-        threshold_spinbox = Spinbox(threshold_frame, from_=0.0, to=0.80, increment=0.05, justify='center')
+        default_value = StringVar()
+        default_value.set("0.25")
+        threshold_spinbox = Spinbox(threshold_frame, from_=0.0, to=0.80, increment=0.05, justify='center',
+                                    textvariable=default_value)
         ToolTip(threshold_frame,
                 text="From -'x' to +'x', where 'x' is the value selected, the label of the text will be "
                      "'Neutral'.\nIn the computation of the performance score, 'Neutral' is both considered "
@@ -444,11 +456,13 @@ class Application(Frame):
                                       float(threshold_spinbox.get()))
                 self._create_viewer_panel(self.display, result)
 
-        Button(custom_text_frame, text="Analyse text", command=text_analysis).grid(padx=5, pady=5)
+        b_frame_1 = Frame(custom_text_frame)
+        Button(b_frame_1, text="Analyse text", command=text_analysis).grid()
 
-        ToolTip(custom_text_frame,
+        ToolTip(b_frame_1,
                 text="Will analyse and predict the sentiment of the text.\nIt will open another tab to visualize the "
                      "result")
+        b_frame_1.grid()
 
         custom_text_frame.grid(column=0, row=1, padx=10, pady=10)
 
@@ -464,12 +478,13 @@ class Application(Frame):
 
         Label(custom_file_frame).grid(row=0, padx=5, pady=5, )
 
-        Button(custom_file_frame, text="Open file & Analyse", command=ask_file).grid(row=1, padx=5, pady=5,
-                                                                                     sticky="s")
+        b_frame_2 = Frame(custom_file_frame)
+        Button(b_frame_2, text="Open file & Analyse", command=ask_file).grid(row=1, sticky="s")
 
-        ToolTip(custom_file_frame,
+        ToolTip(b_frame_2,
                 text="Will analyse and predict the sentiment of the file. The file is supposed to contain one tweet "
                      "per line.\nIt will open another tab to visualize the result")
+        b_frame_2.grid()
 
         custom_file_frame.grid(column=1, row=1, padx=10, pady=10, sticky="n")
 
@@ -501,11 +516,12 @@ class Application(Frame):
                                        float(threshold_spinbox.get()))
                 self._create_viewer_panel(self.display, result)
 
-        Button(query_frame, text="Analyse trend", command=query_analysis).grid(padx=5, pady=5)
-
-        ToolTip(query_frame,
+        b_frame_3 = Frame(query_frame)
+        Button(b_frame_3, text="Analyse trend", command=query_analysis).grid()
+        ToolTip(b_frame_3,
                 text="Will analyse and predict the sentiment of some tweets regarding the '#'.\nIt will open another "
                      "tab to visualize the result")
+        b_frame_3.grid()
 
         query_frame.grid(column=2, row=1, padx=10, pady=10)
 
@@ -522,11 +538,12 @@ class Application(Frame):
                                     float(threshold_spinbox.get()))
             self._create_viewer_panel(self.display, result)
 
-        Button(number_frame, text="Analyse 'x' tweets", command=analyse_stream_tweet).grid(padx=5, pady=5)
-
-        ToolTip(number_frame,
+        b_frame_4 = Frame(number_frame)
+        Button(b_frame_4, text="Analyse 'x' tweets", command=analyse_stream_tweet).grid()
+        ToolTip(b_frame_4,
                 text="Will analyse and predict the sentiment of 'x' tweets from the Twitter API stream.\nIt will open "
                      "another tab to visualize the result")
+        b_frame_4.grid()
 
         number_frame.grid(column=3, row=1, padx=10, pady=10)
 
@@ -538,31 +555,31 @@ class Application(Frame):
         self.count_visualiser += 1
         name_viewer = "fen_visualiser_{}".format(self.count_visualiser)
 
-        global_frame = Frame(display, width=900, height=600)
+        # Frame that contain everything #
+        global_frame = Frame(display)
 
-        def close_tab():
-            display.forget(self.count_visualiser + 3)
+        # ---------- Creating the list view -------------
+        self.list_frame = Frame(global_frame, width=900, height=600)
 
-        Button(global_frame, command=close_tab, text="Close tab").grid()
-
-        canvas_result = Canvas(global_frame, width=900, height=600)
+        canvas_result = Canvas(self.list_frame, width=900, height=600)
         canvas_result.grid(row=1, column=0, sticky="nsew")
 
         fen_visualiser = Frame(canvas_result, name=name_viewer)
         canvas_result.create_window(0, 0, window=fen_visualiser)
 
         for idx, value in enumerate(result):
-            if value[1] in ["Negative", "Neutral", "Positive"]:
+            if value[1][0] in ["Negative", "Neutral", "Positive"]:
                 group_tweet = LabelFrame(fen_visualiser, text="Tweet {}".format(idx + 1))
                 Label(group_tweet, text="Text :").grid(column=0, row=idx // 2, sticky="e")
                 Label(group_tweet, text=bytes(value[0], 'utf-8')).grid(column=1, row=idx // 2, sticky="w")
                 Label(group_tweet, text="Label :").grid(column=0, row=idx // 2 + 1, sticky="e")
-                if value[1] == "Negative":
-                    Label(group_tweet, text=value[1], foreground="red").grid(column=1, row=idx // 2 + 1, sticky="w")
-                elif value[1] == "Neutral":
-                    Label(group_tweet, text=value[1], foreground="gray").grid(column=1, row=idx // 2 + 1, sticky="w")
-                elif value[1] == "Positive":
-                    Label(group_tweet, text=value[1], foreground="green").grid(column=1, row=idx // 2 + 1, sticky="w")
+                if value[1][0] == "Negative":
+                    Label(group_tweet, text=value[1][0], foreground="red").grid(column=1, row=idx // 2 + 1, sticky="w")
+                elif value[1][0] == "Neutral":
+                    Label(group_tweet, text=value[1][0], foreground="gray").grid(column=1, row=idx // 2 + 1, sticky="w")
+                elif value[1][0] == "Positive":
+                    Label(group_tweet, text=value[1][0], foreground="green").grid(column=1, row=idx // 2 + 1,
+                                                                                  sticky="w")
             else:
                 group_tweet = LabelFrame(fen_visualiser, text="Classifier {}".format(idx + 1))
                 Label(group_tweet, text="Classifier :").grid(column=0, row=idx // 2, sticky="e")
@@ -571,10 +588,10 @@ class Application(Frame):
                 Label(group_tweet, text=value[1], foreground="blue").grid(column=1, row=idx // 2 + 1, sticky="w")
             group_tweet.grid(sticky="w")
 
-        vertical_scrollbar = Scrollbar(global_frame, command=canvas_result.yview)
+        vertical_scrollbar = Scrollbar(self.list_frame, command=canvas_result.yview)
         canvas_result.configure(yscrollcommand=vertical_scrollbar.set)
 
-        horizontal_scrollbar = Scrollbar(global_frame, orient=HORIZONTAL, command=canvas_result.xview)
+        horizontal_scrollbar = Scrollbar(self.list_frame, orient=HORIZONTAL, command=canvas_result.xview)
         canvas_result.configure(xscrollcommand=horizontal_scrollbar.set)
 
         vertical_scrollbar.grid(row=1, column=1, sticky="ns")
@@ -584,5 +601,103 @@ class Application(Frame):
             canvas_result.configure(scrollregion=canvas_result.bbox("all"))
 
         fen_visualiser.bind("<Configure>", update_scroll_region)
+
+        # ---------- Creating the graphic view -------------
+        self.graphic_frame = Frame(global_frame, width=900, height=600)
+
+        if result[0][1][0] not in ["Negative", "Neutral", "Positive"]:
+            fig = Figure(figsize=(11, 7), dpi=96, tight_layout=True)
+            ax = fig.add_subplot(111)
+            ax.grid(True)
+
+            for idx, value in enumerate(result):
+                ax.barh(value[0], value[1])
+                ax.text(value[1], idx, str(value[1]))
+            graph = FigureCanvasTkAgg(fig, self.graphic_frame)
+            canvas = graph.get_tk_widget()
+            canvas.grid()
+
+        else:
+            select_frame = LabelFrame(self.graphic_frame, text="Select 3 variables")
+
+            def create_graphic(result, dic):
+                x, y, z = list(), list(), list()
+                result = [x[1] for x in result]
+                if dic["count"] == 2:
+                    if dict_variable["pos_word"]:
+                        print(result)
+                        x = [x[1][0] for x in result]
+                        print(x)
+                    if dic["count"] == 3:
+                        pass
+
+            def select_variable(value, dic, result):
+                if value.get() and dic["count"] == 3:
+                    value.set(0)
+                elif value.get() and dic["count"] < 3:
+                    dic["count"] += 1
+                else:
+                    dic["count"] -= 1
+
+                create_graphic(result, dic)
+
+            dict_variable = {
+                "pos_word"    : IntVar(),
+                "neg_word"    : IntVar(),
+                "pos_emoticon": IntVar(),
+                "neg_emoticon": IntVar(),
+                "negation"    : IntVar(),
+                "count"       : 0
+            }
+            dict_variable["pos_word"].set(1)
+            dict_variable["count"] += 1
+            Checkbutton(select_frame, text="Positive Words",
+                        command=partial(select_variable, dict_variable["pos_word"], dict_variable, result),
+                        variable=dict_variable["pos_word"]).grid(row=0, column=0, padx=5, pady=5)
+            dict_variable["neg_word"].set(0)
+            Checkbutton(select_frame, text="Negative Words",
+                        command=partial(select_variable, dict_variable["neg_word"], dict_variable, result),
+                        variable=dict_variable["neg_word"]).grid(row=0, column=1, padx=5, pady=5)
+            dict_variable["pos_emoticon"].set(1)
+            dict_variable["count"] += 1
+            Checkbutton(select_frame, text="Positive Emoticons",
+                        command=partial(select_variable, dict_variable["pos_emoticon"], dict_variable, result),
+                        variable=dict_variable["pos_emoticon"]).grid(row=0, column=2, padx=5, pady=5)
+            dict_variable["neg_emoticon"].set(0)
+            Checkbutton(select_frame, text="Negative Emoticons",
+                        command=partial(select_variable, dict_variable["neg_emoticon"], dict_variable, result),
+                        variable=dict_variable["neg_emoticon"]).grid(row=0, column=3, padx=5, pady=5)
+            dict_variable["negation"].set(1)
+            dict_variable["count"] += 1
+            Checkbutton(select_frame, text="Negation",
+                        command=partial(select_variable, dict_variable["negation"], dict_variable, result),
+                        variable=dict_variable["negation"]).grid(row=0, column=4, padx=5, pady=5)
+            select_frame.grid()
+
+        # ---------- Action to change the view and close tab -------------
+        action_frame = LabelFrame(global_frame, text="Tab actions")
+
+        self.active_view.set("Graphic view")
+
+        def activate_view():
+            if self.active_view.get() == "List view":
+                self.list_frame.grid()
+                self.graphic_frame.grid_forget()
+            else:
+                self.list_frame.grid_forget()
+                self.graphic_frame.grid()
+
+        Checkbutton(action_frame, textvariable=self.active_view, variable=self.active_view, onvalue="List view",
+                    offvalue="Graphic vew", command=activate_view).grid(column=0, row=0, padx=5, pady=5)
+
+        def close_tab():
+            display.forget(self.count_visualiser + 3)
+            self.count_visualiser -= 1
+
+        Button(action_frame, command=close_tab, text="Close tab").grid(column=1, row=0, padx=5, pady=5)
+
+        action_frame.grid(padx=10, pady=10)
+
+        activate_view()
 
         display.add(global_frame, text="Visualiser {}".format(self.count_visualiser))
