@@ -9,7 +9,6 @@ from tkinter.ttk import *
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from mpl_toolkits.mplot3d import Axes3D
-from numpy.random import randint
 
 from functools import partial
 
@@ -645,7 +644,7 @@ class Application(Frame):
                             color = "green"
                         else:
                             color = "gray"
-                        ax.scatter(graph_values[0][index], graph_values[1][index], s=randint(50, 1000), c=color,
+                        ax.scatter(graph_values[0][index], graph_values[1][index], s=(index + 1) * 50, c=color,
                                    alpha=0.3)
                 else:
                     ax = self.fig.add_subplot(111, projection="3d")
@@ -657,7 +656,7 @@ class Application(Frame):
                         else:
                             color = "gray"
                         ax.scatter(graph_values[0][index], graph_values[1][index], graph_values[2][index],
-                                   s=randint(50, 1000), c=color, alpha=0.3)
+                                   s=(index + 1) * 50, c=color, alpha=0.3)
                 ax.set_xlabel("X")
                 ax.set_ylabel("Y")
                 graph = FigureCanvasTkAgg(self.fig, self.graphic_frame)
