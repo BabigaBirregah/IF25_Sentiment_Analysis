@@ -570,7 +570,7 @@ class Application(Frame):
         canvas_result.create_window(0, 0, window=fen_visualiser)
 
         for idx, value in enumerate(result):
-            if value[1][0] in ["Negative", "Neutral", "Positive"]:
+            if type(value[1]) is not type(float()):
                 group_tweet = LabelFrame(fen_visualiser, text="Tweet {}".format(idx + 1))
                 Label(group_tweet, text="Text :").grid(column=0, row=idx // 2, sticky="e")
                 Label(group_tweet, text=bytes(value[0], 'utf-8')).grid(column=1, row=idx // 2, sticky="w")
@@ -609,7 +609,7 @@ class Application(Frame):
 
         self.fig = Figure(figsize=(11, 7), dpi=96, tight_layout=True)
 
-        if result[0][1][0] not in ["Negative", "Neutral", "Positive"]:
+        if type(result[0][1]) is not type(tuple()):
             ax = self.fig.add_subplot(111)
             ax.grid(True)
 
@@ -737,7 +737,7 @@ class Application(Frame):
                 self.graphic_frame.grid()
 
         Checkbutton(action_frame, textvariable=self.active_view, variable=self.active_view, onvalue="Graphic view",
-                    offvalue="List vew", command=activate_view).grid(column=0, row=0, padx=5, pady=5)
+                    offvalue="List view", command=activate_view).grid(column=0, row=0, padx=5, pady=5)
 
         def close_tab():
             display.forget(self.count_visualiser + 3)
