@@ -613,7 +613,14 @@ class Application(Frame):
             ax.grid(True)
 
             for idx, value in enumerate(result):
-                ax.barh(value[0], value[1])
+                if "linear" in value[0]:
+                    ax.barh(value[0], value[1], color="red")
+                elif "poly" in value[0]:
+                    ax.barh(value[0], value[1], color="green")
+                elif "gaussian" in value[0]:
+                    ax.barh(value[0], value[1], color="blue")
+                elif "radial" in value[0]:
+                    ax.barh(value[0], value[1], color="orange")
                 ax.text(value[1], idx, str(value[1]))
             graph = FigureCanvasTkAgg(self.fig, self.graphic_frame)
             canvas = graph.get_tk_widget()
@@ -644,7 +651,8 @@ class Application(Frame):
                             color = "green"
                         else:
                             color = "gray"
-                        ax.scatter(graph_values[0][index], graph_values[1][index], s=(index + 1) * 50, c=color,
+                        ax.scatter(graph_values[0][index], graph_values[1][index], s=max((index + 1) * 50, 2000),
+                                   c=color,
                                    alpha=0.3)
                 else:
                     ax = self.fig.add_subplot(111, projection="3d")
@@ -656,7 +664,7 @@ class Application(Frame):
                         else:
                             color = "gray"
                         ax.scatter(graph_values[0][index], graph_values[1][index], graph_values[2][index],
-                                   s=(index + 1) * 50, c=color, alpha=0.3)
+                                   s=max((index + 1) * 50, 2000), c=color, alpha=0.3)
                 ax.set_xlabel("X")
                 ax.set_ylabel("Y")
                 graph = FigureCanvasTkAgg(self.fig, self.graphic_frame)

@@ -191,10 +191,10 @@ def predict_test(nb_tweet_sample, Resource, threshold, size_sample=None, randomi
     if name_kernel is not None:
         result.append(_prediction(m_features, m_labels, threshold, size_sample, randomised, equal_pos_neg, name_kernel))
     else:
-        for size_sample in [1000, 10000]:
-            for randomised in [True, False]:
-                for equal_pos_neg in [True, False]:
-                    for name_kernel in ["linear", "poly_kernel", "gaussian", "radial_basis"]:
+        for name_kernel in ["linear", "poly_kernel", "gaussian", "radial_basis"]:
+            for size_sample in [1000, 10000]:
+                for randomised in [True, False]:
+                    for equal_pos_neg in [True, False]:
                         result.append(
                             _prediction(m_features, m_labels, threshold, size_sample, randomised, equal_pos_neg,
                                         name_kernel))
