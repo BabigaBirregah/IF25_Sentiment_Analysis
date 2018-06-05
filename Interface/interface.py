@@ -608,6 +608,7 @@ class Application(Frame):
 
         self.fig = Figure(figsize=(11, 7), dpi=96, tight_layout=True)
 
+        # Case : result of 'Predict' (measure the performance)
         if type(result[0][1]) is not type(tuple()):
             ax = self.fig.add_subplot(111)
             ax.grid(True)
@@ -626,8 +627,18 @@ class Application(Frame):
             canvas = graph.get_tk_widget()
             canvas.grid()
 
+        # Case : result of 'Actions' (predict the sentiment)
         else:
             def create_graphic(result, dic):
+                """
+                Create a 2D or 3D graphic depending on the number of selected variables in the dictionary or if
+                result contains 'Predict' outcome (performances of SVM classifier) or 'Actions' outcome (containing
+                tweet, sentiment and characteristic vector)
+                :param result: list of element to be used in the creation of the graphic
+                :param dic: dictionary containing all the IntVar of every variable selectable and the number of
+                selected variable. Used to create the graphic
+                :return:
+                """
                 try:
                     self.canvas.grid_forget()
                 except:
@@ -651,7 +662,7 @@ class Application(Frame):
                             color = "green"
                         else:
                             color = "gray"
-                        ax.scatter(graph_values[0][index], graph_values[1][index], s=max((index + 1) * 50, 2000),
+                        ax.scatter(graph_values[0][index], graph_values[1][index], s=min((index + 1) * 50, 2000),
                                    c=color,
                                    alpha=0.3)
                 else:
@@ -664,7 +675,7 @@ class Application(Frame):
                         else:
                             color = "gray"
                         ax.scatter(graph_values[0][index], graph_values[1][index], graph_values[2][index],
-                                   s=max((index + 1) * 50, 2000), c=color, alpha=0.3)
+                                   s=min((index + 1) * 50, 2000), c=color, alpha=0.3)
                 ax.set_xlabel("X")
                 ax.set_ylabel("Y")
                 graph = FigureCanvasTkAgg(self.fig, self.graphic_frame)
@@ -673,6 +684,15 @@ class Application(Frame):
 
 
             def select_variable(value, dic, result):
+                """
+                Track and control the number of selected variables (up to 3) and initiate the creation of the graphic
+                if enough are selected.
+                :param value: IntVar associated with the Checkbutton that have triggered this call
+                :param dic: dictionary containing all the IntVar of every variable selectable and the number of
+                selected variable. Used to create the graphic
+                :param result: list of element to be used in the creation of the graphic
+                :return:
+                """
                 if value.get() and dic["count"] == 3:
                     value.set(0)
                 elif value.get() and dic["count"] < 3:
@@ -683,6 +703,7 @@ class Application(Frame):
                 if 2 <= dic["count"] <= 3:
                     create_graphic(result, dic)
 
+            # ---------- Choos the variables to be used in the graphic -------------
             select_frame = LabelFrame(self.graphic_frame, text="Select 3 variables")
             dict_variable = {
                 "pos_word":     IntVar(),
@@ -718,13 +739,18 @@ class Application(Frame):
 
             select_frame.grid(padx=10, pady=10)
 
+            # ---------- Indicate the meaning of the color -------------
             legend_frame = LabelFrame(self.graphic_frame, text="Legend about color")
+
             Label(legend_frame, background="red", width=3).grid(row=0, column=0, padx=5, pady=5)
             Label(legend_frame, text="Negative").grid(row=0, column=1, padx=5, pady=5)
             Label(legend_frame, background="gray", width=3).grid(row=0, column=2, padx=5, pady=5)
             Label(legend_frame, text="Neutral").grid(row=0, column=3, padx=5, pady=5)
             Label(legend_frame, background="green", width=3).grid(row=0, column=4, padx=5, pady=5)
             Label(legend_frame, text="Positive").grid(row=0, column=5, padx=5, pady=5)
+
+            ToolTip(legend_frame,
+                    text="The bigger and the more contrast of a dot means that they are a lot of vectors at the same position")
 
             legend_frame.grid(padx=10, pady=10)
 

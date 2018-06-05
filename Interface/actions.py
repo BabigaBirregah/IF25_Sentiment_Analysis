@@ -36,7 +36,7 @@ def _minimal_analysis(text, classifier, Resource, threshold, language='en'):
     performance score, 'Neutral' is both considered 'Positive' and 'Negative'
     :param language: not used, choose between french and english
         'fr' | 'en'
-    :return: sentiment label of the text
+    :return: Tuples containing the sentiment of the text and its characteristic vector. The sentiment could be :
         'Negative' | 'Neutral' | 'Positive'
     """
     list_text = clean_text(bytes(text, 'utf-8'), get_correct_stop_word(Resource, language))
@@ -56,7 +56,8 @@ def analyse_text(custom_text, classifier, Resource, threshold, language='en'):
     performance score, 'Neutral' is both considered 'Positive' and 'Negative'
     :param language: not used, choose between french and english
         'fr' | 'en'
-    :return: list of sentiments label of the text
+    :return: list of tuples containing the text and a tuple containing the sentiment of the text and its
+    characteristic vector. The sentiment could be :
         'Negative' | 'Neutral' | 'Positive'
     """
     return [(custom_text, _minimal_analysis(custom_text, classifier, Resource, threshold, language))]
@@ -73,7 +74,8 @@ def analyse_file(file_content, classifier, Resource, threshold, language='en'):
     performance score, 'Neutral' is both considered 'Positive' and 'Negative'
     :param language: not used, choose between french and english
         'fr' | 'en'
-    :return: generator of sentiments label of the text
+    :return: list of tuples containing the text and a tuple containing the sentiment of the text and its
+    characteristic vector. The sentiment could be :
         'Negative' | 'Neutral' | 'Positive'
     """
     return [(line, _minimal_analysis(line, classifier, Resource, threshold, language)) for line in file_content]
@@ -90,7 +92,8 @@ def analyse_query(query, classifier, Resource, threshold, language='en'):
     performance score, 'Neutral' is both considered 'Positive' and 'Negative'
     :param language: not used, choose between french and english
         'fr' | 'en'
-    :return: generator of sentiments label of the text
+    :return: list of tuples containing the text and a tuple containing the sentiment of the text and its
+    characteristic vector. The sentiment could be :
         'Negative' | 'Neutral' | 'Positive'
     """
     return [(line, _minimal_analysis(line, classifier, Resource, threshold, language)) for line in search_sample(query)]
@@ -107,7 +110,8 @@ def analyse_tweets(nb_tweets, classifier, Resource, threshold, language='en'):
     performance score, 'Neutral' is both considered 'Positive' and 'Negative'
     :param language: not used, choose between french and english
         'fr' | 'en'
-    :return: generator of sentiments label of the text
+    :return: list of tuples containing the text and a tuple containing the sentiment of the text and its
+    characteristic vector. The sentiment could be :
         'Negative' | 'Neutral' | 'Positive'
     """
     return [(line, _minimal_analysis(line, classifier, Resource, threshold, language)) for line in
@@ -182,7 +186,7 @@ def predict_test(nb_tweet_sample, Resource, threshold, size_sample=None, randomi
     :param name_kernel: name of the kernel use to build and save the SVM classifier
     :param language: not used, choose between english and french
         'en' | 'fr'
-    :return: generator containing tuples of the name of the classifier and its performance score
+    :return: list containing tuples of the name of the classifier and its performance score
     """
     m_features, m_labels = get_characteristic_label_vectors(nb_tweet_sample, randomised, equal_pos_neg, Resource, False,
                                                             language)
@@ -212,7 +216,7 @@ def custom_training(nb_tweet_sample, randomised, equal_pos_neg, language, name_k
     :param name_kernel: name of the kernel to use to create the desired SVM classifier
     :param Resource: class object containing all the resources (positive words, negative words, positive emoticons,
     negative emoticons, stop words)
-    :return:
+    :return: SVM classifier
     """
     m_features, m_labels = get_characteristic_label_vectors(nb_tweet_sample, randomised, equal_pos_neg, Resource, False,
                                                             language)
