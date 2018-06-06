@@ -164,7 +164,7 @@ def _count_pos_neg_sample():
     print(count_neg, count_pos, count_neg + count_pos)
 
 
-def get_characteristic_label_vectors(nb, randomness, pos_equal_neg, Resource, bypass=False, language='en'):
+def get_characteristic_label_vectors(nb, randomness, pos_equal_neg, Resource, keep_null_vector=False, language='en'):
     """
     Collect the desired number of label vectors regarding the parameters given. Provide 2 booleans to get a
     collection randomised or not and equal in number of positive and negative vector, or not.
@@ -173,7 +173,7 @@ def get_characteristic_label_vectors(nb, randomness, pos_equal_neg, Resource, by
     :param pos_equal_neg: if we want the same amount of positive and negative vectors
     :param Resource: class object containing all the resources (positive words, negative words, positive emoticons,
     negative emoticons, stop words)
-    :param bypass: False or True
+    :param keep_null_vector: False or True
         False : if we only want non null vector
         True : if we want tweets only, with the corresponding eventually null vector
     :param language: Choose the language from french to english
@@ -182,7 +182,7 @@ def get_characteristic_label_vectors(nb, randomness, pos_equal_neg, Resource, by
     """
     m_features, m_labels = list(), list()
     nb_pos, nb_neg, nb_tweet = 0, 0, 0
-    if bypass:
+    if keep_null_vector:
         nb = min(nb, NB_TWEETS_PER_FILE * 2)
         with open(get_path_resource('Sentiment_analysis_dataset_1.csv'), 'rb') as file_part1:
             with open(get_path_resource('Sentiment_analysis_dataset_2.csv'), 'rb') as file_part2:
