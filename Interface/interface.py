@@ -655,27 +655,42 @@ class Application(Frame):
 
                 if dic["count"] == 2:
                     ax = self.fig.add_subplot(111)
+                    dic_count = dict()
                     for index, label in enumerate(labels):
                         if label == "Negative":
                             color = "red"
                         elif label == "Positive":
                             color = "green"
                         else:
-                            color = "gray"
-                        ax.scatter(graph_values[0][index], graph_values[1][index], s=min((index + 1) * 50, 2000),
+                            color = "blue"
+                        try:
+                            dic_count[str(graph_values[0][index]) + str(graph_values[1][index])] += 1
+                        except:
+                            dic_count[str(graph_values[0][index]) + str(graph_values[1][index])] = 1
+                        ax.scatter(graph_values[0][index], graph_values[1][index],
+                                   s=min(dic_count[str(graph_values[0][index]) + str(graph_values[1][index])] * 50,
+                                         2000),
                                    c=color,
-                                   alpha=0.3)
+                                   alpha=0.25)
                 else:
                     ax = self.fig.add_subplot(111, projection="3d")
+                    dic_count = dict()
                     for index, label in enumerate(labels):
                         if label == "Negative":
                             color = "red"
                         elif label == "Positive":
                             color = "green"
                         else:
-                            color = "gray"
+                            color = "blue"
+                        try:
+                            dic_count[str(graph_values[0][index]) + str(graph_values[1][index]) + str(
+                                    graph_values[2][index])] += 1
+                        except:
+                            dic_count[str(graph_values[0][index]) + str(graph_values[1][index]) + str(
+                                    graph_values[2][index])] = 1
                         ax.scatter(graph_values[0][index], graph_values[1][index], graph_values[2][index],
-                                   s=min((index + 1) * 50, 2000), c=color, alpha=0.3)
+                                   s=min(dic_count[str(graph_values[0][index]) + str(graph_values[1][index]) + str(
+                                           graph_values[2][index])] * 50, 2000), c=color, alpha=0.25)
                 ax.set_xlabel("X")
                 ax.set_ylabel("Y")
                 graph = FigureCanvasTkAgg(self.fig, self.graphic_frame)
