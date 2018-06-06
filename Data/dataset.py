@@ -1,3 +1,4 @@
+from json import loads
 from secrets import randbelow
 
 from numpy import array
@@ -8,6 +9,7 @@ from Ressources.resource import get_correct_stop_word
 from Ressources.resource import get_path_resource
 
 NB_TWEETS_PER_FILE = 789314
+NB_NON_NULL_VECTORS = 808850
 NB_TOTAL_POSITIVE_TWEETS = 790185
 NB_TOTAL_NEGATIVE_TWEETS = 788442
 
@@ -180,17 +182,18 @@ def get_characteristic_label_vectors(nb, randomness, pos_equal_neg, Resource, by
     """
     m_features, m_labels = list(), list()
     nb_pos, nb_neg, nb_tweet = 0, 0, 0
-    with open(get_path_resource('Sentiment_analysis_dataset_1.csv'), 'rb') as file_part1:
-        with open(get_path_resource('Sentiment_analysis_dataset_2.csv'), 'rb') as file_part2:
-            global_file = file_part1.readlines() + file_part2.readlines()
-            while nb_tweet < nb:
-                if randomness:
-                    label, text = clean_line(global_file.pop(randbelow(len(global_file))))
-                else:
-                    label, text = clean_line(global_file.pop())
-                feature_vector = characteristic_vector(clean_text(text, get_correct_stop_word(Resource, language)),
-                                                       Resource)
-                if feature_vector != [0, 0, 0, 0, 0] or bypass:
+    if bypass:
+        nb = min(nb, NB_TWEETS_PER_FILE * 2)
+        with open(get_path_resource('Sentiment_analysis_dataset_1.csv'), 'rb') as file_part1:
+            with open(get_path_resource('Sentiment_analysis_dataset_2.csv'), 'rb') as file_part2:
+                global_file = file_part1.readlines() + file_part2.readlines()
+                while nb_tweet < nb:
+                    if randomness:
+                        label, text = clean_line(global_file.pop(randbelow(len(global_file))))
+                    else:
+                        label, text = clean_line(global_file.pop())
+                    feature_vector = characteristic_vector(clean_text(text, get_correct_stop_word(Resource, language)),
+                                                           Resource)
                     float_label = float(label)
                     if pos_equal_neg:
                         if float_label == 0.0 and nb_neg < nb // 2 or float_label == 1.0 and nb_pos < nb // 2:
@@ -205,4 +208,29 @@ def get_characteristic_label_vectors(nb, randomness, pos_equal_neg, Resource, by
                         m_features.append(feature_vector)
                         m_labels.append(float_label)
                         nb_tweet += 1
+    else:
+        nb = min(nb, NB_NON_NULL_VECTORS)
+        with open(get_path_resource('Features_labels_dataset.json'), 'r') as f_l_file:
+            global_file = loads(f_l_file.read())
+            while nb_tweet < nb:
+                if randomness:
+                    index = randbelow(len(global_file["vectors"]))
+                else:
+                    index = 0
+                label = float(global_file["labels"].pop(index))
+                if pos_equal_neg and nb_pos < nb // 2 and label == 1.0:
+                    m_features.append(global_file["vectors"].pop(index))
+                    m_labels.append(label)
+                    nb_tweet += 1
+                    nb_pos += 1
+                elif pos_equal_neg and nb_neg < nb // 2 and label == 0.0:
+                    m_features.append(global_file["vectors"].pop(index))
+                    m_labels.append(label)
+                    nb_tweet += 1
+                    nb_neg += 1
+                elif not pos_equal_neg:
+                    m_features.append(global_file["vectors"].pop(index))
+                    m_labels.append(label)
+                    nb_tweet += 1
+
     return array(m_features), array(m_labels)

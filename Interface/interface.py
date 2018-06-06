@@ -3,14 +3,13 @@
 # https://docs.python.org/3/library/tkinter.ttk.html#notebook
 # http://tkinter.fdex.eu/index.html
 
+from functools import partial
 from tkinter.filedialog import *
 from tkinter.ttk import *
 
-from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.figure import Figure
 from mpl_toolkits.mplot3d import Axes3D
-
-from functools import partial
 
 from Classifier.SVM import get_from_file
 from Classifier.profile import construct_name_file, readable_name_classifier
@@ -410,7 +409,7 @@ class Application(Frame):
 
         options_frame.grid(padx=10, pady=10)
 
-        display.add(fen_predict, text="Predict")
+        display.add(fen_predict, text="Performance")
 
 
     def _create_actions_panel(self, display):
@@ -608,7 +607,7 @@ class Application(Frame):
 
         self.fig = Figure(figsize=(11, 7), dpi=96, tight_layout=True)
 
-        # Case : result of 'Predict' (measure the performance)
+        # Case : result of 'Performance' (measure the performance)
         if type(result[0][1]) is not type(tuple()):
             ax = self.fig.add_subplot(111)
             ax.grid(True)
@@ -632,7 +631,7 @@ class Application(Frame):
             def create_graphic(result, dic):
                 """
                 Create a 2D or 3D graphic depending on the number of selected variables in the dictionary or if
-                result contains 'Predict' outcome (performances of SVM classifier) or 'Actions' outcome (containing
+                result contains 'Performance' outcome (performances of SVM classifier) or 'Actions' outcome (containing
                 tweet, sentiment and characteristic vector)
                 :param result: list of element to be used in the creation of the graphic
                 :param dic: dictionary containing all the IntVar of every variable selectable and the number of
