@@ -144,8 +144,8 @@ def _performance(Classifier, features, labels, threshold):
     correct = 0
     for index, vector in enumerate(features):
         result = _minimal_predict(Classifier, vector, threshold)
-        if result == "Positive" and labels[index] == 1.0 or result == "Negative" and labels[
-            index] == 0.0 or result == "Neutral":
+        if result == "Positive" and labels[index] == 1.0 or result == "Negative" and \
+                labels[index] == 0.0 or result == "Neutral":
             correct += 1
     return correct / len(labels) * 100
 
@@ -170,9 +170,7 @@ def _prediction(features, labels, threshold, size_sample, randomised, equal_pos_
 
 
 def predict_test(nb_tweet_sample, Resource, threshold, keep_null_vector, size_sample=None, randomised=None,
-                 equal_pos_neg=None,
-                 name_kernel=None,
-                 language='en'):
+                 equal_pos_neg=None, name_kernel=None, language='en'):
     """
     Measure the performance score for one specific classifier or all the default profiles
     :param nb_tweet_sample: size of the sample to test against the classifier
@@ -180,6 +178,7 @@ def predict_test(nb_tweet_sample, Resource, threshold, keep_null_vector, size_sa
     negative emoticons, stop words)
     :param threshold: From -'threshold' to +'threshold' the class label will be 'Neutral'. In the computation of the
     performance score, 'Neutral' is both considered 'Positive' and 'Negative'
+    :param keep_null_vector: Whether to use or not the null characteristic vector from the data set
     :param size_sample: size of the sample use to build and save the SVM classifier
     :param randomised: boolean to indicate the randomised reading of the sample use to build and save the SVM classifier
     :param equal_pos_neg: boolean to indicate if the number of positive and negative tweets of the sample use to
@@ -190,8 +189,7 @@ def predict_test(nb_tweet_sample, Resource, threshold, keep_null_vector, size_sa
     :return: list containing tuples of the name of the classifier and its performance score
     """
     m_features, m_labels = get_characteristic_label_vectors(nb_tweet_sample, randomised, equal_pos_neg, Resource,
-                                                            keep_null_vector,
-                                                            language)
+                                                            keep_null_vector, language)
 
     result = list()
     if name_kernel is not None:
@@ -202,8 +200,8 @@ def predict_test(nb_tweet_sample, Resource, threshold, keep_null_vector, size_sa
                 for randomised in [True, False]:
                     for equal_pos_neg in [True, False]:
                         result.append(
-                            _prediction(m_features, m_labels, threshold, size_sample, randomised, equal_pos_neg,
-                                        name_kernel))
+                                _prediction(m_features, m_labels, threshold, size_sample, randomised, equal_pos_neg,
+                                            name_kernel))
     return result
 
 
@@ -218,11 +216,11 @@ def custom_training(nb_tweet_sample, randomised, equal_pos_neg, language, name_k
     :param name_kernel: name of the kernel to use to create the desired SVM classifier
     :param Resource: class object containing all the resources (positive words, negative words, positive emoticons,
     negative emoticons, stop words)
+    :param keep_null_vector: Whether to use or not the null characteristic vector from the data set
     :return: SVM classifier
     """
     m_features, m_labels = get_characteristic_label_vectors(nb_tweet_sample, randomised, equal_pos_neg, Resource,
-                                                            keep_null_vector,
-                                                            language)
+                                                            keep_null_vector, language)
 
     kernel = Kernel.get_correct_kernel(name_kernel)
     custom_SVM = SVM(kernel)

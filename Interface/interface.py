@@ -149,8 +149,7 @@ class Application(Frame):
 
         Checkbutton(random_frame, textvariable=self.toggle_randomness, variable=self.toggle_randomness,
                     onvalue="Randomised", offvalue="Non-randomised",
-                    command=self._load_default_classifier).grid(padx=5,
-                                                                pady=5)
+                    command=self._load_default_classifier).grid(padx=5, pady=5)
         ToolTip(random_frame,
                 text="If the data set is read randomly or we just pop the last item to populate the sample")
 
@@ -253,8 +252,8 @@ class Application(Frame):
                     value="poly_kernel").grid(column=0, row=1, padx=5, pady=5, sticky="w")
         Radiobutton(kernel_frame, text="Gaussian", variable=self.train_kernel,
                     value="gaussian").grid(column=1, row=0, padx=5, pady=5, sticky="w")
-        Radiobutton(kernel_frame, text="Radial basis", variable=self.train_kernel, value="radial_basis").grid(
-                column=1, row=1, padx=5, pady=5, sticky="w")
+        Radiobutton(kernel_frame, text="Radial basis", variable=self.train_kernel,
+                    value="radial_basis").grid(column=1, row=1, padx=5, pady=5, sticky="w")
 
         kernel_frame.grid(column=3, row=0, padx=10, pady=10)
 
@@ -438,7 +437,6 @@ class Application(Frame):
 
         display.add(fen_predict, text="Performance")
 
-
     def _create_actions_panel(self, display):
         fen_actions = Frame(display, name="fen_actions")
 
@@ -456,7 +454,6 @@ class Application(Frame):
         threshold_spinbox.grid(column=0, row=0, padx=5, pady=5)
 
         threshold_frame.grid(padx=10, pady=10)
-
 
         # Trigger some specific actions #
         specific_actions = LabelFrame(fen_actions, text="Trigger specific analysis")
@@ -724,7 +721,6 @@ class Application(Frame):
                 self.canvas = graph.get_tk_widget()
                 self.canvas.grid()
 
-
             def select_variable(value, dic, result):
                 """
                 Track and control the number of selected variables (up to 3) and initiate the creation of the graphic
@@ -745,7 +741,7 @@ class Application(Frame):
                 if 2 <= dic["count"] <= 3:
                     create_graphic(result, dic)
 
-            # ---------- Choos the variables to be used in the graphic -------------
+            # ---------- Choose the variables to be used in the graphic -------------
             select_frame = LabelFrame(self.graphic_frame, text="Select 3 variables")
             dict_variable = {
                 "pos_word":     IntVar(),
@@ -792,7 +788,8 @@ class Application(Frame):
             Label(legend_frame, text="Positive").grid(row=0, column=5, padx=5, pady=5)
 
             ToolTip(legend_frame,
-                    text="The bigger and the more contrast of a dot means that they are a lot of vectors at the same position")
+                    text="The bigger and the more contrast of a dot means that they are a lot of vectors at the same "
+                         "position")
 
             legend_frame.grid(padx=10, pady=10)
 

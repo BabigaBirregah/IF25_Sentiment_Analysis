@@ -19,11 +19,11 @@ l_text = [clean_text(x[1], get_correct_stop_word(Resources)) for x in clean_list
 
 # Create the dual array of features and labels for training and testing
 m_features, m_label = list(), list()
-for indice, text in enumerate(l_text):
+for index, text in enumerate(l_text):
     feature_vector = characteristic_vector(text, Resources)
     if feature_vector != [0, 0, 0, 0, 0]:
         m_features.append(feature_vector)
-        m_label.append(l_label[indice])
+        m_label.append(l_label[index])
 m_f_train, m_f_test = array(m_features[:len(m_features) // 2]), array(m_features[len(m_features) // 2:])
 m_l_train, m_l_test = array(m_label[:len(m_label) // 2]), array(m_label[len(m_label) // 2:])
 

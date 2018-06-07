@@ -18,12 +18,12 @@ class SVM(object):
         if self.C is not None:
             self.C = float(self.C)
 
-    def fit(self, features, labels, iters=16):
+    def fit(self, features, labels, iterations=16):
         """
         Compute the parameters of the SVM classifier regarding the features and the associated labels.
         :param features: array of features vectors
         :param labels: array of labels vectors corresponding to the features
-        :param iters: number of iteration to solve the quadratic problem
+        :param iterations: number of iteration to solve the quadratic problem
         :return:
         """
         n_samples, n_features = features.shape
@@ -52,7 +52,7 @@ class SVM(object):
 
         # 2) Resolve QP problem
         options = dict()
-        options['maxiters'] = iters
+        options['maxiters'] = iterations
         options['show_progress'] = False
         solution = qp(P, q, G, h, A, b, options=options)['x']
 

@@ -27,6 +27,7 @@ def readable_name_classifier(name_file):
 
     return classifier_name + kernel + " kernel"
 
+
 def construct_name_file(size_sample, randomness, pos_equal_neg, kernel):
     """
     Build the name of the file to save the SVM classifier attributes to create a SVM classifier later
