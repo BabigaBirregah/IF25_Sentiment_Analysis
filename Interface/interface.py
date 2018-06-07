@@ -66,6 +66,8 @@ class Application(Frame):
         self.toggle_nb_pos_neg_p = StringVar()
         self.train_kernel = StringVar()
         self.predict_kernel = StringVar()
+        self.keep_null_vector_t = StringVar()
+        self.keep_null_vector_p = StringVar()
         self.SVMClassifier = None
         self.custom_SVMClassifier = None
         self.Resource = Resource()
@@ -125,7 +127,7 @@ class Application(Frame):
                 text="French here is not relevant since this application has no data set available for french, "
                      "but may be added")
 
-        language_frame.grid(column=0, row=0, padx=10, pady=10)
+        language_frame.grid(column=0, row=0, padx=10, pady=10, sticky='n')
 
         # Options for the default SVM classifier #
         default_classifier = LabelFrame(general_options, text="Default SVM classifier")
@@ -183,6 +185,11 @@ class Application(Frame):
 
         default_classifier.grid(column=1, row=0, padx=10, pady=10)
 
+        #  ---------- Choose the kernel used -------------
+        info = Label(default_classifier, text="Help", foreground="blue")
+        ToolTip(info, text="All the default profile of SVM were constructed without using null characteristic vector")
+        info.grid(column=4, sticky='e')
+
         general_options.grid(padx=10, pady=10)
 
         display.add(fen_user, text="Options")
@@ -201,7 +208,14 @@ class Application(Frame):
         self.nb_tweet_train.set(100)
 
         Spinbox(size_frame, from_=100, to=1000000, increment=100, textvariable=self.nb_tweet_train,
-                justify='center').grid(column=1, row=0, padx=5, pady=5)
+                justify='center').grid(column=0, row=0, padx=5, pady=5)
+
+        self.keep_null_vector_t.set("Don't keep null vector")
+        b_frame = Frame(size_frame)
+        Checkbutton(b_frame, textvariable=self.keep_null_vector_t, variable=self.keep_null_vector_t,
+                    onvalue="Keep null vector", offvalue="Don't keep null vector").grid()
+        ToolTip(b_frame, text="Whether to keep the null vector from the data set or not")
+        b_frame.grid(column=0, row=1, padx=5, pady=5)
 
         size_frame.grid(column=0, row=0, padx=10, pady=10, sticky="n")
 
@@ -249,7 +263,8 @@ class Application(Frame):
             self.custom_SVMClassifier = custom_training(self.nb_tweet_train.get(),
                                                         self.toggle_randomness_t.get() == "Randomised",
                                                         self.toggle_nb_pos_neg_t.get() == "Equal", self.toggle_language,
-                                                        self.train_kernel.get(), self.Resource)
+                                                        self.train_kernel.get(), self.Resource,
+                                                        self.keep_null_vector_t.get() == "Keep null vector")
 
         b_frame_1 = Frame(options_frame)
         Button(b_frame_1, text="Create custom SVM", command=train_settings).grid()
@@ -324,6 +339,16 @@ class Application(Frame):
 
         threshold_frame.grid(column=1, row=0, padx=10, pady=10)
 
+        # ---------- Keep or not the null vector from data set -------------
+        null_vector_frame = LabelFrame(for_all_frame, text="Use null vector")
+
+        self.keep_null_vector_p.set("Don't keep null vector")
+        Checkbutton(null_vector_frame, textvariable=self.keep_null_vector_p, variable=self.keep_null_vector_p,
+                    onvalue="Keep null vector", offvalue="Don't keep null vector").grid(column=0, row=0, padx=5, pady=5)
+        ToolTip(null_vector_frame, text="Whether to keep the null vector from the data set or not")
+
+        null_vector_frame.grid(column=2, row=0, padx=10, pady=10)
+
         for_all_frame.grid(padx=10, pady=10)
 
         # Test a specific SVM classifier
@@ -386,6 +411,7 @@ class Application(Frame):
         # ---------- Test the desired custom SVM classifier -------------
         def test_specific():
             result = predict_test(self.nb_tweet_predict.get(), self.Resource, float(threshold_spinbox.get()),
+                                  self.keep_null_vector_p.get() == "Keep null vector",
                                   self.size_sample_p.get(), self.toggle_randomness_p.get() == "Randomised",
                                   self.toggle_nb_pos_neg_p.get() == "Equal", self.predict_kernel.get())
             self._create_viewer_panel(self.display, result)
@@ -397,7 +423,8 @@ class Application(Frame):
 
         # Test all SVM default profiles
         def test_all():
-            result = predict_test(self.nb_tweet_predict.get(), self.Resource, float(threshold_spinbox.get()))
+            result = predict_test(self.nb_tweet_predict.get(), self.Resource, float(threshold_spinbox.get()),
+                                  self.keep_null_vector_p.get() == "Keep null vector")
             self._create_viewer_panel(self.display, result)
 
         b_frame_1 = Frame(test_frame)
@@ -415,11 +442,8 @@ class Application(Frame):
     def _create_actions_panel(self, display):
         fen_actions = Frame(display, name="fen_actions")
 
-        # Trigger some specific actions #
-        specific_actions = LabelFrame(fen_actions, text="Trigger specific analysis")
-
         # ---------- Threshold for 'Neutral' class -------------
-        threshold_frame = LabelFrame(specific_actions, text="Tolerance 'Neutral'")
+        threshold_frame = LabelFrame(fen_actions, text="Tolerance 'Neutral'")
 
         default_value = StringVar()
         default_value.set("0.25")
@@ -431,7 +455,11 @@ class Application(Frame):
                      "'Positive' and 'Negative'")
         threshold_spinbox.grid(column=0, row=0, padx=5, pady=5)
 
-        threshold_frame.grid(row=0, padx=10, pady=10)
+        threshold_frame.grid(padx=10, pady=10)
+
+
+        # Trigger some specific actions #
+        specific_actions = LabelFrame(fen_actions, text="Trigger specific analysis")
 
         # ---------- Submit custom text -------------
         custom_text_frame = LabelFrame(specific_actions, text="Analyse custom text")
@@ -476,7 +504,7 @@ class Application(Frame):
                                   float(threshold_spinbox.get()))
             self._create_viewer_panel(self.display, result)
 
-        Label(custom_file_frame).grid(row=0, padx=5, pady=5, )
+        Label(custom_file_frame).grid(row=0, padx=5, pady=5)
 
         b_frame_2 = Frame(custom_file_frame)
         Button(b_frame_2, text="Open file & Analyse", command=ask_file).grid(row=1, sticky="s")

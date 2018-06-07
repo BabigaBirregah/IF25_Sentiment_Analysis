@@ -169,7 +169,8 @@ def _prediction(features, labels, threshold, size_sample, randomised, equal_pos_
     return name_file, _performance(Classifier, features, labels, threshold)
 
 
-def predict_test(nb_tweet_sample, Resource, threshold, size_sample=None, randomised=None, equal_pos_neg=None,
+def predict_test(nb_tweet_sample, Resource, threshold, keep_null_vector, size_sample=None, randomised=None,
+                 equal_pos_neg=None,
                  name_kernel=None,
                  language='en'):
     """
@@ -188,7 +189,8 @@ def predict_test(nb_tweet_sample, Resource, threshold, size_sample=None, randomi
         'en' | 'fr'
     :return: list containing tuples of the name of the classifier and its performance score
     """
-    m_features, m_labels = get_characteristic_label_vectors(nb_tweet_sample, randomised, equal_pos_neg, Resource, False,
+    m_features, m_labels = get_characteristic_label_vectors(nb_tweet_sample, randomised, equal_pos_neg, Resource,
+                                                            keep_null_vector,
                                                             language)
 
     result = list()
@@ -205,7 +207,7 @@ def predict_test(nb_tweet_sample, Resource, threshold, size_sample=None, randomi
     return result
 
 
-def custom_training(nb_tweet_sample, randomised, equal_pos_neg, language, name_kernel, Resource):
+def custom_training(nb_tweet_sample, randomised, equal_pos_neg, language, name_kernel, Resource, keep_null_vector):
     """
     Create a tailored SVM classifier to further use to predict
     :param nb_tweet_sample: size of the desired characteristic vector to be used to train the classifier
@@ -218,7 +220,8 @@ def custom_training(nb_tweet_sample, randomised, equal_pos_neg, language, name_k
     negative emoticons, stop words)
     :return: SVM classifier
     """
-    m_features, m_labels = get_characteristic_label_vectors(nb_tweet_sample, randomised, equal_pos_neg, Resource, False,
+    m_features, m_labels = get_characteristic_label_vectors(nb_tweet_sample, randomised, equal_pos_neg, Resource,
+                                                            keep_null_vector,
                                                             language)
 
     kernel = Kernel.get_correct_kernel(name_kernel)
