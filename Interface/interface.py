@@ -73,6 +73,10 @@ class Application(Frame):
         self.Resource = Resource()
         self.count_visualiser = 0
         self.active_view = StringVar()
+        self.canvas = list()
+        self.dict_result = list()
+        self.graphic_frame = list()
+        self.list_frame = list()
 
         # Populate the window
         self._create_widgets()
@@ -580,20 +584,22 @@ class Application(Frame):
         self.count_visualiser += 1
         name_viewer = "fen_visualiser_{}".format(self.count_visualiser)
 
+        self.dict_result.append(result)
+
         # Frame that contain everything #
         global_frame = Frame(display)
 
         # ---------- Creating the list view -------------
-        self.list_frame = Frame(global_frame, width=900, height=600)
+        self.list_frame.append(Frame(global_frame, width=900, height=600))
 
-        canvas_result = Canvas(self.list_frame, width=900, height=600)
+        canvas_result = Canvas(self.list_frame[-1], width=900, height=600)
         canvas_result.grid(row=1, column=0, sticky="nsew")
 
         fen_visualiser = Frame(canvas_result, name=name_viewer)
         canvas_result.create_window(0, 0, window=fen_visualiser)
 
-        for idx, value in enumerate(result):
-            if type(value[1]) is not type(float()):
+        for idx, value in enumerate(self.dict_result[-1]):
+            if not isinstance(value[1], float):
                 group_tweet = LabelFrame(fen_visualiser, text="Tweet {}".format(idx + 1))
                 Label(group_tweet, text="Text :").grid(column=0, row=idx // 2, sticky="e")
                 Label(group_tweet, text=bytes(value[0], 'utf-8')).grid(column=1, row=idx // 2, sticky="w")
@@ -613,10 +619,10 @@ class Application(Frame):
                 Label(group_tweet, text=value[1], foreground="blue").grid(column=1, row=idx // 2 + 1, sticky="w")
             group_tweet.grid(sticky="w")
 
-        vertical_scrollbar = Scrollbar(self.list_frame, command=canvas_result.yview)
+        vertical_scrollbar = Scrollbar(self.list_frame[-1], command=canvas_result.yview)
         canvas_result.configure(yscrollcommand=vertical_scrollbar.set)
 
-        horizontal_scrollbar = Scrollbar(self.list_frame, orient=HORIZONTAL, command=canvas_result.xview)
+        horizontal_scrollbar = Scrollbar(self.list_frame[-1], orient=HORIZONTAL, command=canvas_result.xview)
         canvas_result.configure(xscrollcommand=horizontal_scrollbar.set)
 
         vertical_scrollbar.grid(row=1, column=1, sticky="ns")
@@ -628,16 +634,16 @@ class Application(Frame):
         fen_visualiser.bind("<Configure>", update_scroll_region)
 
         # ---------- Creating the graphic view -------------
-        self.graphic_frame = Frame(global_frame, width=900, height=600)
+        self.graphic_frame.append(Frame(global_frame, width=900, height=600))
 
         self.fig = Figure(figsize=(11, 7), dpi=96, tight_layout=True)
 
         # Case : result of 'Performance' (measure the performance)
-        if type(result[0][1]) is not type(tuple()):
+        if not isinstance(self.dict_result[-1][0][1], tuple):
             ax = self.fig.add_subplot(111)
             ax.grid(True)
 
-            for idx, value in enumerate(result):
+            for idx, value in enumerate(self.dict_result[-1]):
                 if "linear" in value[0]:
                     ax.barh(value[0], value[1], color="red")
                 elif "poly" in value[0]:
@@ -647,13 +653,13 @@ class Application(Frame):
                 elif "radial" in value[0]:
                     ax.barh(value[0], value[1], color="orange")
                 ax.text(value[1], idx, str(value[1]))
-            graph = FigureCanvasTkAgg(self.fig, self.graphic_frame)
-            canvas = graph.get_tk_widget()
-            canvas.grid()
+            graph = FigureCanvasTkAgg(self.fig, self.graphic_frame[-1])
+            self.canvas.append(graph.get_tk_widget())
+            self.canvas[-1].grid()
 
         # Case : result of 'Actions' (predict the sentiment)
         else:
-            def create_graphic(result, dic):
+            def create_graphic(result, dic, new):
                 """
                 Create a 2D or 3D graphic depending on the number of selected variables in the dictionary or if
                 result contains 'Performance' outcome (performances of SVM classifier) or 'Actions' outcome (containing
@@ -663,11 +669,6 @@ class Application(Frame):
                 selected variable. Used to create the graphic
                 :return:
                 """
-                try:
-                    self.canvas.grid_forget()
-                except:
-                    pass
-
                 labels, vectors, graph_values = list(), list(), list()
                 for element in result:
                     labels.append(element[1][0])
@@ -717,9 +718,14 @@ class Application(Frame):
                                            graph_values[2][index])] * 50, 2000), c=color, alpha=0.25)
                 ax.set_xlabel("X")
                 ax.set_ylabel("Y")
-                graph = FigureCanvasTkAgg(self.fig, self.graphic_frame)
-                self.canvas = graph.get_tk_widget()
-                self.canvas.grid()
+                graph = FigureCanvasTkAgg(self.fig, self.graphic_frame[display.index("current") - 4])
+                if not new:
+                    self.canvas[display.index("current") - 4].grid_forget()
+                    self.canvas[display.index("current") - 4] = graph.get_tk_widget()
+                    self.canvas[display.index("current") - 4].grid()
+                else:
+                    self.canvas.append(graph.get_tk_widget())
+                    self.canvas[-1].grid()
 
             def select_variable(value, dic, result):
                 """
@@ -739,10 +745,10 @@ class Application(Frame):
                     dic["count"] -= 1
 
                 if 2 <= dic["count"] <= 3:
-                    create_graphic(result, dic)
+                    create_graphic(self.dict_result[display.index("current") - 4], dic, False)
 
             # ---------- Choose the variables to be used in the graphic -------------
-            select_frame = LabelFrame(self.graphic_frame, text="Select 3 variables")
+            select_frame = LabelFrame(self.graphic_frame[display.index("current") - 4], text="Select 3 variables")
             dict_variable = {
                 "pos_word":     IntVar(),
                 "neg_word":     IntVar(),
@@ -778,11 +784,11 @@ class Application(Frame):
             select_frame.grid(padx=10, pady=10)
 
             # ---------- Indicate the meaning of the color -------------
-            legend_frame = LabelFrame(self.graphic_frame, text="Legend about color")
+            legend_frame = LabelFrame(self.graphic_frame[display.index("current") - 4], text="Legend about color")
 
             Label(legend_frame, background="red", width=3).grid(row=0, column=0, padx=5, pady=5)
             Label(legend_frame, text="Negative").grid(row=0, column=1, padx=5, pady=5)
-            Label(legend_frame, background="gray", width=3).grid(row=0, column=2, padx=5, pady=5)
+            Label(legend_frame, background="blue", width=3).grid(row=0, column=2, padx=5, pady=5)
             Label(legend_frame, text="Neutral").grid(row=0, column=3, padx=5, pady=5)
             Label(legend_frame, background="green", width=3).grid(row=0, column=4, padx=5, pady=5)
             Label(legend_frame, text="Positive").grid(row=0, column=5, padx=5, pady=5)
@@ -793,7 +799,7 @@ class Application(Frame):
 
             legend_frame.grid(padx=10, pady=10)
 
-            create_graphic(result, dict_variable)
+            create_graphic(result, dict_variable, True)
 
         # ---------- Action to change the view and close tab -------------
         action_frame = LabelFrame(global_frame, text="Tab actions")
@@ -802,23 +808,27 @@ class Application(Frame):
 
         def activate_view():
             if self.active_view.get() == "List view":
-                self.list_frame.grid()
-                self.graphic_frame.grid_forget()
+                self.list_frame[display.index("current") - 4].grid()
+                self.graphic_frame[display.index("current") - 4].grid_forget()
             else:
-                self.list_frame.grid_forget()
-                self.graphic_frame.grid()
+                self.list_frame[display.index("current") - 4].grid_forget()
+                self.graphic_frame[display.index("current") - 4].grid()
 
         Checkbutton(action_frame, textvariable=self.active_view, variable=self.active_view, onvalue="Graphic view",
                     offvalue="List view", command=activate_view).grid(column=0, row=0, padx=5, pady=5)
 
         def close_tab():
-            display.forget(self.count_visualiser + 3)
+            display.forget(display.index("current"))
             self.count_visualiser -= 1
+            self.canvas.pop(display.index("current") - 4)
+            self.graphic_frame.pop(display.index("current") - 4)
+            self.list_frame.pop(display.index("current") - 4)
+            self.dict_result.pop(display.index("current") - 4)
 
         Button(action_frame, command=close_tab, text="Close tab").grid(column=1, row=0, padx=5, pady=5)
 
         action_frame.grid(padx=10, pady=10)
 
-        activate_view()
+        self.graphic_frame[-1].grid()
 
         display.add(global_frame, text="Visualiser {}".format(self.count_visualiser))
