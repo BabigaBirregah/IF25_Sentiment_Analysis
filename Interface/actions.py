@@ -150,7 +150,7 @@ def _performance(Classifier, features, labels, threshold):
     return correct / len(labels) * 100
 
 
-def _prediction(features, labels, threshold, size_sample, randomised, equal_pos_neg, name_kernel):
+def _prediction(features, labels, threshold, size_sample, randomised, equal_pos_neg, name_kernel, custom_SVM=None):
     """
     Generic method to compute the performance score of a designated classifier
     :param features: array containing multiple features vectors
@@ -164,13 +164,16 @@ def _prediction(features, labels, threshold, size_sample, randomised, equal_pos_
     :param name_kernel: name of the kernel use to build and save the SVM classifier
     :return: tuple containing the general name of the classifier and the performance score of this classifier
     """
-    Classifier = load_classifier(size_sample, randomised, equal_pos_neg, name_kernel)
+    if custom_SVM:
+        Classifier = custom_SVM
+    else:
+        Classifier = load_classifier(size_sample, randomised, equal_pos_neg, name_kernel)
     name_file = str(construct_name_file(size_sample, randomised, equal_pos_neg, name_kernel).split(".json")[0])
     return name_file, _performance(Classifier, features, labels, threshold)
 
 
 def predict_test(nb_tweet_sample, Resource, threshold, keep_null_vector, size_sample=None, randomised=None,
-                 equal_pos_neg=None, name_kernel=None, language='en'):
+                 equal_pos_neg=None, name_kernel=None, custom_SVM=None, language='en'):
     """
     Measure the performance score for one specific classifier or all the default profiles
     :param nb_tweet_sample: size of the sample to test against the classifier
@@ -184,6 +187,7 @@ def predict_test(nb_tweet_sample, Resource, threshold, keep_null_vector, size_sa
     :param equal_pos_neg: boolean to indicate if the number of positive and negative tweets of the sample use to
     build and save the SVM classifier
     :param name_kernel: name of the kernel use to build and save the SVM classifier
+    :param custom_SVM: custom SVM to test
     :param language: not used, choose between english and french
         'en' | 'fr'
     :return: list containing tuples of the name of the classifier and its performance score
@@ -192,8 +196,11 @@ def predict_test(nb_tweet_sample, Resource, threshold, keep_null_vector, size_sa
                                                             keep_null_vector, language)
 
     result = list()
-    if name_kernel is not None:
+    if name_kernel is not None and custom_SVM is None:
         result.append(_prediction(m_features, m_labels, threshold, size_sample, randomised, equal_pos_neg, name_kernel))
+    elif custom_SVM:
+        result.append(_prediction(m_features, m_labels, threshold, size_sample, randomised, equal_pos_neg, name_kernel,
+                                  custom_SVM))
     else:
         for name_kernel in ["linear", "poly_kernel", "gaussian", "radial_basis"]:
             for size_sample in [1000, 10000]:

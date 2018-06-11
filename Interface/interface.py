@@ -424,6 +424,23 @@ class Application(Frame):
         ToolTip(b_frame_2, text="Will test the chosen SVM classifier and measure its performance")
         b_frame_2.grid(column=0, row=0, padx=10, pady=10)
 
+        # ---------- Test the desired custom SVM classifier -------------
+        def test_custom():
+            if self.custom_SVMClassifier:
+                result = predict_test(self.nb_tweet_predict.get(), self.Resource, float(threshold_spinbox.get()),
+                                      self.keep_null_vector_p.get() == "Keep null vector",
+                                      self.size_sample_p.get(), self.toggle_randomness_p.get() == "Randomised",
+                                      self.toggle_nb_pos_neg_p.get() == "Equal",
+                                      str(self.custom_SVMClassifier.kernel).split('.')[1], self.custom_SVMClassifier)
+                self._create_viewer_panel(self.display, result)
+
+        b_frame_3 = Frame(test_frame)
+        Button(b_frame_3, text="Test custom SVM", command=test_custom).grid()
+        ToolTip(b_frame_3,
+                text="Will test your custom SVM classifier and measure its performance.\nIt should be loaded in the "
+                     "'Training' tab, otherwise this button will not trigger anything")
+        b_frame_3.grid(column=1, row=0, padx=10, pady=10)
+
         # Test all SVM default profiles
         def test_all():
             result = predict_test(self.nb_tweet_predict.get(), self.Resource, float(threshold_spinbox.get()),
@@ -433,7 +450,7 @@ class Application(Frame):
         b_frame_1 = Frame(test_frame)
         Button(b_frame_1, text="Test all SVMs", command=test_all).grid()
         ToolTip(b_frame_1, text="Will test all the default SVM classifiers and measure their performances")
-        b_frame_1.grid(column=1, row=0, padx=10, pady=10)
+        b_frame_1.grid(column=2, row=0, padx=10, pady=10)
 
         test_frame.grid(padx=10, pady=10)
 
@@ -719,6 +736,7 @@ class Application(Frame):
                 ax.set_xlabel("X")
                 ax.set_ylabel("Y")
                 graph = FigureCanvasTkAgg(self.fig, self.graphic_frame[display.index("current") - 4])
+
                 if not new:
                     self.canvas[display.index("current") - 4].grid_forget()
                     self.canvas[display.index("current") - 4] = graph.get_tk_widget()
@@ -726,6 +744,9 @@ class Application(Frame):
                 else:
                     self.canvas.append(graph.get_tk_widget())
                     self.canvas[-1].grid()
+
+                if dic["count"] == 3:
+                    Axes3D.mouse_init(ax)
 
             def select_variable(value, dic, result):
                 """
