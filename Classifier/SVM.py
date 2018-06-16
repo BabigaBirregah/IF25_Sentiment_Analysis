@@ -17,6 +17,7 @@ class SVM(object):
         self.C = C
         if self.C is not None:
             self.C = float(self.C)
+        self.performance = 0
 
     def fit(self, features, labels, iterations=16):
         """
@@ -94,6 +95,7 @@ class SVM(object):
         dic_attribute["support_vectors"] = self.support_vectors.tolist()
         dic_attribute["support_vectors_labels"] = self.support_vectors_labels.tolist()
         dic_attribute["bias"] = self.bias
+        dic_attribute["performance"] = self.performance
         return dic_attribute
 
     def save_to_file(self, name_file):
@@ -137,7 +139,8 @@ class SVM(object):
 
 class SVMPredictor(SVM):
 
-    def __init__(self, kernel, C, weights, lagrange_multipliers, support_vectors, support_vectors_labels, bias):
+    def __init__(self, kernel, C, weights, lagrange_multipliers, support_vectors, support_vectors_labels, bias,
+                 performance):
         self.kernel = kernel
         self.C = C
         self.weights = weights
@@ -145,6 +148,7 @@ class SVMPredictor(SVM):
         self.support_vectors = support_vectors
         self.support_vectors_labels = support_vectors_labels
         self.bias = bias
+        self.performance = performance
 
 
 def get_from_file(name_file):
@@ -170,4 +174,5 @@ def get_from_file(name_file):
 
     return SVMPredictor(kernel, dic_attribute["C"], dic_attribute["weights"],
                         array(dic_attribute["lagrange_multipliers"]), array(dic_attribute["support_vectors"]),
-                        array(dic_attribute["support_vectors_labels"]), dic_attribute["bias"])
+                        array(dic_attribute["support_vectors_labels"]), dic_attribute["bias"],
+                        dic_attribute["performance"])

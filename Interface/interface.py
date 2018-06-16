@@ -50,6 +50,7 @@ class Application(Frame):
         # Object to be used
         self.display = Notebook(self, name="nb")  # tab manager
         self.toggle_language = StringVar()
+        self.performance = StringVar()
         self.analyse_kernel = StringVar()
         self.size_sample = StringVar()
         self.size_sample_p = StringVar()
@@ -95,6 +96,14 @@ class Application(Frame):
                                              self.toggle_randomness.get() == "Randomised",
                                              self.toggle_nb_pos_neg.get() == "Equal",
                                              self.analyse_kernel.get())
+        if self.SVMClassifier.performance <= 50:
+            color = "red"
+        elif self.SVMClassifier.performance < 75:
+            color = "orange"
+        else:
+            color = "green"
+        self.perf_label.configure(foreground=color)
+        self.performance.set(str(self.SVMClassifier.performance))
         return self.SVMClassifier
 
     def _create_widgets(self):
@@ -185,6 +194,15 @@ class Application(Frame):
                     command=self._load_default_classifier).grid(column=1, row=1, padx=5, pady=5, sticky="w")
 
         kernel_frame.grid(column=4, row=0, padx=10, pady=10)
+
+        # ---------- Performance of the classifier choose -------------
+
+        performance_frame = Frame(default_classifier)
+        Label(performance_frame, text="Performance : ").grid(column=0, row=0, padx=5, pady=5)
+        self.perf_label = Label(performance_frame, textvariable=self.performance)
+        self.perf_label.grid(column=1, row=0, padx=5, pady=5)
+        performance_frame.grid(column=3, padx=10, pady=10)
+        self._load_default_classifier()
 
         default_classifier.grid(column=1, row=0, padx=10, pady=10)
 
@@ -518,7 +536,7 @@ class Application(Frame):
         def ask_file():
             file_name = askopenfile(title="Open file of tweets",
                                     filetypes=[('txt files', '.txt'), ('csv files', '.csv')])
-            result = analyse_file(open(file_name, "rb").readlines(), self._get_classifier(), self.Resource,
+            result = analyse_file(open(file_name.name, "rb").readlines()[:500], self._get_classifier(), self.Resource,
                                   float(threshold_spinbox.get()))
             self._create_viewer_panel(self.display, result)
 
@@ -528,8 +546,9 @@ class Application(Frame):
         Button(b_frame_2, text="Open file & Analyse", command=ask_file).grid(row=1, sticky="s")
 
         ToolTip(b_frame_2,
-                text="Will analyse and predict the sentiment of the file. The file is supposed to contain one tweet "
-                     "per line.\nIt will open another tab to visualize the result")
+                text="Will analyse and predict the sentiment of each tweet in the file. The file is supposed to "
+                     "contain one tweet per line and up to 500 tweets.\n500 is the observed limit of the graphic "
+                     "library.\nIt will open another tab to visualize the result")
         b_frame_2.grid()
 
         custom_file_frame.grid(column=1, row=1, padx=10, pady=10, sticky="n")
@@ -619,7 +638,7 @@ class Application(Frame):
             if not isinstance(value[1], float):
                 group_tweet = LabelFrame(fen_visualiser, text="Tweet {}".format(idx + 1))
                 Label(group_tweet, text="Text :").grid(column=0, row=idx // 2, sticky="e")
-                Label(group_tweet, text=bytes(value[0], 'utf-8')).grid(column=1, row=idx // 2, sticky="w")
+                Label(group_tweet, text=value[0]).grid(column=1, row=idx // 2, sticky="w")
                 Label(group_tweet, text="Label :").grid(column=0, row=idx // 2 + 1, sticky="e")
                 if value[1][0] == "Negative":
                     Label(group_tweet, text=value[1][0], foreground="red").grid(column=1, row=idx // 2 + 1, sticky="w")

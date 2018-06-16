@@ -39,7 +39,7 @@ def _minimal_analysis(text, classifier, Resource, threshold, language='en'):
     :return: Tuples containing the sentiment of the text and its characteristic vector. The sentiment could be :
         'Negative' | 'Neutral' | 'Positive'
     """
-    list_text = clean_text(bytes(text, 'utf-8'), get_correct_stop_word(Resource, language))
+    list_text = clean_text(text, get_correct_stop_word(Resource, language))
     m_features = list()
     m_features.append(characteristic_vector(list_text, Resource))
     return classifier.predict(array(m_features), threshold), m_features
@@ -60,7 +60,8 @@ def analyse_text(custom_text, classifier, Resource, threshold, language='en'):
     characteristic vector. The sentiment could be :
         'Negative' | 'Neutral' | 'Positive'
     """
-    return [(custom_text, _minimal_analysis(custom_text, classifier, Resource, threshold, language))]
+    return [(bytes(custom_text, 'utf-8'),
+             _minimal_analysis(bytes(custom_text, 'utf-8'), classifier, Resource, threshold, language))]
 
 
 def analyse_file(file_content, classifier, Resource, threshold, language='en'):
@@ -96,7 +97,8 @@ def analyse_query(query, classifier, Resource, threshold, language='en'):
     characteristic vector. The sentiment could be :
         'Negative' | 'Neutral' | 'Positive'
     """
-    return [(line, _minimal_analysis(line, classifier, Resource, threshold, language)) for line in search_sample(query)]
+    return [(bytes(line, 'utf-8'), _minimal_analysis(bytes(line, 'utf-8'), classifier, Resource, threshold, language))
+            for line in search_sample(query)]
 
 
 def analyse_tweets(nb_tweets, classifier, Resource, threshold, language='en'):
@@ -114,7 +116,8 @@ def analyse_tweets(nb_tweets, classifier, Resource, threshold, language='en'):
     characteristic vector. The sentiment could be :
         'Negative' | 'Neutral' | 'Positive'
     """
-    return [(line, _minimal_analysis(line, classifier, Resource, threshold, language)) for line in
+    return [(bytes(line, 'utf-8'), _minimal_analysis(bytes(line, 'utf-8'), classifier, Resource, threshold, language))
+            for line in
             collect_tweet(nb_tweets)]
 
 
@@ -147,7 +150,8 @@ def _performance(Classifier, features, labels, threshold):
         if result == "Positive" and labels[index] == 1.0 or result == "Negative" and \
                 labels[index] == 0.0 or result == "Neutral":
             correct += 1
-    return correct / len(labels) * 100
+    Classifier.performance = correct / len(labels) * 100
+    return Classifier.performance
 
 
 def _prediction(features, labels, threshold, size_sample, randomised, equal_pos_neg, name_kernel, custom_SVM=None):
