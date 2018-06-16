@@ -138,7 +138,7 @@ class Application(Frame):
 
         ToolTip(language_frame,
                 text="French here is not relevant since this application has no data set available for french, "
-                     "but may be added")
+                     "but may be added.\nOnly caracteristic vectors will be impacted.")
 
         language_frame.grid(column=0, row=0, padx=10, pady=10, sticky='n')
 
@@ -479,8 +479,10 @@ class Application(Frame):
     def _create_actions_panel(self, display):
         fen_actions = Frame(display, name="fen_actions")
 
+        # Options Frame
+        options_frame = LabelFrame(fen_actions, text="Options for all actions")
         # ---------- Threshold for 'Neutral' class -------------
-        threshold_frame = LabelFrame(fen_actions, text="Tolerance 'Neutral'")
+        threshold_frame = LabelFrame(options_frame, text="Tolerance 'Neutral'")
 
         default_value = StringVar()
         default_value.set("0.25")
@@ -490,9 +492,20 @@ class Application(Frame):
                 text="From -'x' to +'x', where 'x' is the value selected, the label of the text will be "
                      "'Neutral'.\nIn the computation of the performance score, 'Neutral' is both considered "
                      "'Positive' and 'Negative'")
-        threshold_spinbox.grid(column=0, row=0, padx=5, pady=5)
+        threshold_spinbox.grid(padx=5, pady=5)
 
-        threshold_frame.grid(padx=10, pady=10)
+        threshold_frame.grid(column=0, row=0, padx=10, pady=10)
+
+        language_frame = LabelFrame(options_frame, text="Choose language")
+        Checkbutton(language_frame, textvariable=self.toggle_language, variable=self.toggle_language, onvalue="English",
+                    offvalue="Français").grid(padx=5, pady=5)
+
+        ToolTip(language_frame,
+                text="French here is not relevant since this application has no data set available for french, "
+                     "but may be added.\nOnly construction of characteristic vectors will be impacted.")
+        language_frame.grid(column=1, row=0, padx=10, pady=10)
+
+        options_frame.grid(padx=10, pady=10)
 
         # Trigger some specific actions #
         specific_actions = LabelFrame(fen_actions, text="Trigger specific analysis")
@@ -517,7 +530,7 @@ class Application(Frame):
         def text_analysis():
             if self.value_submit.get() != "Text to analyse":
                 result = analyse_text(self.value_submit.get(), self._get_classifier(), self.Resource,
-                                      float(threshold_spinbox.get()))
+                                      float(threshold_spinbox.get()), self.toggle_language.get())
                 self._create_viewer_panel(self.display, result)
 
         b_frame_1 = Frame(custom_text_frame)
@@ -537,7 +550,7 @@ class Application(Frame):
             file_name = askopenfile(title="Open file of tweets",
                                     filetypes=[('txt files', '.txt'), ('csv files', '.csv')])
             result = analyse_file(open(file_name.name, "rb").readlines()[:500], self._get_classifier(), self.Resource,
-                                  float(threshold_spinbox.get()))
+                                  float(threshold_spinbox.get()), self.toggle_language.get())
             self._create_viewer_panel(self.display, result)
 
         Label(custom_file_frame).grid(row=0, padx=5, pady=5)
@@ -574,11 +587,11 @@ class Application(Frame):
         def query_analysis():
             if self.user_query.get() != "'#ITAR'" and '#' in self.user_query.get():
                 result = analyse_query(self.user_query.get(), self._get_classifier(), self.Resource,
-                                       float(threshold_spinbox.get()))
+                                       float(threshold_spinbox.get()), self.toggle_language.get())
                 self._create_viewer_panel(self.display, result)
             elif self.user_query.get() != "'#ITAR'":
                 result = analyse_query('#' + self.user_query.get(), self._get_classifier(), self.Resource,
-                                       float(threshold_spinbox.get()))
+                                       float(threshold_spinbox.get()), self.toggle_language.get())
                 self._create_viewer_panel(self.display, result)
 
         b_frame_3 = Frame(query_frame)
@@ -600,7 +613,7 @@ class Application(Frame):
 
         def analyse_stream_tweet():
             result = analyse_tweets(self.nb_tweet_collect.get(), self._get_classifier(), self.Resource,
-                                    float(threshold_spinbox.get()))
+                                    float(threshold_spinbox.get()), self.toggle_language.get())
             self._create_viewer_panel(self.display, result)
 
         b_frame_4 = Frame(number_frame)
