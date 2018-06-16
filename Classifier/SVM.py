@@ -60,7 +60,7 @@ class SVM(object):
         # 3) Lagrange multipliers
         lagrange_multipliers = ravel(solution)
 
-        # 4) Lagrange multipliers
+        # 4) Support vectors
         support_vectors = lagrange_multipliers > 1e-5
         ind = arange(len(lagrange_multipliers))[support_vectors]
         self.lagrange_multipliers = lagrange_multipliers[support_vectors]
