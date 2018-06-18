@@ -88,7 +88,7 @@ class Resource(object):
         self.negative_words = _load_negative_words()
         self.positive_emoticons, self.negative_emoticons = _load_emoticons()
         self.stop_words_en = _load_stop_word('en')
-        # self.stop_words_fr = _load_stop_word('fr')
+        self.stop_words_fr = _load_stop_word('fr')
 
 
 def get_correct_stop_word(Resource, language='en'):

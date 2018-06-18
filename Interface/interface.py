@@ -198,6 +198,7 @@ class Application(Frame):
         # ---------- Performance of the classifier choose -------------
 
         performance_frame = Frame(default_classifier)
+
         Label(performance_frame, text="Performance : ").grid(column=0, row=0, padx=5, pady=5)
         self.perf_label = Label(performance_frame, textvariable=self.performance)
         self.perf_label.grid(column=1, row=0, padx=5, pady=5)
@@ -227,7 +228,6 @@ class Application(Frame):
         size_frame = LabelFrame(options_frame, text="Size of the training sample")
 
         self.nb_tweet_train.set(100)
-
         Spinbox(size_frame, from_=100, to=1000000, increment=100, textvariable=self.nb_tweet_train,
                 justify='center').grid(column=0, row=0, padx=5, pady=5)
 
@@ -244,7 +244,6 @@ class Application(Frame):
         random_frame = LabelFrame(options_frame, text="Order of tweets")
 
         self.toggle_randomness_t.set("Randomised")
-
         Checkbutton(random_frame, textvariable=self.toggle_randomness_t, variable=self.toggle_randomness_t,
                     onvalue="Randomised", offvalue="Non-randomised").grid(padx=5, pady=5)
         ToolTip(random_frame,
@@ -256,7 +255,6 @@ class Application(Frame):
         nb_pos_neg_frame = LabelFrame(options_frame, text="Number of positive and negative tweets")
 
         self.toggle_nb_pos_neg_t.set("Equal")
-
         Checkbutton(nb_pos_neg_frame, textvariable=self.toggle_nb_pos_neg_t, variable=self.toggle_nb_pos_neg_t,
                     onvalue="Equal", offvalue="Non-equal").grid(padx=5, pady=5)
         ToolTip(nb_pos_neg_frame, text="If the number of positive and negative tweets should be equal")
@@ -267,7 +265,6 @@ class Application(Frame):
         kernel_frame = LabelFrame(options_frame, text="Choose the kernel to use")
 
         self.train_kernel.set("linear")
-
         Radiobutton(kernel_frame, text="Linear", variable=self.train_kernel,
                     value="linear").grid(column=0, row=0, padx=5, pady=5, sticky="w")
         Radiobutton(kernel_frame, text="Polynomial", variable=self.train_kernel,
@@ -322,7 +319,7 @@ class Application(Frame):
 
         existing_SVM_frame.grid(padx=10, pady=10)
 
-        custom_SVM_frame.grid()
+        custom_SVM_frame.grid(padx=10, pady=10)
 
         display.add(fen_training, text="Training")
 
@@ -339,7 +336,6 @@ class Application(Frame):
         size_frame = LabelFrame(for_all_frame, text="Size of the sample to test")
 
         self.nb_tweet_predict.set(100)
-
         Spinbox(size_frame, from_=10, to=1000000, increment=100, textvariable=self.nb_tweet_predict,
                 justify='center').grid(column=0, row=0, padx=5, pady=5)
 
@@ -379,7 +375,6 @@ class Application(Frame):
         sample_frame = LabelFrame(specific_frame, text="Choose the sample used")
 
         self.size_sample_p.set("10 000 tweets")
-
         Checkbutton(sample_frame, textvariable=self.size_sample_p, variable=self.size_sample_p, onvalue="10 000 tweets",
                     offvalue="1 000 tweets").grid(padx=5, pady=5)
 
@@ -389,7 +384,6 @@ class Application(Frame):
         random_frame = LabelFrame(specific_frame, text="Order of tweets")
 
         self.toggle_randomness_p.set("Randomised")
-
         Checkbutton(random_frame, textvariable=self.toggle_randomness_p, variable=self.toggle_randomness_p,
                     onvalue="Randomised", offvalue="Non-randomised").grid(padx=5, pady=5)
         ToolTip(random_frame,
@@ -401,7 +395,6 @@ class Application(Frame):
         nb_pos_neg_frame = LabelFrame(specific_frame, text="Number of positive and negative tweets")
 
         self.toggle_nb_pos_neg_p.set("Equal")
-
         Checkbutton(nb_pos_neg_frame, textvariable=self.toggle_nb_pos_neg_p, variable=self.toggle_nb_pos_neg_p,
                     onvalue="Equal", offvalue="Non-equal").grid(padx=5, pady=5)
         ToolTip(nb_pos_neg_frame, text="If the number of positive and negative tweets should be equal")
@@ -412,7 +405,6 @@ class Application(Frame):
         kernel_frame = LabelFrame(specific_frame, text="Choose the kernel to use")
 
         self.predict_kernel.set("linear")
-
         Radiobutton(kernel_frame, text="Linear", variable=self.predict_kernel,
                     value="linear").grid(column=0, row=0, padx=5, pady=5, sticky="w")
         Radiobutton(kernel_frame, text="Polynomial", variable=self.predict_kernel,
