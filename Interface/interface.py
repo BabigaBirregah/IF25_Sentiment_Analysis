@@ -642,22 +642,22 @@ class Application(Frame):
         for idx, value in enumerate(self.dict_result[-1]):
             if not isinstance(value[1], float):
                 group_tweet = LabelFrame(fen_visualiser, text="Tweet {}".format(idx + 1))
-                Label(group_tweet, text="Text :").grid(column=0, row=idx // 2, sticky="e")
-                Label(group_tweet, text=value[0]).grid(column=1, row=idx // 2, sticky="w")
-                Label(group_tweet, text="Label :").grid(column=0, row=idx // 2 + 1, sticky="e")
+                Label(group_tweet, text="Text :").grid(column=0, row=idx % 2, sticky="e")
+                Label(group_tweet, text=value[0]).grid(column=1, row=idx % 2, sticky="w")
+                Label(group_tweet, text="Label :").grid(column=0, row=idx % 2 + 1, sticky="e")
                 if value[1][0] == "Negative":
-                    Label(group_tweet, text=value[1][0], foreground="red").grid(column=1, row=idx // 2 + 1, sticky="w")
+                    Label(group_tweet, text=value[1][0], foreground="red").grid(column=1, row=idx % 2 + 1, sticky="w")
                 elif value[1][0] == "Neutral":
-                    Label(group_tweet, text=value[1][0], foreground="gray").grid(column=1, row=idx // 2 + 1, sticky="w")
+                    Label(group_tweet, text=value[1][0], foreground="gray").grid(column=1, row=idx % 2 + 1, sticky="w")
                 elif value[1][0] == "Positive":
-                    Label(group_tweet, text=value[1][0], foreground="green").grid(column=1, row=idx // 2 + 1,
+                    Label(group_tweet, text=value[1][0], foreground="green").grid(column=1, row=idx % 2 + 1,
                                                                                   sticky="w")
             else:
                 group_tweet = LabelFrame(fen_visualiser, text="Classifier {}".format(idx + 1))
-                Label(group_tweet, text="Classifier :").grid(column=0, row=idx // 2, sticky="e")
-                Label(group_tweet, text=readable_name_classifier(value[0])).grid(column=1, row=idx // 2, sticky="w")
-                Label(group_tweet, text="Score (%) :").grid(column=0, row=idx // 2 + 1, sticky="e")
-                Label(group_tweet, text=value[1], foreground="blue").grid(column=1, row=idx // 2 + 1, sticky="w")
+                Label(group_tweet, text="Classifier :").grid(column=0, row=idx % 2, sticky="e")
+                Label(group_tweet, text=readable_name_classifier(value[0])).grid(column=1, row=idx % 2, sticky="w")
+                Label(group_tweet, text="Score (%) :").grid(column=0, row=idx % 2 + 1, sticky="e")
+                Label(group_tweet, text=value[1], foreground="blue").grid(column=1, row=idx % 2 + 1, sticky="w")
             group_tweet.grid(sticky="w")
 
         vertical_scrollbar = Scrollbar(self.list_frame[-1], command=canvas_result.yview)
