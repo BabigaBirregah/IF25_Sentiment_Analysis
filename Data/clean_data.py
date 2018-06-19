@@ -34,8 +34,8 @@ def _clean_element(element, stop_words):
     # remove all the punctuations in the element
     element = sub(rb'[%s]+' % escape("""~"'([-|`\_^@)]=}/*-+.$£¨*!:/;,? """.encode()), rb'', element)
 
-    # remove all repetition of the same alphabetic character
-    element = sub(rb'(\w)\1+', rb'\1', element)
+    # remove all repetition (more than twice) of the same alphabetic character
+    element = sub(rb'(\w)\1+', rb'\1\1', element)
 
     # check whether the element is relevant or not
     if element in stop_words:
